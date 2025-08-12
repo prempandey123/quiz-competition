@@ -475,32 +475,96 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx
 function Results() {
     // Future me yaha Firebase se data fetch hoga
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        style: {
-            padding: "20px"
-        },
-        children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                children: "📊 Quiz Results"
-            }, void 0, false, {
-                fileName: "[project]/src/components/Results.js",
-                lineNumber: 5,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                children: "Results yaha dikhenge..."
-            }, void 0, false, {
-                fileName: "[project]/src/components/Results.js",
-                lineNumber: 6,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
+        style: styles.container,
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            style: styles.card,
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                    style: styles.heading,
+                    children: "📊 Quiz Results"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 6,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                    style: styles.text,
+                    children: "Results yaha dikhenge..."
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 7,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    style: styles.placeholderBox,
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                        style: styles.placeholderText,
+                        children: "No results yet"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Results.js",
+                        lineNumber: 9,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 8,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/src/components/Results.js",
+            lineNumber: 5,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
         fileName: "[project]/src/components/Results.js",
         lineNumber: 4,
         columnNumber: 5
     }, this);
 }
 _c = Results;
+const styles = {
+    container: {
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        padding: "20px"
+    },
+    card: {
+        background: "#fff",
+        padding: "30px 40px",
+        borderRadius: "15px",
+        boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+        textAlign: "center",
+        width: "100%",
+        maxWidth: "500px"
+    },
+    heading: {
+        marginBottom: "15px",
+        fontSize: "28px",
+        color: "#333"
+    },
+    text: {
+        fontSize: "16px",
+        color: "#555",
+        marginBottom: "20px"
+    },
+    placeholderBox: {
+        background: "#f5f5f5",
+        border: "2px dashed #ccc",
+        borderRadius: "10px",
+        padding: "30px",
+        textAlign: "center"
+    },
+    placeholderText: {
+        color: "#999",
+        fontSize: "14px",
+        fontStyle: "italic"
+    }
+};
 var _c;
 __turbopack_context__.k.register(_c, "Results");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {

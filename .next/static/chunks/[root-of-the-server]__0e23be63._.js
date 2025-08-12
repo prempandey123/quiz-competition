@@ -482,46 +482,58 @@ function AdminLogin() {
     const [password, setPassword] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])("");
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$router$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useRouter"])();
     const handleLogin = ()=>{
-        if (password === "admin123") {
+        if (password.trim() === "admin123") {
             router.push("/results");
         } else {
-            alert("Galat password");
+            alert("❌ Galat password!");
         }
     };
+    const handleKeyPress = (e)=>{
+        if (e.key === "Enter") handleLogin();
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        style: {
-            padding: "20px"
-        },
-        children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                children: "🔐 Admin Login"
-            }, void 0, false, {
-                fileName: "[project]/src/components/AdminLogin.js",
-                lineNumber: 18,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                type: "password",
-                placeholder: "Enter admin password",
-                value: password,
-                onChange: (e)=>setPassword(e.target.value)
-            }, void 0, false, {
-                fileName: "[project]/src/components/AdminLogin.js",
-                lineNumber: 19,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                onClick: handleLogin,
-                children: "Login"
-            }, void 0, false, {
-                fileName: "[project]/src/components/AdminLogin.js",
-                lineNumber: 25,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
+        style: styles.container,
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            style: styles.card,
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                    style: styles.heading,
+                    children: "🔐 Admin Login"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/AdminLogin.js",
+                    lineNumber: 23,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                    type: "password",
+                    placeholder: "Enter admin password",
+                    value: password,
+                    onChange: (e)=>setPassword(e.target.value),
+                    onKeyDown: handleKeyPress,
+                    style: styles.input
+                }, void 0, false, {
+                    fileName: "[project]/src/components/AdminLogin.js",
+                    lineNumber: 24,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                    onClick: handleLogin,
+                    style: styles.button,
+                    children: "Login"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/AdminLogin.js",
+                    lineNumber: 32,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/src/components/AdminLogin.js",
+            lineNumber: 22,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
         fileName: "[project]/src/components/AdminLogin.js",
-        lineNumber: 17,
+        lineNumber: 21,
         columnNumber: 5
     }, this);
 }
@@ -531,6 +543,51 @@ _s(AdminLogin, "hJdSY+HVKmHTVr4+7OTZbFHODxI=", false, function() {
     ];
 });
 _c = AdminLogin;
+const styles = {
+    container: {
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+    },
+    card: {
+        background: "#fff",
+        padding: "30px 40px",
+        borderRadius: "15px",
+        boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+        textAlign: "center",
+        width: "100%",
+        maxWidth: "350px"
+    },
+    heading: {
+        marginBottom: "20px",
+        fontSize: "24px",
+        color: "#333"
+    },
+    input: {
+        width: "100%",
+        padding: "12px",
+        marginBottom: "15px",
+        borderRadius: "8px",
+        border: "1px solid #ccc",
+        fontSize: "16px",
+        outline: "none",
+        transition: "border-color 0.3s ease"
+    },
+    button: {
+        width: "100%",
+        padding: "12px",
+        background: "linear-gradient(90deg, #4facfe, #00f2fe)",
+        color: "#fff",
+        border: "none",
+        borderRadius: "8px",
+        fontSize: "16px",
+        cursor: "pointer",
+        transition: "background 0.3s ease"
+    }
+};
 var _c;
 __turbopack_context__.k.register(_c, "AdminLogin");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {

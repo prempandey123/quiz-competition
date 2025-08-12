@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import "../styles/quiz.css"; // We'll make a separate CSS file for styling
+import { db } from "../firebaseConfig";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function QuizPage() {
   const [userData, setUserData] = useState({ name: "", email: "", empId: "" });
@@ -51,11 +53,20 @@ export default function QuizPage() {
     setAnswers({ ...answers, [id]: option });
   };
 
-  const handleSubmit = () => {
-    console.log("User Details:", userData);
-    console.log("Submitted Answers:", answers);
+  const handleSubmit = async () => {
+  try {
+    await addDoc(collection(db, "quizResults"), {
+      name,
+      email,
+      employeeId,
+      answers,
+      submittedAt: serverTimestamp(),
+    });
     setSubmitted(true);
-  };
+  } catch (error) {
+    console.error("Error saving quiz:", error);
+  }
+};
 
   const handleStart = () => {
     if (userData.name && userData.email && userData.empId) {

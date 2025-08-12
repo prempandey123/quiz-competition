@@ -1,11 +1,12 @@
 (globalThis.TURBOPACK_CHUNK_LISTS = globalThis.TURBOPACK_CHUNK_LISTS || []).push({
     script: typeof document === "object" ? document.currentScript : undefined,
     chunks: [
-  "static/chunks/node_modules_next_dist_4f3d469a._.js",
+  "static/chunks/node_modules_next_dist_756b85fa._.js",
   "static/chunks/node_modules_react_1cad9b0b._.js",
   "static/chunks/node_modules_react-dom_cjs_react-dom_development_ab7e073c.js",
   "static/chunks/node_modules_react-dom_f14d0471._.js",
-  "static/chunks/node_modules_3bfdc6a4._.js",
+  "static/chunks/node_modules_@firebase_firestore_dist_index_esm_f4851282.js",
+  "static/chunks/node_modules_83c6db46._.js",
   "static/chunks/[root-of-the-server]__f47464d0._.js",
   "static/chunks/src_styles_quiz_df072973.css"
 ],
