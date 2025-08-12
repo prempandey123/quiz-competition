@@ -61,13 +61,13 @@ var __turbopack_async_dependencies__ = __turbopack_handle_async_dependencies__([
 ;
 ;
 const firebaseConfig = {
-    apiKey: "AIzaSyBw8R0I1JS-aiKFkXJ41_x7M367Cct1Tf8",
-    authDomain: "herosteels-quiz.firebaseapp.com",
-    projectId: "herosteels-quiz",
-    storageBucket: "herosteels-quiz.firebasestorage.app",
-    messagingSenderId: "787656898836",
-    appId: "1:787656898836:web:ea9846107a045a02122a01",
-    measurementId: "G-N182PJLLDZ"
+    apiKey: "AIzAx_xxx_xxx",
+    authDomain: "quiz-competition.firebaseapp.com",
+    projectId: "quiz-competition",
+    storageBucket: "quiz-competition.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abcdef123456",
+    measurementId: "G-XXXXXX"
 };
 const app = !(0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$app__$5b$external$5d$__$28$firebase$2f$app$2c$__esm_import$29$__["getApps"])().length ? (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$app__$5b$external$5d$__$28$firebase$2f$app$2c$__esm_import$29$__["initializeApp"])(firebaseConfig) : (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$app__$5b$external$5d$__$28$firebase$2f$app$2c$__esm_import$29$__["getApp"])();
 const auth = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$auth__$5b$external$5d$__$28$firebase$2f$auth$2c$__esm_import$29$__["getAuth"])(app);
