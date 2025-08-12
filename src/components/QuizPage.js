@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import "./quiz.css"; // We'll make a separate CSS file for styling
 
 export default function QuizPage() {
+  const [userData, setUserData] = useState({ name: "", email: "", empId: "" });
+  const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 min in seconds
 
   const questions = [
     { id: 1, q: "Krishna Janmashtami kis devta ke janm din ke roop me manai jati hai?", options: ["Shiva", "Vishnu ke avatar Krishna", "Brahma"] },
@@ -29,14 +32,14 @@ export default function QuizPage() {
   ];
 
   useEffect(() => {
-    if (timeLeft > 0 && !submitted) {
+    if (quizStarted && timeLeft > 0 && !submitted) {
       const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
       return () => clearInterval(timer);
     }
     if (timeLeft === 0 && !submitted) {
       handleSubmit();
     }
-  }, [timeLeft, submitted]);
+  }, [timeLeft, quizStarted, submitted]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
@@ -49,23 +52,65 @@ export default function QuizPage() {
   };
 
   const handleSubmit = () => {
+    console.log("User Details:", userData);
     console.log("Submitted Answers:", answers);
     setSubmitted(true);
   };
 
+  const handleStart = () => {
+    if (userData.name && userData.email && userData.empId) {
+      setQuizStarted(true);
+    } else {
+      alert("Please fill all details before starting!");
+    }
+  };
+
+  if (!quizStarted) {
+    return (
+      <div className="quiz-container">
+        <h1>🪔 Krishna Janmashtami Quiz</h1>
+        <div className="card">
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={userData.name}
+            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={userData.email}
+            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Employee ID"
+            value={userData.empId}
+            onChange={(e) => setUserData({ ...userData, empId: e.target.value })}
+          />
+          <button onClick={handleStart}>Start Quiz</button>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted) {
-    return <h2>🎉 Dhanyavaad! Aapka quiz submit ho gaya!</h2>;
+    return (
+      <div className="quiz-container">
+        <h2>🎉 Dhanyavaad! Aapka quiz submit ho gaya!</h2>
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+    <div className="quiz-container">
       <h1>🪔 Krishna Janmashtami Quiz</h1>
       <h3>⏳ Time Left: {formatTime(timeLeft)}</h3>
       {questions.map((q) => (
-        <div key={q.id} style={{ marginBottom: "20px", padding: "10px", border: "1px solid #ccc", borderRadius: "5px" }}>
+        <div key={q.id} className="question-card">
           <p><b>{q.id}. {q.q}</b></p>
           {q.options.map((opt) => (
-            <label key={opt} style={{ display: "block", margin: "5px 0" }}>
+            <label key={opt} className="option">
               <input
                 type="radio"
                 name={q.id}
@@ -78,19 +123,7 @@ export default function QuizPage() {
           ))}
         </div>
       ))}
-      <button
-        onClick={handleSubmit}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#4CAF50",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Submit
-      </button>
+      <button className="submit-btn" onClick={handleSubmit}>Submit</button>
     </div>
   );
 }

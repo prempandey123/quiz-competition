@@ -1,0 +1,46 @@
+/* [project]/src/components/quiz.css [client] (css) */
+.quiz-container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+  font-family: Segoe UI, sans-serif;
+}
+
+.card, .question-card {
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 6px #0000001a;
+}
+
+.card input {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  display: block;
+}
+
+.card button, .submit-btn {
+  color: #fff;
+  cursor: pointer;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+}
+
+.card button:hover, .submit-btn:hover {
+  background-color: #45a049;
+}
+
+.option {
+  margin: 8px 0;
+  display: block;
+}
+
+
+/*# sourceMappingURL=src_components_quiz_ce6019f2.css.map*/
