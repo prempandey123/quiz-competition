@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import "../styles/quiz.css"; // We'll make a separate CSS file for styling
 import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
@@ -54,19 +53,19 @@ export default function QuizPage() {
   };
 
   const handleSubmit = async () => {
-  try {
-    await addDoc(collection(db, "quizResults"), {
-      name,
-      email,
-      employeeId,
-      answers,
-      submittedAt: serverTimestamp(),
-    });
-    setSubmitted(true);
-  } catch (error) {
-    console.error("Error saving quiz:", error);
-  }
-};
+    try {
+      await addDoc(collection(db, "quizResults"), {
+        name: userData.name,
+        email: userData.email,
+        employeeId: userData.empId,
+        answers,
+        submittedAt: serverTimestamp(),
+      });
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Error saving quiz:", error);
+    }
+  };
 
   const handleStart = () => {
     if (userData.name && userData.email && userData.empId) {
@@ -76,30 +75,25 @@ export default function QuizPage() {
     }
   };
 
+  const styles = {
+    container: { maxWidth: "600px", margin: "auto", padding: "20px", fontFamily: "Arial, sans-serif" },
+    card: { display: "flex", flexDirection: "column", gap: "10px", background: "#f9f9f9", padding: "20px", borderRadius: "8px" },
+    input: { padding: "10px", fontSize: "16px", borderRadius: "5px", border: "1px solid #ccc" },
+    button: { padding: "10px", fontSize: "16px", border: "none", borderRadius: "5px", background: "#4CAF50", color: "#fff", cursor: "pointer" },
+    question: { background: "#fff", padding: "15px", borderRadius: "8px", marginBottom: "10px", border: "1px solid #ddd" },
+    option: { display: "block", marginTop: "5px" },
+    timer: { color: "red" },
+  };
+
   if (!quizStarted) {
     return (
-      <div className="quiz-container">
+      <div style={styles.container}>
         <h1>🪔 Krishna Janmashtami Quiz</h1>
-        <div className="card">
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={userData.name}
-            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={userData.email}
-            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Employee ID"
-            value={userData.empId}
-            onChange={(e) => setUserData({ ...userData, empId: e.target.value })}
-          />
-          <button onClick={handleStart}>Start Quiz</button>
+        <div style={styles.card}>
+          <input style={styles.input} type="text" placeholder="Full Name" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
+          <input style={styles.input} type="email" placeholder="Email" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
+          <input style={styles.input} type="text" placeholder="Employee ID" value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
+          <button style={styles.button} onClick={handleStart}>Start Quiz</button>
         </div>
       </div>
     );
@@ -107,34 +101,27 @@ export default function QuizPage() {
 
   if (submitted) {
     return (
-      <div className="quiz-container">
+      <div style={styles.container}>
         <h2>🎉 Dhanyavaad! Aapka quiz submit ho gaya!</h2>
       </div>
     );
   }
 
   return (
-    <div className="quiz-container">
+    <div style={styles.container}>
       <h1>🪔 Krishna Janmashtami Quiz</h1>
-      <h3>⏳ Time Left: {formatTime(timeLeft)}</h3>
+      <h3 style={styles.timer}>⏳ Time Left: {formatTime(timeLeft)}</h3>
       {questions.map((q) => (
-        <div key={q.id} className="question-card">
+        <div key={q.id} style={styles.question}>
           <p><b>{q.id}. {q.q}</b></p>
           {q.options.map((opt) => (
-            <label key={opt} className="option">
-              <input
-                type="radio"
-                name={q.id}
-                value={opt}
-                onChange={() => handleChange(q.id, opt)}
-                checked={answers[q.id] === opt}
-              />
-              {opt}
+            <label key={opt} style={styles.option}>
+              <input type="radio" name={q.id} value={opt} onChange={() => handleChange(q.id, opt)} checked={answers[q.id] === opt} /> {opt}
             </label>
           ))}
         </div>
       ))}
-      <button className="submit-btn" onClick={handleSubmit}>Submit</button>
+      <button style={styles.button} onClick={handleSubmit}>Submit</button>
     </div>
   );
 }

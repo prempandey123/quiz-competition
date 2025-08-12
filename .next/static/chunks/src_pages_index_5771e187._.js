@@ -8,8 +8,7 @@
   "static/chunks/node_modules_@firebase_auth_dist_esm_5de3fe95._.js",
   "static/chunks/node_modules_@firebase_firestore_dist_index_esm_f4851282.js",
   "static/chunks/node_modules_0b861ec7._.js",
-  "static/chunks/[root-of-the-server]__2cb06578._.js",
-  "static/chunks/src_styles_quiz_df072973.css"
+  "static/chunks/[root-of-the-server]__2cb06578._.js"
 ],
     source: "entry"
 });
