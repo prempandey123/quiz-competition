@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "../styles/quiz.css"; // We'll make a separate CSS file for styling
-import { db } from "../firebaseConfig";
+import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function QuizPage() {
