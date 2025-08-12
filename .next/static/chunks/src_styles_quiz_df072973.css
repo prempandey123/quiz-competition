@@ -1,0 +1,35 @@
+/* [project]/src/styles/quiz.css [client] (css) */
+.quiz-container {
+  background: #fff8e7;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  font-family: sans-serif;
+  box-shadow: 0 4px 10px #0000001a;
+}
+
+.quiz-question {
+  margin-bottom: 20px;
+}
+
+.submit-btn {
+  color: #fff;
+  cursor: pointer;
+  background: #ff9800;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+}
+
+.submit-btn:hover {
+  background: #e68900;
+}
+
+.admin-login {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+
+/*# sourceMappingURL=src_styles_quiz_df072973.css.map*/

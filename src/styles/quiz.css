@@ -1,0 +1,31 @@
+.quiz-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  font-family: sans-serif;
+  background: #fff8e7;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.quiz-question {
+  margin-bottom: 20px;
+}
+
+.submit-btn {
+  background: #ff9800;
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: #e68900;
+}
+
+.admin-login {
+  margin-top: 20px;
+  font-size: 14px;
+}
