@@ -479,26 +479,214 @@ function QuizPage() {
     _s();
     const [answers, setAnswers] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])({});
     const [submitted, setSubmitted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(30 * 60); // 30 minutes in seconds
     const questions = [
         {
             id: 1,
-            q: "React ka creator kaun hai?",
+            q: "Krishna Janmashtami kis devta ke janm din ke roop me manai jati hai?",
             options: [
-                "Facebook",
-                "Google",
-                "Microsoft"
+                "Shiva",
+                "Vishnu ke avatar Krishna",
+                "Brahma"
             ]
         },
         {
             id: 2,
-            q: "JavaScript ka file extension kya hota hai?",
+            q: "Krishna ka janm kis nagar me hua tha?",
             options: [
-                ".js",
-                ".java",
-                ".py"
+                "Mathura",
+                "Dwarka",
+                "Vrindavan"
+            ]
+        },
+        {
+            id: 3,
+            q: "Krishna ke pita kaun the?",
+            options: [
+                "Vasudeva",
+                "Nanda",
+                "Dasharatha"
+            ]
+        },
+        {
+            id: 4,
+            q: "Krishna ki maa kaun thi?",
+            options: [
+                "Devaki",
+                "Yashoda",
+                "Kaikeyi"
+            ]
+        },
+        {
+            id: 5,
+            q: "Krishna ko kis raja ne kaid me rakha tha?",
+            options: [
+                "Kansa",
+                "Ravana",
+                "Hiranyakashipu"
+            ]
+        },
+        {
+            id: 6,
+            q: "Krishna ka rang kaunsa tha?",
+            options: [
+                "Shyam (dark blue)",
+                "Gora",
+                "Peela"
+            ]
+        },
+        {
+            id: 7,
+            q: "Krishna ka vishesh vadya kaunsa tha?",
+            options: [
+                "Bansuri",
+                "Veena",
+                "Sitar"
+            ]
+        },
+        {
+            id: 8,
+            q: "Krishna ka priy bhojan kya tha?",
+            options: [
+                "Makhan",
+                "Kheer",
+                "Puri"
+            ]
+        },
+        {
+            id: 9,
+            q: "Krishna ke bade bhai kaun the?",
+            options: [
+                "Balarama",
+                "Shatrughna",
+                "Lakshmana"
+            ]
+        },
+        {
+            id: 10,
+            q: "Krishna ne kis nag ko daman kiya tha?",
+            options: [
+                "Kaliya Naag",
+                "Vasuki",
+                "Takshaka"
+            ]
+        },
+        {
+            id: 11,
+            q: "Janmashtami kis tithi ko manai jati hai?",
+            options: [
+                "Ashtami",
+                "Purnima",
+                "Chaturthi"
+            ]
+        },
+        {
+            id: 12,
+            q: "Krishna ka bachpan kis gaon me bita?",
+            options: [
+                "Vrindavan",
+                "Ayodhya",
+                "Hastinapur"
+            ]
+        },
+        {
+            id: 13,
+            q: "Krishna ke pradhan mitra kaun the?",
+            options: [
+                "Sudama",
+                "Karna",
+                "Arjun"
+            ]
+        },
+        {
+            id: 14,
+            q: "Krishna kis yudh me saarathi bane?",
+            options: [
+                "Mahabharat",
+                "Ram-Ravan Yudh",
+                "Kurukshetra ke bahar"
+            ]
+        },
+        {
+            id: 15,
+            q: "Krishna ka priy geet kaunsa tha?",
+            options: [
+                "Bhagavad Gita",
+                "Rigveda",
+                "Samveda"
+            ]
+        },
+        {
+            id: 16,
+            q: "Krishna ne kis rani se vivah kiya?",
+            options: [
+                "Rukmini",
+                "Sita",
+                "Draupadi"
+            ]
+        },
+        {
+            id: 17,
+            q: "Krishna ke kitne pramukh patra the Mahabharat me?",
+            options: [
+                "Bahut",
+                "Ek",
+                "Teen"
+            ]
+        },
+        {
+            id: 18,
+            q: "Krishna ka janm raat ko hua tha ya din me?",
+            options: [
+                "Raat",
+                "Din",
+                "Subah"
+            ]
+        },
+        {
+            id: 19,
+            q: "Krishna ko kis naam se bhi jana jata hai?",
+            options: [
+                "Govind",
+                "Vishnu",
+                "Indra"
+            ]
+        },
+        {
+            id: 20,
+            q: "Janmashtami ke din log kya karte hain?",
+            options: [
+                "Upvaas",
+                "Yudh",
+                "Shikar"
             ]
         }
     ];
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "QuizPage.useEffect": ()=>{
+            if (timeLeft > 0 && !submitted) {
+                const timer = setInterval({
+                    "QuizPage.useEffect.timer": ()=>setTimeLeft({
+                            "QuizPage.useEffect.timer": (prev)=>prev - 1
+                        }["QuizPage.useEffect.timer"])
+                }["QuizPage.useEffect.timer"], 1000);
+                return ({
+                    "QuizPage.useEffect": ()=>clearInterval(timer)
+                })["QuizPage.useEffect"];
+            }
+            if (timeLeft === 0 && !submitted) {
+                handleSubmit();
+            }
+        }
+    }["QuizPage.useEffect"], [
+        timeLeft,
+        submitted
+    ]);
+    const formatTime = (seconds)=>{
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    };
     const handleChange = (id, option)=>{
         setAnswers({
             ...answers,
@@ -511,81 +699,115 @@ function QuizPage() {
     };
     if (submitted) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-            children: "Shukriya! Aapka quiz submit ho gaya 🎉"
+            children: "🎉 Dhanyavaad! Aapka quiz submit ho gaya!"
         }, void 0, false, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 22,
+            lineNumber: 57,
             columnNumber: 12
         }, this);
     }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         style: {
-            padding: "20px"
+            padding: "20px",
+            fontFamily: "Arial"
         },
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                children: "📝 Quiz Competition"
+                children: "🪔 Krishna Janmashtami Quiz"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 27,
+                lineNumber: 62,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                children: [
+                    "⏳ Time Left: ",
+                    formatTime(timeLeft)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 63,
                 columnNumber: 7
             }, this),
             questions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     style: {
-                        marginBottom: "20px"
+                        marginBottom: "20px",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px"
                     },
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                            children: q.q
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                children: [
+                                    q.id,
+                                    ". ",
+                                    q.q
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/QuizPage.js",
+                                lineNumber: 66,
+                                columnNumber: 14
+                            }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 30,
+                            lineNumber: 66,
                             columnNumber: 11
                         }, this),
                         q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                 style: {
-                                    display: "block"
+                                    display: "block",
+                                    margin: "5px 0"
                                 },
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                         type: "radio",
                                         name: q.id,
                                         value: opt,
-                                        onChange: ()=>handleChange(q.id, opt)
+                                        onChange: ()=>handleChange(q.id, opt),
+                                        checked: answers[q.id] === opt
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/QuizPage.js",
-                                        lineNumber: 33,
+                                        lineNumber: 69,
                                         columnNumber: 15
                                     }, this),
                                     opt
                                 ]
                             }, opt, true, {
                                 fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 32,
+                                lineNumber: 68,
                                 columnNumber: 13
                             }, this))
                     ]
                 }, q.id, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 29,
+                    lineNumber: 65,
                     columnNumber: 9
                 }, this)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                 onClick: handleSubmit,
+                style: {
+                    padding: "10px 20px",
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer"
+                },
                 children: "Submit"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 44,
+                lineNumber: 81,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 26,
+        lineNumber: 61,
         columnNumber: 5
     }, this);
 }
-_s(QuizPage, "O/nYjJkSnbJ3pHgVyFGmBZJX18s=");
+_s(QuizPage, "2VLQD5WUKiRwRfMroK6B4HIOLw8=");
 _c = QuizPage;
 var _c;
 __turbopack_context__.k.register(_c, "QuizPage");
@@ -623,7 +845,7 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
 {
-const PAGE_PATH = "/admin";
+const PAGE_PATH = "/";
 (window.__NEXT_P = window.__NEXT_P || []).push([
     PAGE_PATH,
     ()=>{
