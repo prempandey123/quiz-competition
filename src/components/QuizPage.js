@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./quiz.css"; // We'll make a separate CSS file for styling
+import "../styles/quiz.css"; // We'll make a separate CSS file for styling
 
 export default function QuizPage() {
   const [userData, setUserData] = useState({ name: "", email: "", empId: "" });

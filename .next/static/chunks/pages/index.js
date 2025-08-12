@@ -5,7 +5,7 @@ __turbopack_load_page_chunks__("/", [
   "static/chunks/node_modules_react-dom_f14d0471._.js",
   "static/chunks/node_modules_3bfdc6a4._.js",
   "static/chunks/[root-of-the-server]__f47464d0._.js",
-  "static/chunks/src_components_quiz_ce6019f2.css",
+  "static/chunks/src_styles_quiz_df072973.css",
   "static/chunks/src_pages_index_5771e187._.js",
-  "static/chunks/src_pages_index_72842792._.js"
+  "static/chunks/src_pages_index_ec66ec0a._.js"
 ])

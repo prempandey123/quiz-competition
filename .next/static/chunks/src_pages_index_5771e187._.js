@@ -7,7 +7,7 @@
   "static/chunks/node_modules_react-dom_f14d0471._.js",
   "static/chunks/node_modules_3bfdc6a4._.js",
   "static/chunks/[root-of-the-server]__f47464d0._.js",
-  "static/chunks/src_components_quiz_ce6019f2.css"
+  "static/chunks/src_styles_quiz_df072973.css"
 ],
     source: "entry"
 });
