@@ -8,7 +8,16 @@ export default function Results() {
   const [error, setError] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState(null);
 
+  // 🔐 Password state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  // Allowed passwords
+  const allowedPasswords = ["admin123", "secret456"]; // Change these
+
   useEffect(() => {
+    if (!isAuthenticated) return; // Fetch only after login
     const fetchResults = async () => {
       try {
         const q = query(
@@ -41,7 +50,38 @@ export default function Results() {
     };
 
     fetchResults();
-  }, []);
+  }, [isAuthenticated]);
+
+  // Password check
+  const handleLogin = () => {
+    if (allowedPasswords.includes(passwordInput.trim())) {
+      setIsAuthenticated(true);
+      setPasswordError("");
+    } else {
+      setPasswordError("Invalid password. Please try again.");
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div style={styles.loginContainer}>
+        <div style={styles.loginCard}>
+          <h2>🔐 Enter Password to View Results</h2>
+          <input
+            type="password"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            placeholder="Enter password"
+            style={styles.passwordInput}
+          />
+          <button onClick={handleLogin} style={styles.button}>
+            Submit
+          </button>
+          {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return <h2 style={{ textAlign: "center" }}>Loading results...</h2>;
@@ -126,9 +166,30 @@ export default function Results() {
 }
 
 const styles = {
+  loginContainer: {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "linear-gradient(135deg, #899596ff 0%, #425261ff 100%)",
+  },
+  loginCard: {
+    background: "#fff",
+    padding: "30px",
+    borderRadius: "10px",
+    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+    textAlign: "center",
+  },
+  passwordInput: {
+    padding: "8px",
+    margin: "10px 0",
+    width: "200px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+  },
   container: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)",
+    background: "linear-gradient(135deg, #00f2fe 0%, #1a1b1dff 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -166,7 +227,7 @@ const styles = {
   },
   button: {
     padding: "6px 10px",
-    background: "#4facfe",
+    background: "#0087fdff",
     border: "none",
     borderRadius: "5px",
     color: "#fff",
