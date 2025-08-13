@@ -48,31 +48,41 @@ export default function QuizPage() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const handleChange = (id, option) => {
-    setAnswers({ ...answers, [id]: option });
-  };
-
   const handleSubmit = async () => {
-    // Mandatory check: all questions answered
-    if (Object.keys(answers).length !== questions.length) {
-      alert("Please answer all questions before submitting!");
-      return;
+  // Mandatory check: all questions answered
+  if (Object.keys(answers).length !== questions.length) {
+    alert("Please answer all questions before submitting!");
+    return;
+  }
+
+  try {
+    // 1️⃣ Check if Employee ID already exists
+    const q = query(
+      collection(db, "quizResults"),
+      where("employeeId", "==", userData.empId)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      alert("❌ This Employee ID has already submitted the quiz!");
+      return; // Stop submission
     }
 
-    try {
-      await addDoc(collection(db, "quizResults"), {
-        name: userData.name,
-        email: userData.email,
-        department: userData.department,
-        employeeId: userData.empId,
-        answers,
-        submittedAt: serverTimestamp(),
-      });
-      setSubmitted(true);
-    } catch (error) {
-      console.error("Error saving quiz:", error);
-    }
-  };
+    // 2️⃣ If not exists, add new entry
+    await addDoc(collection(db, "quizResults"), {
+      name: userData.name,
+      email: userData.email,
+      department: userData.department,
+      employeeId: userData.empId,
+      answers,
+      submittedAt: serverTimestamp(),
+    });
+
+    setSubmitted(true);
+  } catch (error) {
+    console.error("Error saving quiz:", error);
+  }
+};
 
   const handleStart = () => {
     if (userData.name && userData.email && userData.department && userData.empId) {
