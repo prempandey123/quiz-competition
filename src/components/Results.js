@@ -1,23 +1,46 @@
 import { useEffect, useState } from "react";
-import { db } from "../firebase"; // apna firebase config
+import { db } from "../firebase"; // your firebase config
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 export default function Results() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const q = query(collection(db, "quizResults"), orderBy("submittedAt", "desc"));
+        console.log("Fetching quiz results from Firestore...");
+        const q = query(
+          collection(db, "quizResults"),
+          orderBy("submittedAt", "desc")
+        );
+
         const querySnapshot = await getDocs(q);
-        const fetchedResults = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setResults(fetchedResults);
-      } catch (error) {
-        console.error("Error fetching results:", error);
+        console.log("Query snapshot received:", querySnapshot);
+
+        if (querySnapshot.empty) {
+          console.log("No documents found in quizResults collection.");
+          setResults([]);
+        } else {
+          const fetchedResults = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            console.log("Document data:", data);
+
+            return {
+              id: doc.id,
+              name: data.name || "N/A",
+              email: data.email || "N/A",
+              employeeId: data.employeeId || "N/A",
+              submittedAt: data.submittedAt || null,
+            };
+          });
+          setResults(fetchedResults);
+          console.log("Fetched results:", fetchedResults);
+        }
+      } catch (err) {
+        console.error("Error fetching results:", err.message);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -28,6 +51,14 @@ export default function Results() {
 
   if (loading) {
     return <h2 style={{ textAlign: "center" }}>Loading results...</h2>;
+  }
+
+  if (error) {
+    return (
+      <h2 style={{ textAlign: "center", color: "red" }}>
+        Failed to fetch results: {error}
+      </h2>
+    );
   }
 
   return (
@@ -55,7 +86,7 @@ export default function Results() {
                   <td style={styles.td}>
                     {r.submittedAt?.toDate
                       ? r.submittedAt.toDate().toLocaleString()
-                      : ""}
+                      : "N/A"}
                   </td>
                 </tr>
               ))}
@@ -107,4 +138,3 @@ const styles = {
     padding: "8px",
   },
 };
-
