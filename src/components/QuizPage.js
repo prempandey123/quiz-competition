@@ -94,7 +94,7 @@ export default function QuizPage() {
   };
 
   const handleStart = () => {
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@herosteels\.com$/;
     if (!userData.name || !userData.email || !userData.empId || !userData.department) {
       alert("Please fill all details before starting!");
       return;
