@@ -93,6 +93,7 @@ export default function QuizPage() {
         <div style={styles.card}>
           <input style={styles.input} type="text" placeholder="Full Name" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
           <input style={styles.input} type="email" placeholder="Email" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
+          <input style={styles.input} type="email" placeholder="Department" value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
           <input style={styles.input} type="text" placeholder="Employee ID" value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
           <button style={styles.button} onClick={handleStart}>Start Quiz</button>
         </div>
