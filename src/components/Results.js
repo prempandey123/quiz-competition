@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { db } from "../firebase"; // अपने firebase.js/ts का सही path डालें
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { db } from "../firebase"; // apna firebase config
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 export default function Results() {
   const [results, setResults] = useState([]);
@@ -10,12 +10,12 @@ export default function Results() {
     const fetchResults = async () => {
       try {
         const q = query(collection(db, "quizResults"), orderBy("submittedAt", "desc"));
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs.map((doc) => ({
+        const querySnapshot = await getDocs(q);
+        const fetchedResults = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setResults(data);
+        setResults(fetchedResults);
       } catch (error) {
         console.error("Error fetching results:", error);
       } finally {
@@ -26,18 +26,18 @@ export default function Results() {
     fetchResults();
   }, []);
 
+  if (loading) {
+    return <h2 style={{ textAlign: "center" }}>Loading results...</h2>;
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <h1 style={styles.heading}>📊 Quiz Results</h1>
-        {loading ? (
-          <p style={styles.text}>Loading...</p>
-        ) : results.length === 0 ? (
-          <div style={styles.placeholderBox}>
-            <span style={styles.placeholderText}>No results yet</span>
-          </div>
+        {results.length === 0 ? (
+          <p style={styles.text}>No results yet</p>
         ) : (
-          <table style={styles.table}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
                 <th style={styles.th}>Name</th>
@@ -47,15 +47,15 @@ export default function Results() {
               </tr>
             </thead>
             <tbody>
-              {results.map((res) => (
-                <tr key={res.id}>
-                  <td style={styles.td}>{res.name}</td>
-                  <td style={styles.td}>{res.email}</td>
-                  <td style={styles.td}>{res.employeeId}</td>
+              {results.map((r) => (
+                <tr key={r.id}>
+                  <td style={styles.td}>{r.name}</td>
+                  <td style={styles.td}>{r.email}</td>
+                  <td style={styles.td}>{r.employeeId}</td>
                   <td style={styles.td}>
-                    {res.submittedAt?.toDate
-                      ? res.submittedAt.toDate().toLocaleString()
-                      : "—"}
+                    {r.submittedAt?.toDate
+                      ? r.submittedAt.toDate().toLocaleString()
+                      : ""}
                   </td>
                 </tr>
               ))}
@@ -82,46 +82,29 @@ const styles = {
     padding: "30px 40px",
     borderRadius: "15px",
     boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+    textAlign: "center",
     width: "100%",
-    maxWidth: "700px",
+    maxWidth: "800px",
+    overflowX: "auto",
   },
   heading: {
     marginBottom: "15px",
     fontSize: "28px",
     color: "#333",
-    textAlign: "center",
   },
   text: {
     fontSize: "16px",
     color: "#555",
     marginBottom: "20px",
-    textAlign: "center",
-  },
-  placeholderBox: {
-    background: "#f5f5f5",
-    border: "2px dashed #ccc",
-    borderRadius: "10px",
-    padding: "30px",
-    textAlign: "center",
-  },
-  placeholderText: {
-    color: "#999",
-    fontSize: "14px",
-    fontStyle: "italic",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "20px",
   },
   th: {
-    background: "#4facfe",
-    color: "#fff",
-    padding: "10px",
-    textAlign: "left",
+    border: "1px solid #ddd",
+    padding: "8px",
+    background: "#f2f2f2",
   },
   td: {
-    borderBottom: "1px solid #ddd",
-    padding: "10px",
+    border: "1px solid #ddd",
+    padding: "8px",
   },
 };
+
