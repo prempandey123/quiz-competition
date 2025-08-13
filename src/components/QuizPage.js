@@ -3,7 +3,7 @@ import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function QuizPage() {
-  const [userData, setUserData] = useState({ name: "", email: "", empId: "" });
+  const [userData, setUserData] = useState({ name: "", email: "", empId: "", department: "" });
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -57,6 +57,7 @@ export default function QuizPage() {
       await addDoc(collection(db, "quizResults"), {
         name: userData.name,
         email: userData.email,
+        department: userData.department,
         employeeId: userData.empId,
         answers,
         submittedAt: serverTimestamp(),
