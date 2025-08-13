@@ -3,7 +3,7 @@ import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function QuizPage() {
-  const [userData, setUserData] = useState({ name: "", email: "", department: "", empId: "" });
+  const [userData, setUserData] = useState({ name: "", email: "", empId: "" });
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -48,44 +48,27 @@ export default function QuizPage() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  const handleChange = (id, option) => {
+    setAnswers({ ...answers, [id]: option });
+  };
+
   const handleSubmit = async () => {
-  // Mandatory check: all questions answered
-  if (Object.keys(answers).length !== questions.length) {
-    alert("Please answer all questions before submitting!");
-    return;
-  }
-
-  try {
-    // 1️⃣ Check if Employee ID already exists
-    const q = query(
-      collection(db, "quizResults"),
-      where("employeeId", "==", userData.empId)
-    );
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      alert("❌ This Employee ID has already submitted the quiz!");
-      return; // Stop submission
+    try {
+      await addDoc(collection(db, "quizResults"), {
+        name: userData.name,
+        email: userData.email,
+        employeeId: userData.empId,
+        answers,
+        submittedAt: serverTimestamp(),
+      });
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Error saving quiz:", error);
     }
-
-    // 2️⃣ If not exists, add new entry
-    await addDoc(collection(db, "quizResults"), {
-      name: userData.name,
-      email: userData.email,
-      department: userData.department,
-      employeeId: userData.empId,
-      answers,
-      submittedAt: serverTimestamp(),
-    });
-
-    setSubmitted(true);
-  } catch (error) {
-    console.error("Error saving quiz:", error);
-  }
-};
+  };
 
   const handleStart = () => {
-    if (userData.name && userData.email && userData.department && userData.empId) {
+    if (userData.name && userData.email && userData.empId) {
       setQuizStarted(true);
     } else {
       alert("Please fill all details before starting!");
@@ -109,7 +92,6 @@ export default function QuizPage() {
         <div style={styles.card}>
           <input style={styles.input} type="text" placeholder="Full Name" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
           <input style={styles.input} type="email" placeholder="Email" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
-          <input style={styles.input} type="text" placeholder="Department" value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
           <input style={styles.input} type="text" placeholder="Employee ID" value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
           <button style={styles.button} onClick={handleStart}>Start Quiz</button>
         </div>
@@ -127,7 +109,7 @@ export default function QuizPage() {
 
   return (
     <div style={styles.container}>
-      <h1>📝 Quiz Time</h1>
+      <h1>🪔 Krishna Janmashtami Quiz</h1>
       <h3 style={styles.timer}>⏳ Time Left: {formatTime(timeLeft)}</h3>
       {questions.map((q) => (
         <div key={q.id} style={styles.question}>

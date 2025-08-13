@@ -1,45 +1,39 @@
 import { useEffect, useState } from "react";
-import { db } from "../firebase"; // your firebase config
+import { db } from "../firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 export default function Results() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedAnswers, setSelectedAnswers] = useState(null);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        console.log("Fetching quiz results from Firestore...");
         const q = query(
           collection(db, "quizResults"),
           orderBy("submittedAt", "desc")
         );
-
         const querySnapshot = await getDocs(q);
-        console.log("Query snapshot received:", querySnapshot);
 
         if (querySnapshot.empty) {
-          console.log("No documents found in quizResults collection.");
           setResults([]);
         } else {
           const fetchedResults = querySnapshot.docs.map((doc) => {
             const data = doc.data();
-            console.log("Document data:", data);
-
             return {
               id: doc.id,
               name: data.name || "N/A",
               email: data.email || "N/A",
               employeeId: data.employeeId || "N/A",
+              answers: data.answers || {},
               submittedAt: data.submittedAt || null,
             };
           });
           setResults(fetchedResults);
-          console.log("Fetched results:", fetchedResults);
         }
       } catch (err) {
-        console.error("Error fetching results:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -68,30 +62,63 @@ export default function Results() {
         {results.length === 0 ? (
           <p style={styles.text}>No results yet</p>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Email</th>
-                <th style={styles.th}>Employee ID</th>
-                <th style={styles.th}>Submitted At</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((r) => (
-                <tr key={r.id}>
-                  <td style={styles.td}>{r.name}</td>
-                  <td style={styles.td}>{r.email}</td>
-                  <td style={styles.td}>{r.employeeId}</td>
-                  <td style={styles.td}>
-                    {r.submittedAt?.toDate
-                      ? r.submittedAt.toDate().toLocaleString()
-                      : "N/A"}
-                  </td>
+          <>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Name</th>
+                  <th style={styles.th}>Email</th>
+                  <th style={styles.th}>Employee ID</th>
+                  <th style={styles.th}>Submitted At</th>
+                  <th style={styles.th}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {results.map((r) => (
+                  <tr key={r.id}>
+                    <td style={styles.td}>{r.name}</td>
+                    <td style={styles.td}>{r.email}</td>
+                    <td style={styles.td}>{r.employeeId}</td>
+                    <td style={styles.td}>
+                      {r.submittedAt?.toDate
+                        ? r.submittedAt.toDate().toLocaleString()
+                        : "N/A"}
+                    </td>
+                    <td style={styles.td}>
+                      <button
+                        style={styles.button}
+                        onClick={() => setSelectedAnswers(r.answers)}
+                      >
+                        View Answers
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Answers Modal */}
+            {selectedAnswers && (
+              <div style={styles.modalOverlay}>
+                <div style={styles.modal}>
+                  <h2>User Answers</h2>
+                  <ul>
+                    {Object.entries(selectedAnswers).map(([qId, ans]) => (
+                      <li key={qId}>
+                        <b>Q{qId}:</b> {ans}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    style={styles.closeButton}
+                    onClick={() => setSelectedAnswers(null)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -115,7 +142,7 @@ const styles = {
     boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
     textAlign: "center",
     width: "100%",
-    maxWidth: "800px",
+    maxWidth: "900px",
     overflowX: "auto",
   },
   heading: {
@@ -136,5 +163,41 @@ const styles = {
   td: {
     border: "1px solid #ddd",
     padding: "8px",
+  },
+  button: {
+    padding: "6px 10px",
+    background: "#4facfe",
+    border: "none",
+    borderRadius: "5px",
+    color: "#fff",
+    cursor: "pointer",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "10px",
+    width: "400px",
+    maxHeight: "80vh",
+    overflowY: "auto",
+  },
+  closeButton: {
+    padding: "8px 12px",
+    background: "red",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginTop: "10px",
   },
 };
