@@ -3,15 +3,15 @@ import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function QuizPage() {
-  const [userData, setUserData] = useState({ name: "", email: "", empId: "", department: "" });
+  const [userData, setUserData] = useState({ name: "", empId: "", department: "" });
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30 * 60);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [startCountdown, setStartCountdown] = useState(null);
 
   // Set quiz start date/time
-  const quizStartDate = new Date("2025-08-13T11:55:00");
+  const quizStartDate = new Date("2025-08-15T11:55:00");
 
   const questions = [
     { id: 1, q: "Krishna Janmashtami kis devta ke janm din ke roop me manai jati hai?", options: ["Shiva", "Vishnu ke avatar Krishna", "Brahma"] },
@@ -78,29 +78,25 @@ export default function QuizPage() {
   };
 
   const handleSubmit = async () => {
-    try {
-      await addDoc(collection(db, "quizResults"), {
-        name: userData.name,
-        email: userData.email,
-        department: userData.department,
-        employeeId: userData.empId,
-        answers,
-        submittedAt: serverTimestamp(),
-      });
-      setSubmitted(true);
-    } catch (error) {
-      console.error("Error saving quiz:", error);
-    }
-  };
+  try {
+    await addDoc(collection(db, "quizResults"), {
+      name: userData.name,
+      department: userData.department,
+      employeeId: userData.empId,
+      answers,
+      submittedAt: serverTimestamp(),
+    });
+    setSubmitted(true);
+    setQuizStarted(false); // quiz close
+  } catch (error) {
+    console.error("Error saving quiz:", error);
+    setSubmitted(true); // even if error, still show thank you
+  }
+};
 
   const handleStart = () => {
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@herosteels\.com$/;
-    if (!userData.name || !userData.email || !userData.empId || !userData.department) {
+    if (!userData.name || !userData.empId || !userData.department) {
       alert("Please fill all details before starting!");
-      return;
-    }
-    if (!gmailRegex.test(userData.email)) {
-      alert("Please enter a valid Gmail address!");
       return;
     }
     if (startCountdown > 0) {
@@ -129,7 +125,6 @@ export default function QuizPage() {
         )}
         <div style={styles.card}>
           <input style={styles.input} type="text" placeholder="Full Name" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
-          <input style={styles.input} type="email" placeholder="Email (Gmail only)" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
           <input style={styles.input} type="text" placeholder="Department" value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
           <input style={styles.input} type="text" placeholder="Employee ID" value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
           <button style={styles.button} onClick={handleStart} disabled={startCountdown > 0}>Start Quiz</button>
