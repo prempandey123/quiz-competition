@@ -7,7 +7,11 @@ export default function QuizPage() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 min in seconds
+  const [timeLeft, setTimeLeft] = useState(30 * 60);
+  const [startCountdown, setStartCountdown] = useState(null);
+
+  // Set quiz start date/time
+  const quizStartDate = new Date("2025-08-13T11:55:00");
 
   const questions = [
     { id: 1, q: "Krishna Janmashtami kis devta ke janm din ke roop me manai jati hai?", options: ["Shiva", "Vishnu ke avatar Krishna", "Brahma"] },
@@ -32,6 +36,17 @@ export default function QuizPage() {
     { id: 20, q: "Janmashtami ke din log kya karte hain?", options: ["Upvaas", "Yudh", "Shikar"] },
   ];
 
+  // Countdown to quiz start
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diff = quizStartDate - now;
+      setStartCountdown(diff > 0 ? diff : 0);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Quiz timer
   useEffect(() => {
     if (quizStarted && timeLeft > 0 && !submitted) {
       const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
@@ -46,6 +61,16 @@ export default function QuizPage() {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const formatCountdown = (ms) => {
+    const totalSec = Math.floor(ms / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const handleChange = (id, option) => {
@@ -69,11 +94,20 @@ export default function QuizPage() {
   };
 
   const handleStart = () => {
-    if (userData.name && userData.email && userData.empId) {
-      setQuizStarted(true);
-    } else {
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!userData.name || !userData.email || !userData.empId || !userData.department) {
       alert("Please fill all details before starting!");
+      return;
     }
+    if (!gmailRegex.test(userData.email)) {
+      alert("Please enter a valid Gmail address!");
+      return;
+    }
+    if (startCountdown > 0) {
+      alert("Quiz has not started yet!");
+      return;
+    }
+    setQuizStarted(true);
   };
 
   const styles = {
@@ -90,12 +124,15 @@ export default function QuizPage() {
     return (
       <div style={styles.container}>
         <h1>Quiz Time</h1>
+        {startCountdown > 0 && (
+          <h3>⏳ Quiz will start in: {formatCountdown(startCountdown)}</h3>
+        )}
         <div style={styles.card}>
           <input style={styles.input} type="text" placeholder="Full Name" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
-          <input style={styles.input} type="email" placeholder="Email" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
-          <input style={styles.input} type="email" placeholder="Department" value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
+          <input style={styles.input} type="email" placeholder="Email (Gmail only)" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} />
+          <input style={styles.input} type="text" placeholder="Department" value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
           <input style={styles.input} type="text" placeholder="Employee ID" value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
-          <button style={styles.button} onClick={handleStart}>Start Quiz</button>
+          <button style={styles.button} onClick={handleStart} disabled={startCountdown > 0}>Start Quiz</button>
         </div>
       </div>
     );
@@ -111,7 +148,7 @@ export default function QuizPage() {
 
   return (
     <div style={styles.container}>
-      <h1>🪔 Krishna Janmashtami Quiz</h1>
+      <h1>Quiz</h1>
       <h3 style={styles.timer}>⏳ Time Left: {formatTime(timeLeft)}</h3>
       {questions.map((q) => (
         <div key={q.id} style={styles.question}>

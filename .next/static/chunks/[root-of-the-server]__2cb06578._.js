@@ -482,13 +482,13 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2
 ;
 ;
 const firebaseConfig = {
-    apiKey: "AIzAx_xxx_xxx",
-    authDomain: "quiz-competition.firebaseapp.com",
-    projectId: "quiz-competition",
-    storageBucket: "quiz-competition.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abcdef123456",
-    measurementId: "G-XXXXXX"
+    apiKey: "AIzaSyBw8R0I1JS-aiKFkXJ41_x7M367Cct1Tf8",
+    authDomain: "herosteels-quiz.firebaseapp.com",
+    projectId: "herosteels-quiz",
+    storageBucket: "herosteels-quiz.firebasestorage.app",
+    messagingSenderId: "787656898836",
+    appId: "1:787656898836:web:ea9846107a045a02122a01",
+    measurementId: "G-N182PJLLDZ"
 };
 const app = !(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApps"])().length ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["initializeApp"])(firebaseConfig) : (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$app$2f$dist$2f$esm$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["getApp"])();
 const auth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$auth$2f$dist$2f$esm$2f$index$2d$9ccb475d$2e$js__$5b$client$5d$__$28$ecmascript$29$__$3c$export__p__as__getAuth$3e$__["getAuth"])(app);
@@ -521,12 +521,16 @@ function QuizPage() {
     const [userData, setUserData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])({
         name: "",
         email: "",
-        empId: ""
+        empId: "",
+        department: ""
     });
     const [quizStarted, setQuizStarted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [answers, setAnswers] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])({});
     const [submitted, setSubmitted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(30 * 60); // 30 min in seconds
+    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(30 * 60);
+    const [startCountdown, setStartCountdown] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    // Set quiz start date/time
+    const quizStartDate = new Date("2025-08-13T11:55:00");
     const questions = [
         {
             id: 1,
@@ -709,6 +713,22 @@ function QuizPage() {
             ]
         }
     ];
+    // Countdown to quiz start
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "QuizPage.useEffect": ()=>{
+            const interval = setInterval({
+                "QuizPage.useEffect.interval": ()=>{
+                    const now = new Date();
+                    const diff = quizStartDate - now;
+                    setStartCountdown(diff > 0 ? diff : 0);
+                }
+            }["QuizPage.useEffect.interval"], 1000);
+            return ({
+                "QuizPage.useEffect": ()=>clearInterval(interval)
+            })["QuizPage.useEffect"];
+        }
+    }["QuizPage.useEffect"], []);
+    // Quiz timer
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "QuizPage.useEffect": ()=>{
             if (quizStarted && timeLeft > 0 && !submitted) {
@@ -735,6 +755,13 @@ function QuizPage() {
         const s = seconds % 60;
         return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
     };
+    const formatCountdown = (ms)=>{
+        const totalSec = Math.floor(ms / 1000);
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor(totalSec % 3600 / 60);
+        const s = totalSec % 60;
+        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    };
     const handleChange = (id, option)=>{
         setAnswers({
             ...answers,
@@ -746,6 +773,7 @@ function QuizPage() {
             await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2e$js__$5b$client$5d$__$28$ecmascript$29$__["db"], "quizResults"), {
                 name: userData.name,
                 email: userData.email,
+                department: userData.department,
                 employeeId: userData.empId,
                 answers,
                 submittedAt: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__["serverTimestamp"])()
@@ -756,11 +784,20 @@ function QuizPage() {
         }
     };
     const handleStart = ()=>{
-        if (userData.name && userData.email && userData.empId) {
-            setQuizStarted(true);
-        } else {
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!userData.name || !userData.email || !userData.empId || !userData.department) {
             alert("Please fill all details before starting!");
+            return;
         }
+        if (!gmailRegex.test(userData.email)) {
+            alert("Please enter a valid Gmail address!");
+            return;
+        }
+        if (startCountdown > 0) {
+            alert("Quiz has not started yet!");
+            return;
+        }
+        setQuizStarted(true);
     };
     const styles = {
         container: {
@@ -812,11 +849,21 @@ function QuizPage() {
             style: styles.container,
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                    children: "🪔 Krishna Janmashtami Quiz"
+                    children: "Quiz Time"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 91,
+                    lineNumber: 126,
                     columnNumber: 9
+                }, this),
+                startCountdown > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                    children: [
+                        "⏳ Quiz will start in: ",
+                        formatCountdown(startCountdown)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/QuizPage.js",
+                    lineNumber: 128,
+                    columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     style: styles.card,
@@ -832,13 +879,13 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 93,
+                            lineNumber: 131,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                             style: styles.input,
                             type: "email",
-                            placeholder: "Email",
+                            placeholder: "Email (Gmail only)",
                             value: userData.email,
                             onChange: (e)=>setUserData({
                                     ...userData,
@@ -846,7 +893,21 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 94,
+                            lineNumber: 132,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                            style: styles.input,
+                            type: "text",
+                            placeholder: "Department",
+                            value: userData.department,
+                            onChange: (e)=>setUserData({
+                                    ...userData,
+                                    department: e.target.value
+                                })
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/QuizPage.js",
+                            lineNumber: 133,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -860,28 +921,29 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 95,
+                            lineNumber: 134,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                             style: styles.button,
                             onClick: handleStart,
+                            disabled: startCountdown > 0,
                             children: "Start Quiz"
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 96,
+                            lineNumber: 135,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 92,
+                    lineNumber: 130,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 90,
+            lineNumber: 125,
             columnNumber: 7
         }, this);
     }
@@ -892,12 +954,12 @@ function QuizPage() {
                 children: "🎉 Dhanyavaad! Aapka quiz submit ho gaya!"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 105,
+                lineNumber: 144,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 104,
+            lineNumber: 143,
             columnNumber: 7
         }, this);
     }
@@ -905,10 +967,10 @@ function QuizPage() {
         style: styles.container,
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                children: "🪔 Krishna Janmashtami Quiz"
+                children: "Quiz"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 112,
+                lineNumber: 151,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -919,7 +981,7 @@ function QuizPage() {
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 113,
+                lineNumber: 152,
                 columnNumber: 7
             }, this),
             questions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -934,12 +996,12 @@ function QuizPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 116,
+                                lineNumber: 155,
                                 columnNumber: 14
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 116,
+                            lineNumber: 155,
                             columnNumber: 11
                         }, this),
                         q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -953,7 +1015,7 @@ function QuizPage() {
                                         checked: answers[q.id] === opt
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/QuizPage.js",
-                                        lineNumber: 119,
+                                        lineNumber: 158,
                                         columnNumber: 15
                                     }, this),
                                     " ",
@@ -961,13 +1023,13 @@ function QuizPage() {
                                 ]
                             }, opt, true, {
                                 fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 118,
+                                lineNumber: 157,
                                 columnNumber: 13
                             }, this))
                     ]
                 }, q.id, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 115,
+                    lineNumber: 154,
                     columnNumber: 9
                 }, this)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -976,17 +1038,17 @@ function QuizPage() {
                 children: "Submit"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 124,
+                lineNumber: 163,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 111,
+        lineNumber: 150,
         columnNumber: 5
     }, this);
 }
-_s(QuizPage, "krhNtiWyiQJNYtGitK6EZhWz7fs=");
+_s(QuizPage, "WZ4G3HLuDmUkb8wfaBSpyzLJ7G0=");
 _c = QuizPage;
 var _c;
 __turbopack_context__.k.register(_c, "QuizPage");
