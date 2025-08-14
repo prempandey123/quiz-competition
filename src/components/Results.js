@@ -8,22 +8,18 @@ export default function Results() {
   const [error, setError] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState(null);
 
-  // 🔐 Password state
+  // Password state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // Allowed passwords
   const allowedPasswords = ["admin123", "secret456"]; // Change these
 
   useEffect(() => {
-    if (!isAuthenticated) return; // Fetch only after login
+    if (!isAuthenticated) return;
     const fetchResults = async () => {
       try {
-        const q = query(
-          collection(db, "quizResults"),
-          orderBy("submittedAt", "desc")
-        );
+        const q = query(collection(db, "quizResults"), orderBy("submittedAt", "desc"));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
@@ -52,7 +48,6 @@ export default function Results() {
     fetchResults();
   }, [isAuthenticated]);
 
-  // Password check
   const handleLogin = () => {
     if (allowedPasswords.includes(passwordInput.trim())) {
       setIsAuthenticated(true);
@@ -60,6 +55,43 @@ export default function Results() {
     } else {
       setPasswordError("Invalid password. Please try again.");
     }
+  };
+
+  // Print single user's answers
+  const handlePrintSingle = (user) => {
+    const printWindow = window.open("", "_blank");
+    const formattedDate = user.submittedAt?.toDate
+      ? user.submittedAt.toDate().toLocaleString()
+      : "N/A";
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${user.name} - Quiz Answers</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { margin-bottom: 10px; }
+            p { margin: 5px 0; }
+            ul { margin-top: 10px; }
+            li { margin-bottom: 5px; }
+          </style>
+        </head>
+        <body>
+          <h2>Quiz Submission Details</h2>
+          <p><b>Name:</b> ${user.name}</p>
+          <p><b>Department:</b> ${user.employeeId}</p>
+          <p><b>Submitted At:</b> ${formattedDate}</p>
+          <h3>Answers:</h3>
+          <ul>
+            ${Object.entries(user.answers)
+              .map(([qId, ans]) => `<li><b>Q${qId}:</b> ${ans}</li>`)
+              .join("")}
+          </ul>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   if (!isAuthenticated) {
@@ -83,17 +115,8 @@ export default function Results() {
     );
   }
 
-  if (loading) {
-    return <h2 style={{ textAlign: "center" }}>Loading results...</h2>;
-  }
-
-  if (error) {
-    return (
-      <h2 style={{ textAlign: "center", color: "red" }}>
-        Failed to fetch results: {error}
-      </h2>
-    );
-  }
+  if (loading) return <h2 style={{ textAlign: "center" }}>Loading results...</h2>;
+  if (error) return <h2 style={{ textAlign: "center", color: "red" }}>Failed to fetch results: {error}</h2>;
 
   return (
     <div style={styles.container}>
@@ -102,63 +125,49 @@ export default function Results() {
         {results.length === 0 ? (
           <p style={styles.text}>No results yet</p>
         ) : (
-          <>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Name</th>
-                  <th style={styles.th}>Email</th>
-                  <th style={styles.th}>Employee ID</th>
-                  <th style={styles.th}>Submitted At</th>
-                  <th style={styles.th}>Actions</th>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Name</th>
+                <th style={styles.th}>Email</th>
+                <th style={styles.th}>Department</th>
+                <th style={styles.th}>Submitted At</th>
+                <th style={styles.th}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((r) => (
+                <tr key={r.id}>
+                  <td style={styles.td}>{r.name}</td>
+                  <td style={styles.td}>{r.email}</td>
+                  <td style={styles.td}>{r.employeeId}</td>
+                  <td style={styles.td}>
+                    {r.submittedAt?.toDate
+                      ? r.submittedAt.toDate().toLocaleString()
+                      : "N/A"}
+                  </td>
+                  <td style={styles.td}>
+                    <button style={{ ...styles.button, marginRight: "5px" }} onClick={() => setSelectedAnswers(r.answers)}>View</button>
+                    <button style={{ ...styles.button, background: "green" }} onClick={() => handlePrintSingle(r)}>🖨 Print</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {results.map((r) => (
-                  <tr key={r.id}>
-                    <td style={styles.td}>{r.name}</td>
-                    <td style={styles.td}>{r.email}</td>
-                    <td style={styles.td}>{r.employeeId}</td>
-                    <td style={styles.td}>
-                      {r.submittedAt?.toDate
-                        ? r.submittedAt.toDate().toLocaleString()
-                        : "N/A"}
-                    </td>
-                    <td style={styles.td}>
-                      <button
-                        style={styles.button}
-                        onClick={() => setSelectedAnswers(r.answers)}
-                      >
-                        View Answers
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
+        )}
 
-            {/* Answers Modal */}
-            {selectedAnswers && (
-              <div style={styles.modalOverlay}>
-                <div style={styles.modal}>
-                  <h2>User Answers</h2>
-                  <ul>
-                    {Object.entries(selectedAnswers).map(([qId, ans]) => (
-                      <li key={qId}>
-                        <b>Q{qId}:</b> {ans}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    style={styles.closeButton}
-                    onClick={() => setSelectedAnswers(null)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
+        {selectedAnswers && (
+          <div style={styles.modalOverlay}>
+            <div style={styles.modal}>
+              <h2>User Answers</h2>
+              <ul>
+                {Object.entries(selectedAnswers).map(([qId, ans]) => (
+                  <li key={qId}><b>Q{qId}:</b> {ans}</li>
+                ))}
+              </ul>
+              <button style={styles.closeButton} onClick={() => setSelectedAnswers(null)}>Close</button>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -193,7 +202,6 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     padding: "20px",
   },
   card: {
@@ -206,25 +214,10 @@ const styles = {
     maxWidth: "900px",
     overflowX: "auto",
   },
-  heading: {
-    marginBottom: "15px",
-    fontSize: "28px",
-    color: "#333",
-  },
-  text: {
-    fontSize: "16px",
-    color: "#555",
-    marginBottom: "20px",
-  },
-  th: {
-    border: "1px solid #ddd",
-    padding: "8px",
-    background: "#f2f2f2",
-  },
-  td: {
-    border: "1px solid #ddd",
-    padding: "8px",
-  },
+  heading: { marginBottom: "15px", fontSize: "28px", color: "#333" },
+  text: { fontSize: "16px", color: "#555", marginBottom: "20px" },
+  th: { border: "1px solid #ddd", padding: "8px", background: "#f2f2f2" },
+  td: { border: "1px solid #ddd", padding: "8px" },
   button: {
     padding: "6px 10px",
     background: "#0087fdff",

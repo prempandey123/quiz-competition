@@ -101,17 +101,16 @@ function Results() {
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(true);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(null);
     const [selectedAnswers, setSelectedAnswers] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(null);
-    // 🔐 Password state
+    // Password state
     const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(false);
     const [passwordInput, setPasswordInput] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])("");
     const [passwordError, setPasswordError] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])("");
-    // Allowed passwords
     const allowedPasswords = [
         "admin123",
         "secret456"
     ]; // Change these
     (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useEffect"])(()=>{
-        if (!isAuthenticated) return; // Fetch only after login
+        if (!isAuthenticated) return;
         const fetchResults = async ()=>{
             try {
                 const q = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["query"])((0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["db"], "quizResults"), (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["orderBy"])("submittedAt", "desc"));
@@ -142,7 +141,6 @@ function Results() {
     }, [
         isAuthenticated
     ]);
-    // Password check
     const handleLogin = ()=>{
         if (allowedPasswords.includes(passwordInput.trim())) {
             setIsAuthenticated(true);
@@ -150,6 +148,37 @@ function Results() {
         } else {
             setPasswordError("Invalid password. Please try again.");
         }
+    };
+    // Print single user's answers
+    const handlePrintSingle = (user)=>{
+        const printWindow = window.open("", "_blank");
+        const formattedDate = user.submittedAt?.toDate ? user.submittedAt.toDate().toLocaleString() : "N/A";
+        printWindow.document.write(`
+      <html>
+        <head>
+          <title>${user.name} - Quiz Answers</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { margin-bottom: 10px; }
+            p { margin: 5px 0; }
+            ul { margin-top: 10px; }
+            li { margin-bottom: 5px; }
+          </style>
+        </head>
+        <body>
+          <h2>Quiz Submission Details</h2>
+          <p><b>Name:</b> ${user.name}</p>
+          <p><b>Department:</b> ${user.employeeId}</p>
+          <p><b>Submitted At:</b> ${formattedDate}</p>
+          <h3>Answers:</h3>
+          <ul>
+            ${Object.entries(user.answers).map(([qId, ans])=>`<li><b>Q${qId}:</b> ${ans}</li>`).join("")}
+          </ul>
+        </body>
+      </html>
+    `);
+        printWindow.document.close();
+        printWindow.print();
     };
     if (!isAuthenticated) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -161,7 +190,7 @@ function Results() {
                         children: "🔐 Enter Password to View Results"
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 69,
+                        lineNumber: 101,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
@@ -172,7 +201,7 @@ function Results() {
                         style: styles.passwordInput
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 70,
+                        lineNumber: 102,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
@@ -181,7 +210,7 @@ function Results() {
                         children: "Submit"
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 77,
+                        lineNumber: 109,
                         columnNumber: 11
                     }, this),
                     passwordError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -191,49 +220,45 @@ function Results() {
                         children: passwordError
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 80,
+                        lineNumber: 112,
                         columnNumber: 29
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Results.js",
-                lineNumber: 68,
+                lineNumber: 100,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/Results.js",
-            lineNumber: 67,
+            lineNumber: 99,
             columnNumber: 7
         }, this);
     }
-    if (loading) {
-        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
-            style: {
-                textAlign: "center"
-            },
-            children: "Loading results..."
-        }, void 0, false, {
-            fileName: "[project]/src/components/Results.js",
-            lineNumber: 87,
-            columnNumber: 12
-        }, this);
-    }
-    if (error) {
-        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
-            style: {
-                textAlign: "center",
-                color: "red"
-            },
-            children: [
-                "Failed to fetch results: ",
-                error
-            ]
-        }, void 0, true, {
-            fileName: "[project]/src/components/Results.js",
-            lineNumber: 92,
-            columnNumber: 7
-        }, this);
-    }
+    if (loading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
+        style: {
+            textAlign: "center"
+        },
+        children: "Loading results..."
+    }, void 0, false, {
+        fileName: "[project]/src/components/Results.js",
+        lineNumber: 118,
+        columnNumber: 23
+    }, this);
+    if (error) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
+        style: {
+            textAlign: "center",
+            color: "red"
+        },
+        children: [
+            "Failed to fetch results: ",
+            error
+        ]
+    }, void 0, true, {
+        fileName: "[project]/src/components/Results.js",
+        lineNumber: 119,
+        columnNumber: 21
+    }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
         style: styles.container,
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -244,7 +269,7 @@ function Results() {
                     children: "📊 Quiz Results"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Results.js",
-                    lineNumber: 101,
+                    lineNumber: 124,
                     columnNumber: 9
                 }, this),
                 results.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -252,208 +277,221 @@ function Results() {
                     children: "No results yet"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Results.js",
-                    lineNumber: 103,
+                    lineNumber: 126,
                     columnNumber: 11
-                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["Fragment"], {
+                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("table", {
+                    style: {
+                        width: "100%",
+                        borderCollapse: "collapse"
+                    },
                     children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("table", {
-                            style: {
-                                width: "100%",
-                                borderCollapse: "collapse"
-                            },
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("thead", {
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tr", {
-                                        children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
-                                                style: styles.th,
-                                                children: "Name"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Results.js",
-                                                lineNumber: 109,
-                                                columnNumber: 19
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
-                                                style: styles.th,
-                                                children: "Email"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Results.js",
-                                                lineNumber: 110,
-                                                columnNumber: 19
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
-                                                style: styles.th,
-                                                children: "Employee ID"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Results.js",
-                                                lineNumber: 111,
-                                                columnNumber: 19
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
-                                                style: styles.th,
-                                                children: "Submitted At"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Results.js",
-                                                lineNumber: 112,
-                                                columnNumber: 19
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
-                                                style: styles.th,
-                                                children: "Actions"
-                                            }, void 0, false, {
-                                                fileName: "[project]/src/components/Results.js",
-                                                lineNumber: 113,
-                                                columnNumber: 19
-                                            }, this)
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 108,
-                                        columnNumber: 17
-                                    }, this)
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Results.js",
-                                    lineNumber: 107,
-                                    columnNumber: 15
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tbody", {
-                                    children: results.map((r)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tr", {
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
-                                                    style: styles.td,
-                                                    children: r.name
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Results.js",
-                                                    lineNumber: 119,
-                                                    columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
-                                                    style: styles.td,
-                                                    children: r.email
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Results.js",
-                                                    lineNumber: 120,
-                                                    columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
-                                                    style: styles.td,
-                                                    children: r.employeeId
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Results.js",
-                                                    lineNumber: 121,
-                                                    columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
-                                                    style: styles.td,
-                                                    children: r.submittedAt?.toDate ? r.submittedAt.toDate().toLocaleString() : "N/A"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Results.js",
-                                                    lineNumber: 122,
-                                                    columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
-                                                    style: styles.td,
-                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
-                                                        style: styles.button,
-                                                        onClick: ()=>setSelectedAnswers(r.answers),
-                                                        children: "View Answers"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/src/components/Results.js",
-                                                        lineNumber: 128,
-                                                        columnNumber: 23
-                                                    }, this)
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/Results.js",
-                                                    lineNumber: 127,
-                                                    columnNumber: 21
-                                                }, this)
-                                            ]
-                                        }, r.id, true, {
-                                            fileName: "[project]/src/components/Results.js",
-                                            lineNumber: 118,
-                                            columnNumber: 19
-                                        }, this))
-                                }, void 0, false, {
-                                    fileName: "[project]/src/components/Results.js",
-                                    lineNumber: 116,
-                                    columnNumber: 15
-                                }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "[project]/src/components/Results.js",
-                            lineNumber: 106,
-                            columnNumber: 13
-                        }, this),
-                        selectedAnswers && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-                            style: styles.modalOverlay,
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-                                style: styles.modal,
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("thead", {
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tr", {
                                 children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
-                                        children: "User Answers"
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
+                                        style: styles.th,
+                                        children: "Name"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 144,
-                                        columnNumber: 19
+                                        lineNumber: 131,
+                                        columnNumber: 17
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("ul", {
-                                        children: Object.entries(selectedAnswers).map(([qId, ans])=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("li", {
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
-                                                        children: [
-                                                            "Q",
-                                                            qId,
-                                                            ":"
-                                                        ]
-                                                    }, void 0, true, {
-                                                        fileName: "[project]/src/components/Results.js",
-                                                        lineNumber: 148,
-                                                        columnNumber: 25
-                                                    }, this),
-                                                    " ",
-                                                    ans
-                                                ]
-                                            }, qId, true, {
-                                                fileName: "[project]/src/components/Results.js",
-                                                lineNumber: 147,
-                                                columnNumber: 23
-                                            }, this))
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
+                                        style: styles.th,
+                                        children: "Email"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 145,
-                                        columnNumber: 19
+                                        lineNumber: 132,
+                                        columnNumber: 17
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
-                                        style: styles.closeButton,
-                                        onClick: ()=>setSelectedAnswers(null),
-                                        children: "Close"
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
+                                        style: styles.th,
+                                        children: "Department"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 152,
-                                        columnNumber: 19
+                                        lineNumber: 133,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
+                                        style: styles.th,
+                                        children: "Submitted At"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Results.js",
+                                        lineNumber: 134,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
+                                        style: styles.th,
+                                        children: "Actions"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/Results.js",
+                                        lineNumber: 135,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/Results.js",
-                                lineNumber: 143,
-                                columnNumber: 17
+                                lineNumber: 130,
+                                columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/Results.js",
-                            lineNumber: 142,
-                            columnNumber: 15
+                            lineNumber: 129,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tbody", {
+                            children: results.map((r)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tr", {
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
+                                            style: styles.td,
+                                            children: r.name
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 141,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
+                                            style: styles.td,
+                                            children: r.email
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 142,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
+                                            style: styles.td,
+                                            children: r.employeeId
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 143,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
+                                            style: styles.td,
+                                            children: r.submittedAt?.toDate ? r.submittedAt.toDate().toLocaleString() : "N/A"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 144,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
+                                            style: styles.td,
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
+                                                    style: {
+                                                        ...styles.button,
+                                                        marginRight: "5px"
+                                                    },
+                                                    onClick: ()=>setSelectedAnswers(r.answers),
+                                                    children: "View"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Results.js",
+                                                    lineNumber: 150,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
+                                                    style: {
+                                                        ...styles.button,
+                                                        background: "green"
+                                                    },
+                                                    onClick: ()=>handlePrintSingle(r),
+                                                    children: "🖨 Print"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Results.js",
+                                                    lineNumber: 151,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 149,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, r.id, true, {
+                                    fileName: "[project]/src/components/Results.js",
+                                    lineNumber: 140,
+                                    columnNumber: 17
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/Results.js",
+                            lineNumber: 138,
+                            columnNumber: 13
                         }, this)
                     ]
-                }, void 0, true)
+                }, void 0, true, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 128,
+                    columnNumber: 11
+                }, this),
+                selectedAnswers && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                    style: styles.modalOverlay,
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                        style: styles.modal,
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
+                                children: "User Answers"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Results.js",
+                                lineNumber: 162,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("ul", {
+                                children: Object.entries(selectedAnswers).map(([qId, ans])=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("li", {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
+                                                children: [
+                                                    "Q",
+                                                    qId,
+                                                    ":"
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/components/Results.js",
+                                                lineNumber: 165,
+                                                columnNumber: 33
+                                            }, this),
+                                            " ",
+                                            ans
+                                        ]
+                                    }, qId, true, {
+                                        fileName: "[project]/src/components/Results.js",
+                                        lineNumber: 165,
+                                        columnNumber: 19
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Results.js",
+                                lineNumber: 163,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
+                                style: styles.closeButton,
+                                onClick: ()=>setSelectedAnswers(null),
+                                children: "Close"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Results.js",
+                                lineNumber: 168,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Results.js",
+                        lineNumber: 161,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 160,
+                    columnNumber: 11
+                }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/Results.js",
-            lineNumber: 100,
+            lineNumber: 123,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/Results.js",
-        lineNumber: 99,
+        lineNumber: 122,
         columnNumber: 5
     }, this);
 }
@@ -485,7 +523,6 @@ const styles = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
         padding: "20px"
     },
     card: {

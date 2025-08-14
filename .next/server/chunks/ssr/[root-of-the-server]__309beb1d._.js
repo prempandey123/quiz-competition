@@ -105,10 +105,10 @@ function QuizPage() {
     const [quizStarted, setQuizStarted] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(false);
     const [answers, setAnswers] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])({});
     const [submitted, setSubmitted] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(false);
-    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(60);
-    // Quiz live time range
+    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(1800); // 30 min timer
+    // Quiz live time range (11:00 AM - 11:30 AM on 15 Aug 2025)
     const quizStartTime = new Date("2025-08-14T11:00:00");
-    const quizEndTime = new Date("2025-08-14T14:59:59"); // 12:00 AM next day
+    const quizEndTime = new Date("2025-08-15T18:30:00");
     const questions = [
         {
             id: 1,
@@ -116,7 +116,8 @@ function QuizPage() {
             options: [
                 "Shiva",
                 "Vishnu ke avatar Krishna",
-                "Brahma"
+                "Brahma",
+                "Indra"
             ]
         },
         {
@@ -125,7 +126,8 @@ function QuizPage() {
             options: [
                 "Mathura",
                 "Dwarka",
-                "Vrindavan"
+                "Vrindavan",
+                "Gokul"
             ]
         },
         {
@@ -134,7 +136,8 @@ function QuizPage() {
             options: [
                 "Vasudeva",
                 "Nanda",
-                "Dasharatha"
+                "Dasharatha",
+                "Parikshit"
             ]
         },
         {
@@ -143,7 +146,8 @@ function QuizPage() {
             options: [
                 "Devaki",
                 "Yashoda",
-                "Kaikeyi"
+                "Kaikeyi",
+                "Kunti"
             ]
         },
         {
@@ -152,7 +156,8 @@ function QuizPage() {
             options: [
                 "Kansa",
                 "Ravana",
-                "Hiranyakashipu"
+                "Hiranyakashipu",
+                "Duryodhana"
             ]
         },
         {
@@ -161,7 +166,8 @@ function QuizPage() {
             options: [
                 "Shyam (dark blue)",
                 "Gora",
-                "Peela"
+                "Peela",
+                "Sawla"
             ]
         },
         {
@@ -170,7 +176,8 @@ function QuizPage() {
             options: [
                 "Bansuri",
                 "Veena",
-                "Sitar"
+                "Sitar",
+                "Mridang"
             ]
         },
         {
@@ -179,7 +186,8 @@ function QuizPage() {
             options: [
                 "Makhan",
                 "Kheer",
-                "Puri"
+                "Puri",
+                "Laddu"
             ]
         },
         {
@@ -188,7 +196,8 @@ function QuizPage() {
             options: [
                 "Balarama",
                 "Shatrughna",
-                "Lakshmana"
+                "Lakshmana",
+                "Bharata"
             ]
         },
         {
@@ -197,7 +206,8 @@ function QuizPage() {
             options: [
                 "Kaliya Naag",
                 "Vasuki",
-                "Takshaka"
+                "Takshaka",
+                "Sheshnaag"
             ]
         },
         {
@@ -206,7 +216,8 @@ function QuizPage() {
             options: [
                 "Ashtami",
                 "Purnima",
-                "Chaturthi"
+                "Chaturthi",
+                "Amavasya"
             ]
         },
         {
@@ -215,7 +226,8 @@ function QuizPage() {
             options: [
                 "Vrindavan",
                 "Ayodhya",
-                "Hastinapur"
+                "Hastinapur",
+                "Mathura"
             ]
         },
         {
@@ -224,7 +236,8 @@ function QuizPage() {
             options: [
                 "Sudama",
                 "Karna",
-                "Arjun"
+                "Arjun",
+                "Uddhav"
             ]
         },
         {
@@ -233,7 +246,8 @@ function QuizPage() {
             options: [
                 "Mahabharat",
                 "Ram-Ravan Yudh",
-                "Kurukshetra ke bahar"
+                "Kurukshetra ke bahar",
+                "Dasharatha ka Yudh"
             ]
         },
         {
@@ -242,7 +256,8 @@ function QuizPage() {
             options: [
                 "Bhagavad Gita",
                 "Rigveda",
-                "Samveda"
+                "Samveda",
+                "Atharvaveda"
             ]
         },
         {
@@ -251,7 +266,8 @@ function QuizPage() {
             options: [
                 "Rukmini",
                 "Sita",
-                "Draupadi"
+                "Draupadi",
+                "Jambavati"
             ]
         },
         {
@@ -260,7 +276,8 @@ function QuizPage() {
             options: [
                 "Bahut",
                 "Ek",
-                "Teen"
+                "Teen",
+                "Paanch"
             ]
         },
         {
@@ -269,7 +286,8 @@ function QuizPage() {
             options: [
                 "Raat",
                 "Din",
-                "Subah"
+                "Subah",
+                "Shaam"
             ]
         },
         {
@@ -278,7 +296,8 @@ function QuizPage() {
             options: [
                 "Govind",
                 "Vishnu",
-                "Indra"
+                "Indra",
+                "Murlidhar"
             ]
         },
         {
@@ -287,24 +306,21 @@ function QuizPage() {
             options: [
                 "Upvaas",
                 "Yudh",
-                "Shikar"
+                "Shikar",
+                "Dahi Handi"
             ]
         }
     ];
-    // Quiz timer countdown
+    // Timer
     (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useEffect"])(()=>{
         if (quizStarted && timeLeft > 0 && !submitted) {
-            const timer = setInterval(()=>{
-                setTimeLeft((prev)=>prev - 1);
-            }, 1000);
+            const timer = setInterval(()=>setTimeLeft((prev)=>prev - 1), 1000);
             return ()=>clearInterval(timer);
         }
-        if (timeLeft === 0 && !submitted) {
-            handleSubmit();
-        }
+        if (timeLeft === 0 && !submitted) handleSubmit();
     }, [
-        timeLeft,
         quizStarted,
+        timeLeft,
         submitted
     ]);
     const formatTime = (seconds)=>{
@@ -319,20 +335,15 @@ function QuizPage() {
         });
     };
     const handleSubmit = async ()=>{
-        try {
-            await (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["db"], "quizResults"), {
-                name: userData.name,
-                department: userData.department,
-                employeeId: userData.empId,
-                answers,
-                submittedAt: (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["serverTimestamp"])()
-            });
-            setSubmitted(true);
-            setQuizStarted(false);
-        } catch (error) {
-            console.error("Error saving quiz:", error);
-            setSubmitted(true);
-        }
+        await (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["addDoc"])((0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["collection"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["db"], "quizResults"), {
+            name: userData.name,
+            department: userData.department,
+            employeeId: userData.empId,
+            answers,
+            submittedAt: (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["serverTimestamp"])()
+        });
+        setSubmitted(true);
+        setQuizStarted(false);
     };
     const handleStart = ()=>{
         const now = new Date();
@@ -348,57 +359,77 @@ function QuizPage() {
     };
     const styles = {
         container: {
-            maxWidth: "600px",
+            maxWidth: "700px",
             margin: "auto",
             padding: "20px",
-            fontFamily: "Arial, sans-serif"
+            fontFamily: "'Segoe UI', sans-serif"
+        },
+        header: {
+            textAlign: "center",
+            color: "#2c3e50"
+        },
+        info: {
+            textAlign: "center",
+            color: "#8e44ad",
+            fontSize: "18px",
+            marginBottom: "20px"
         },
         card: {
+            background: "#ffffff",
+            padding: "20px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
             display: "flex",
             flexDirection: "column",
-            gap: "10px",
-            background: "#f9f9f9",
-            padding: "20px",
-            borderRadius: "8px"
+            gap: "10px"
         },
         input: {
-            padding: "10px",
+            padding: "12px",
             fontSize: "16px",
-            borderRadius: "5px",
-            border: "1px solid #ccc"
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            outline: "none",
+            transition: "0.3s"
         },
         button: {
-            padding: "10px",
+            padding: "12px",
             fontSize: "16px",
             border: "none",
-            borderRadius: "5px",
-            background: "#4CAF50",
+            borderRadius: "8px",
+            background: "#3498db",
             color: "#fff",
-            cursor: "pointer"
+            cursor: "pointer",
+            fontWeight: "bold",
+            transition: "0.3s"
+        },
+        buttonHover: {
+            background: "#2980b9"
         },
         question: {
-            background: "#fff",
+            background: "#f7f9fc",
             padding: "15px",
             borderRadius: "8px",
-            marginBottom: "10px",
+            marginBottom: "12px",
             border: "1px solid #ddd"
         },
         option: {
             display: "block",
-            marginTop: "5px"
+            marginTop: "6px",
+            cursor: "pointer"
         },
-        timerFixed: {
+        timer: {
             position: "fixed",
             top: "0",
             left: "0",
             width: "100%",
-            background: "white",
-            color: "red",
+            background: "#ffcccc",
+            color: "#e74c3c",
             padding: "10px",
             fontSize: "18px",
             textAlign: "center",
             zIndex: 1000,
-            borderBottom: "2px solid #ccc"
+            borderBottom: "2px solid #ccc",
+            fontWeight: "bold"
         }
     };
     const now = new Date();
@@ -407,27 +438,30 @@ function QuizPage() {
             style: styles.container,
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h1", {
-                    children: "Quiz Time"
+                    style: styles.header,
+                    children: "📚 Krishna Janmashtami Quiz"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 119,
+                    lineNumber: 165,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
-                    children: "📢 Quiz will be live between 11:00 AM to 12:00 AM on 15 Aug 2025"
+                    style: styles.info,
+                    children: "📢 Quiz will be live between 11:00 AM to 11:30 AM on 15 Aug 2025"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 120,
+                    lineNumber: 166,
                     columnNumber: 9
                 }, this),
                 now < quizStartTime || now > quizEndTime ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
                     style: {
-                        color: "red"
+                        color: "red",
+                        textAlign: "center"
                     },
                     children: "⛔ Quiz is not live right now!"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 122,
+                    lineNumber: 168,
                     columnNumber: 11
                 }, this) : null,
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -444,7 +478,7 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 125,
+                            lineNumber: 171,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
@@ -458,7 +492,7 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 126,
+                            lineNumber: 172,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
@@ -472,28 +506,30 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 127,
+                            lineNumber: 173,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
                             style: styles.button,
+                            onMouseOver: (e)=>e.target.style.background = styles.buttonHover.background,
+                            onMouseOut: (e)=>e.target.style.background = styles.button.background,
                             onClick: handleStart,
-                            children: "Start Quiz"
+                            children: "🚀 Start Quiz"
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 128,
+                            lineNumber: 174,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 124,
+                    lineNumber: 170,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 118,
+            lineNumber: 164,
             columnNumber: 7
         }, this);
     }
@@ -501,15 +537,19 @@ function QuizPage() {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
             style: styles.container,
             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
+                style: {
+                    color: "#27ae60",
+                    textAlign: "center"
+                },
                 children: "🎉 Dhanyavaad! Aapka quiz submit ho gaya!"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 137,
+                lineNumber: 190,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 136,
+            lineNumber: 189,
             columnNumber: 7
         }, this);
     }
@@ -517,19 +557,19 @@ function QuizPage() {
         style: styles.container,
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-                style: styles.timerFixed,
+                style: styles.timer,
                 children: [
                     "⏳ Time Left: ",
                     formatTime(timeLeft)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 144,
+                lineNumber: 197,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
                 style: {
-                    marginTop: "50px"
+                    marginTop: "60px"
                 },
                 children: questions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
                         style: styles.question,
@@ -543,12 +583,12 @@ function QuizPage() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/QuizPage.js",
-                                    lineNumber: 151,
+                                    lineNumber: 204,
                                     columnNumber: 16
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 151,
+                                lineNumber: 204,
                                 columnNumber: 13
                             }, this),
                             q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("label", {
@@ -562,7 +602,7 @@ function QuizPage() {
                                             checked: answers[q.id] === opt
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/QuizPage.js",
-                                            lineNumber: 154,
+                                            lineNumber: 207,
                                             columnNumber: 17
                                         }, this),
                                         " ",
@@ -570,33 +610,35 @@ function QuizPage() {
                                     ]
                                 }, opt, true, {
                                     fileName: "[project]/src/components/QuizPage.js",
-                                    lineNumber: 153,
+                                    lineNumber: 206,
                                     columnNumber: 15
                                 }, this))
                         ]
                     }, q.id, true, {
                         fileName: "[project]/src/components/QuizPage.js",
-                        lineNumber: 150,
+                        lineNumber: 203,
                         columnNumber: 11
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 148,
+                lineNumber: 201,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
                 style: styles.button,
+                onMouseOver: (e)=>e.target.style.background = styles.buttonHover.background,
+                onMouseOut: (e)=>e.target.style.background = styles.button.background,
                 onClick: handleSubmit,
-                children: "Submit"
+                children: "✅ Submit"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 161,
+                lineNumber: 214,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 143,
+        lineNumber: 196,
         columnNumber: 5
     }, this);
 }
