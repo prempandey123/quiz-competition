@@ -106,9 +106,9 @@ function QuizPage() {
     const [answers, setAnswers] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])({});
     const [submitted, setSubmitted] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(false);
     const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(60);
-    const [startCountdown, setStartCountdown] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(null);
-    // Set quiz start date/time
-    const quizStartDate = new Date("2025-08-15T11:55:00");
+    // Quiz live time range
+    const quizStartTime = new Date("2025-08-14T11:00:00");
+    const quizEndTime = new Date("2025-08-14T14:59:59"); // 12:00 AM next day
     const questions = [
         {
             id: 1,
@@ -291,19 +291,12 @@ function QuizPage() {
             ]
         }
     ];
-    // Countdown to quiz start
-    (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useEffect"])(()=>{
-        const interval = setInterval(()=>{
-            const now = new Date();
-            const diff = quizStartDate - now;
-            setStartCountdown(diff > 0 ? diff : 0);
-        }, 1000);
-        return ()=>clearInterval(interval);
-    }, []);
-    // Quiz timer
+    // Quiz timer countdown
     (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useEffect"])(()=>{
         if (quizStarted && timeLeft > 0 && !submitted) {
-            const timer = setInterval(()=>setTimeLeft((prev)=>prev - 1), 1000);
+            const timer = setInterval(()=>{
+                setTimeLeft((prev)=>prev - 1);
+            }, 1000);
             return ()=>clearInterval(timer);
         }
         if (timeLeft === 0 && !submitted) {
@@ -318,13 +311,6 @@ function QuizPage() {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
         return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-    };
-    const formatCountdown = (ms)=>{
-        const totalSec = Math.floor(ms / 1000);
-        const h = Math.floor(totalSec / 3600);
-        const m = Math.floor(totalSec % 3600 / 60);
-        const s = totalSec % 60;
-        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
     };
     const handleChange = (id, option)=>{
         setAnswers({
@@ -342,19 +328,20 @@ function QuizPage() {
                 submittedAt: (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["serverTimestamp"])()
             });
             setSubmitted(true);
-            setQuizStarted(false); // quiz close
+            setQuizStarted(false);
         } catch (error) {
             console.error("Error saving quiz:", error);
-            setSubmitted(true); // even if error, still show thank you
+            setSubmitted(true);
         }
     };
     const handleStart = ()=>{
+        const now = new Date();
         if (!userData.name || !userData.empId || !userData.department) {
             alert("Please fill all details before starting!");
             return;
         }
-        if (startCountdown > 0) {
-            alert("Quiz has not started yet!");
+        if (now < quizStartTime || now > quizEndTime) {
+            alert("Quiz is not live right now!");
             return;
         }
         setQuizStarted(true);
@@ -400,10 +387,21 @@ function QuizPage() {
             display: "block",
             marginTop: "5px"
         },
-        timer: {
-            color: "red"
+        timerFixed: {
+            position: "fixed",
+            top: "0",
+            left: "0",
+            width: "100%",
+            background: "white",
+            color: "red",
+            padding: "10px",
+            fontSize: "18px",
+            textAlign: "center",
+            zIndex: 1000,
+            borderBottom: "2px solid #ccc"
         }
     };
+    const now = new Date();
     if (!quizStarted) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
             style: styles.container,
@@ -412,19 +410,26 @@ function QuizPage() {
                     children: "Quiz Time"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 122,
+                    lineNumber: 119,
                     columnNumber: 9
                 }, this),
-                startCountdown > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
-                    children: [
-                        "⏳ Quiz will start in: ",
-                        formatCountdown(startCountdown)
-                    ]
-                }, void 0, true, {
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
+                    children: "📢 Quiz will be live between 11:00 AM to 12:00 AM on 15 Aug 2025"
+                }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 124,
-                    columnNumber: 11
+                    lineNumber: 120,
+                    columnNumber: 9
                 }, this),
+                now < quizStartTime || now > quizEndTime ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
+                    style: {
+                        color: "red"
+                    },
+                    children: "⛔ Quiz is not live right now!"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/QuizPage.js",
+                    lineNumber: 122,
+                    columnNumber: 11
+                }, this) : null,
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
                     style: styles.card,
                     children: [
@@ -439,7 +444,7 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 127,
+                            lineNumber: 125,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
@@ -453,7 +458,7 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 128,
+                            lineNumber: 126,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
@@ -467,29 +472,28 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 129,
+                            lineNumber: 127,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
                             style: styles.button,
                             onClick: handleStart,
-                            disabled: startCountdown > 0,
                             children: "Start Quiz"
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 130,
+                            lineNumber: 128,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 126,
+                    lineNumber: 124,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 121,
+            lineNumber: 118,
             columnNumber: 7
         }, this);
     }
@@ -500,97 +504,99 @@ function QuizPage() {
                 children: "🎉 Dhanyavaad! Aapka quiz submit ho gaya!"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 139,
+                lineNumber: 137,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 138,
+            lineNumber: 136,
             columnNumber: 7
         }, this);
     }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
         style: styles.container,
         children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h1", {
-                children: "Quiz"
-            }, void 0, false, {
-                fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 146,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
-                style: styles.timer,
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                style: styles.timerFixed,
                 children: [
                     "⏳ Time Left: ",
                     formatTime(timeLeft)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 147,
+                lineNumber: 144,
                 columnNumber: 7
             }, this),
-            questions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-                    style: styles.question,
-                    children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
-                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
-                                children: [
-                                    q.id,
-                                    ". ",
-                                    q.q
-                                ]
-                            }, void 0, true, {
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                style: {
+                    marginTop: "50px"
+                },
+                children: questions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                        style: styles.question,
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
+                                    children: [
+                                        q.id,
+                                        ". ",
+                                        q.q
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/src/components/QuizPage.js",
+                                    lineNumber: 151,
+                                    columnNumber: 16
+                                }, this)
+                            }, void 0, false, {
                                 fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 150,
-                                columnNumber: 14
-                            }, this)
-                        }, void 0, false, {
-                            fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 150,
-                            columnNumber: 11
-                        }, this),
-                        q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("label", {
-                                style: styles.option,
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
-                                        type: "radio",
-                                        name: q.id,
-                                        value: opt,
-                                        onChange: ()=>handleChange(q.id, opt),
-                                        checked: answers[q.id] === opt
-                                    }, void 0, false, {
-                                        fileName: "[project]/src/components/QuizPage.js",
-                                        lineNumber: 153,
-                                        columnNumber: 15
-                                    }, this),
-                                    " ",
-                                    opt
-                                ]
-                            }, opt, true, {
-                                fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 152,
+                                lineNumber: 151,
                                 columnNumber: 13
-                            }, this))
-                    ]
-                }, q.id, true, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 149,
-                    columnNumber: 9
-                }, this)),
+                            }, this),
+                            q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("label", {
+                                    style: styles.option,
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
+                                            type: "radio",
+                                            name: q.id,
+                                            value: opt,
+                                            onChange: ()=>handleChange(q.id, opt),
+                                            checked: answers[q.id] === opt
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/QuizPage.js",
+                                            lineNumber: 154,
+                                            columnNumber: 17
+                                        }, this),
+                                        " ",
+                                        opt
+                                    ]
+                                }, opt, true, {
+                                    fileName: "[project]/src/components/QuizPage.js",
+                                    lineNumber: 153,
+                                    columnNumber: 15
+                                }, this))
+                        ]
+                    }, q.id, true, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 150,
+                        columnNumber: 11
+                    }, this))
+            }, void 0, false, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 148,
+                columnNumber: 7
+            }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
                 style: styles.button,
                 onClick: handleSubmit,
                 children: "Submit"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 158,
+                lineNumber: 161,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 145,
+        lineNumber: 143,
         columnNumber: 5
     }, this);
 }

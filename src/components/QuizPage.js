@@ -8,10 +8,10 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
-  const [startCountdown, setStartCountdown] = useState(null);
 
-  // Set quiz start date/time
-  const quizStartDate = new Date("2025-08-15T11:55:00");
+  // Quiz live time range
+  const quizStartTime = new Date("2025-08-14T11:00:00");
+  const quizEndTime = new Date("2025-08-14T14:59:59"); // 12:00 AM next day
 
   const questions = [
     { id: 1, q: "Krishna Janmashtami kis devta ke janm din ke roop me manai jati hai?", options: ["Shiva", "Vishnu ke avatar Krishna", "Brahma"] },
@@ -36,20 +36,12 @@ export default function QuizPage() {
     { id: 20, q: "Janmashtami ke din log kya karte hain?", options: ["Upvaas", "Yudh", "Shikar"] },
   ];
 
-  // Countdown to quiz start
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const diff = quizStartDate - now;
-      setStartCountdown(diff > 0 ? diff : 0);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Quiz timer
+  // Quiz timer countdown
   useEffect(() => {
     if (quizStarted && timeLeft > 0 && !submitted) {
-      const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
       return () => clearInterval(timer);
     }
     if (timeLeft === 0 && !submitted) {
@@ -63,44 +55,35 @@ export default function QuizPage() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const formatCountdown = (ms) => {
-    const totalSec = Math.floor(ms / 1000);
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
   const handleChange = (id, option) => {
     setAnswers({ ...answers, [id]: option });
   };
 
   const handleSubmit = async () => {
-  try {
-    await addDoc(collection(db, "quizResults"), {
-      name: userData.name,
-      department: userData.department,
-      employeeId: userData.empId,
-      answers,
-      submittedAt: serverTimestamp(),
-    });
-    setSubmitted(true);
-    setQuizStarted(false); // quiz close
-  } catch (error) {
-    console.error("Error saving quiz:", error);
-    setSubmitted(true); // even if error, still show thank you
-  }
-};
+    try {
+      await addDoc(collection(db, "quizResults"), {
+        name: userData.name,
+        department: userData.department,
+        employeeId: userData.empId,
+        answers,
+        submittedAt: serverTimestamp(),
+      });
+      setSubmitted(true);
+      setQuizStarted(false);
+    } catch (error) {
+      console.error("Error saving quiz:", error);
+      setSubmitted(true);
+    }
+  };
 
   const handleStart = () => {
+    const now = new Date();
     if (!userData.name || !userData.empId || !userData.department) {
       alert("Please fill all details before starting!");
       return;
     }
-    if (startCountdown > 0) {
-      alert("Quiz has not started yet!");
+    if (now < quizStartTime || now > quizEndTime) {
+      alert("Quiz is not live right now!");
       return;
     }
     setQuizStarted(true);
@@ -113,21 +96,36 @@ export default function QuizPage() {
     button: { padding: "10px", fontSize: "16px", border: "none", borderRadius: "5px", background: "#4CAF50", color: "#fff", cursor: "pointer" },
     question: { background: "#fff", padding: "15px", borderRadius: "8px", marginBottom: "10px", border: "1px solid #ddd" },
     option: { display: "block", marginTop: "5px" },
-    timer: { color: "red" },
+    timerFixed: { 
+      position: "fixed", 
+      top: "0", 
+      left: "0", 
+      width: "100%", 
+      background: "white", 
+      color: "red", 
+      padding: "10px", 
+      fontSize: "18px", 
+      textAlign: "center", 
+      zIndex: 1000,
+      borderBottom: "2px solid #ccc"
+    }
   };
+
+  const now = new Date();
 
   if (!quizStarted) {
     return (
       <div style={styles.container}>
         <h1>Quiz Time</h1>
-        {startCountdown > 0 && (
-          <h3>⏳ Quiz will start in: {formatCountdown(startCountdown)}</h3>
-        )}
+        <h3>📢 Quiz will be live between 11:00 AM to 12:00 AM on 15 Aug 2025</h3>
+        {now < quizStartTime || now > quizEndTime ? (
+          <p style={{ color: "red" }}>⛔ Quiz is not live right now!</p>
+        ) : null}
         <div style={styles.card}>
           <input style={styles.input} type="text" placeholder="Full Name" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
           <input style={styles.input} type="text" placeholder="Department" value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
           <input style={styles.input} type="text" placeholder="Employee ID" value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
-          <button style={styles.button} onClick={handleStart} disabled={startCountdown > 0}>Start Quiz</button>
+          <button style={styles.button} onClick={handleStart}>Start Quiz</button>
         </div>
       </div>
     );
@@ -143,18 +141,23 @@ export default function QuizPage() {
 
   return (
     <div style={styles.container}>
-      <h1>Quiz</h1>
-      <h3 style={styles.timer}>⏳ Time Left: {formatTime(timeLeft)}</h3>
-      {questions.map((q) => (
-        <div key={q.id} style={styles.question}>
-          <p><b>{q.id}. {q.q}</b></p>
-          {q.options.map((opt) => (
-            <label key={opt} style={styles.option}>
-              <input type="radio" name={q.id} value={opt} onChange={() => handleChange(q.id, opt)} checked={answers[q.id] === opt} /> {opt}
-            </label>
-          ))}
-        </div>
-      ))}
+      <div style={styles.timerFixed}>
+        ⏳ Time Left: {formatTime(timeLeft)}
+      </div>
+
+      <div style={{ marginTop: "50px" }}>
+        {questions.map((q) => (
+          <div key={q.id} style={styles.question}>
+            <p><b>{q.id}. {q.q}</b></p>
+            {q.options.map((opt) => (
+              <label key={opt} style={styles.option}>
+                <input type="radio" name={q.id} value={opt} onChange={() => handleChange(q.id, opt)} checked={answers[q.id] === opt} /> {opt}
+              </label>
+            ))}
+          </div>
+        ))}
+      </div>
+
       <button style={styles.button} onClick={handleSubmit}>Submit</button>
     </div>
   );
