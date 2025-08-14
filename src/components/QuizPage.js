@@ -117,7 +117,7 @@ export default function QuizPage() {
     return (
       <div style={styles.container}>
         <h1>Quiz Time</h1>
-        <h3>📢 Quiz will be live between 11:00 AM to 12:00 AM on 15 Aug 2025</h3>
+        <h3>📢 Quiz will be live between 11:00 AM to 11:30 AM on 15 Aug 2025</h3>
         {now < quizStartTime || now > quizEndTime ? (
           <p style={{ color: "red" }}>⛔ Quiz is not live right now!</p>
         ) : null}
