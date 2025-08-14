@@ -160,29 +160,70 @@ export default function QuizPage() {
   const now = new Date();
 
   if (!quizStarted) {
-    return (
-      <div style={styles.container}>
-        <h1 style={styles.header}>📚 Krishna Janmashtami Quiz</h1>
-        <h3 style={styles.info}>📢 Quiz will be live between 11:00 AM to 11:30 AM on 15 Aug 2025</h3>
-        {now < quizStartTime || now > quizEndTime ? (
-          <p style={{ color: "red", textAlign: "center" }}>⛔ Quiz is not live right now!</p>
-        ) : null}
-        <div style={styles.card}>
-          <input style={styles.input} type="text" placeholder="Full Name" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
-          <input style={styles.input} type="text" placeholder="Department" value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
-          <input style={styles.input} type="text" placeholder="Employee ID" value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
-          <button
-            style={styles.button}
-            onMouseOver={(e) => (e.target.style.background = styles.buttonHover.background)}
-            onMouseOut={(e) => (e.target.style.background = styles.button.background)}
-            onClick={handleStart}
-          >
-            🚀 Start Quiz
-          </button>
-        </div>
+  return (
+    <div style={styles.container}>
+      <h1 style={styles.header}>📚 Quiz Time</h1>
+      <h3 style={styles.info}>
+        📢 Quiz will be live between 11:00 AM to 11:30 AM on 15 Aug 2025
+      </h3>
+      {now < quizStartTime || now > quizEndTime ? (
+        <p style={{ color: "red", textAlign: "center" }}>
+          ⛔ Quiz is not live right now!
+        </p>
+      ) : null}
+      <div style={styles.card}>
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Full Name"
+          value={userData.name}
+          onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+        />
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Department"
+          value={userData.department}
+          onChange={(e) => setUserData({ ...userData, department: e.target.value })}
+        />
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Employee ID"
+          value={userData.empId}
+          onChange={(e) => setUserData({ ...userData, empId: e.target.value })}
+        />
+        <button
+          style={styles.button}
+          onMouseOver={(e) =>
+            (e.target.style.background = styles.buttonHover.background)
+          }
+          onMouseOut={(e) =>
+            (e.target.style.background = styles.button.background)
+          }
+          onClick={handleStart}
+        >
+          🚀 Start Quiz
+        </button>
       </div>
-    );
-  }
+
+      {/* Footer */}
+      <footer
+        style={{
+          marginTop: "30px",
+          padding: "10px",
+          textAlign: "center",
+          fontSize: "14px",
+          color: "#7f8c8d",
+          borderTop: "1px solid #ddd",
+        }}
+      >
+        © {new Date().getFullYear()} Hero Steels Limited, IT Department — All Rights Reserved
+      </footer>
+    </div>
+  );
+}
+
 
   if (submitted) {
     return (
@@ -219,6 +260,8 @@ export default function QuizPage() {
       >
         ✅ Submit
       </button>
+      
     </div>
+    
   );
 }
