@@ -526,209 +526,229 @@ function QuizPage() {
     const [quizStarted, setQuizStarted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [answers, setAnswers] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])({});
     const [submitted, setSubmitted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(1800); // 30 min timer
+    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(300); // 30 min timer
     // Quiz live time range (11:00 AM - 11:30 AM on 15 Aug 2025)
-    const quizStartTime = new Date("2025-08-14T11:00:00");
-    const quizEndTime = new Date("2025-08-15T18:30:00");
+    const quizStartTime = new Date("2025-08-15T12:00:01");
+    const quizEndTime = new Date("2025-08-15T14:00:00");
     const questions = [
         {
             id: 1,
-            q: "Krishna Janmashtami kis devta ke janm din ke roop me manai jati hai?",
+            q: "Who was the Prime Minister of India when the country got independence in 1947?",
             options: [
-                "Shiva",
-                "Vishnu ke avatar Krishna",
-                "Brahma",
-                "Indra"
+                "Sardar Vallabhbhai Patel",
+                "Jawaharlal Nehru",
+                "Subhas Chandra Bose",
+                "Mahatma Gandhi"
             ]
         },
         {
             id: 2,
-            q: "Krishna ka janm kis nagar me hua tha?",
+            q: "Lord Krishna was born in which prison?",
             options: [
                 "Mathura",
                 "Dwarka",
                 "Vrindavan",
-                "Gokul"
+                "Kurukshetra"
             ]
         },
         {
             id: 3,
-            q: "Krishna ke pita kaun the?",
+            q: "What is the name of the demon king who tried to kill baby Krishna?",
             options: [
-                "Vasudeva",
-                "Nanda",
-                "Dasharatha",
-                "Parikshit"
+                "Kans",
+                "Ravan",
+                "Hiranyakashipu",
+                "Duryodhan"
             ]
         },
         {
             id: 4,
-            q: "Krishna ki maa kaun thi?",
+            q: "How many years of independence did India celebrate in 2025?",
             options: [
-                "Devaki",
-                "Yashoda",
-                "Kaikeyi",
-                "Kunti"
+                "74",
+                "75",
+                "78",
+                "79"
             ]
         },
         {
             id: 5,
-            q: "Krishna ko kis raja ne kaid me rakha tha?",
+            q: "What was Lord Krishna’s role in the Mahabharata?",
             options: [
-                "Kansa",
-                "Ravana",
-                "Hiranyakashipu",
-                "Duryodhana"
+                "Warrior",
+                "Sage",
+                "Charioteer and guide",
+                "King of Hastinapur"
             ]
         },
         {
             id: 6,
-            q: "Krishna ka rang kaunsa tha?",
+            q: "Who wrote the Indian National Anthem?",
             options: [
-                "Shyam (dark blue)",
-                "Gora",
-                "Peela",
-                "Sawla"
+                "Bankim Chandra Chatterjee",
+                "Subhas Chandra Bose",
+                "Rabindranath Tagore",
+                "Sarojini Naidu"
             ]
         },
         {
             id: 7,
-            q: "Krishna ka vishesh vadya kaunsa tha?",
+            q: "According to the Bhagavata Purana, at what exact time was Lord Krishna born?",
             options: [
-                "Bansuri",
-                "Veena",
-                "Sitar",
-                "Mridang"
+                "Midnight on Ashtami of Krishna Paksha in Shravana month",
+                "Noon on Navami of Krishna Paksha in Ashadha month",
+                "Midnight on Navami of Shukla Paksha in Bhadrapada month",
+                "Sunrise on Ashtami of Shukla Paksha in Shravan month"
             ]
         },
         {
             id: 8,
-            q: "Krishna ka priy bhojan kya tha?",
+            q: "Who was the Governor-General of India at the time of Indian independence in 1947?",
             options: [
-                "Makhan",
-                "Kheer",
-                "Puri",
-                "Laddu"
+                "Lord Wavell",
+                "Lord Linlithgow",
+                "Lord Mountbatten",
+                "Lord Curzon"
             ]
         },
         {
             id: 9,
-            q: "Krishna ke bade bhai kaun the?",
+            q: "In which Upanishad is Krishna mentioned as the Supreme Personality of Godhead?",
             options: [
-                "Balarama",
-                "Shatrughna",
-                "Lakshmana",
-                "Bharata"
+                "Chandogya Upanishad",
+                "Katha Upanishad",
+                "Gopala-tapani Upanishad",
+                "Mandukya Upanishad"
             ]
         },
         {
             id: 10,
-            q: "Krishna ne kis nag ko daman kiya tha?",
+            q: "The famous slogan 'Aaram haram hai' was given by which Indian freedom fighter after independence?",
             options: [
-                "Kaliya Naag",
-                "Vasuki",
-                "Takshaka",
-                "Sheshnaag"
+                "Lal Bahadur Shastri",
+                "Mahatma Gandhi",
+                "Jawaharlal Nehru",
+                "Sardar Patel"
             ]
         },
         {
             id: 11,
-            q: "Janmashtami kis tithi ko manai jati hai?",
+            q: "Who was the British Prime Minister when India became independent in 1947?",
             options: [
-                "Ashtami",
-                "Purnima",
-                "Chaturthi",
-                "Amavasya"
+                "Winston Churchill",
+                "Neville Chamberlain",
+                "Clement Attlee",
+                "Harold Macmillan"
             ]
         },
         {
             id: 12,
-            q: "Krishna ka bachpan kis gaon me bita?",
+            q: "What was the real name of Krishna’s foster mother in Gokul?",
             options: [
-                "Vrindavan",
-                "Ayodhya",
-                "Hastinapur",
-                "Mathura"
+                "Radha",
+                "Yashoda",
+                "Devaki",
+                "Rohini"
             ]
         },
         {
             id: 13,
-            q: "Krishna ke pradhan mitra kaun the?",
+            q: "What philosophical doctrine did Krishna reveal to Arjuna in the Bhagavad Gita?",
             options: [
-                "Sudama",
-                "Karna",
-                "Arjun",
-                "Uddhav"
+                "Advaita Vedanta",
+                "Karma Yoga and Bhakti Yoga",
+                "Buddhism",
+                "Jainism"
             ]
         },
         {
             id: 14,
-            q: "Krishna kis yudh me saarathi bane?",
+            q: "The Indian National Flag was adopted in its present form on which date?",
             options: [
-                "Mahabharat",
-                "Ram-Ravan Yudh",
-                "Kurukshetra ke bahar",
-                "Dasharatha ka Yudh"
+                "15 August 1947",
+                "26 January 1950",
+                "22 July 1947",
+                "10 August 1947"
             ]
         },
         {
             id: 15,
-            q: "Krishna ka priy geet kaunsa tha?",
+            q: "If Lord Krishna were to advise Mahatma Gandhi during the Quit India Movement, which principle from the Bhagavad Gita would most align with Gandhi’s philosophy?",
             options: [
-                "Bhagavad Gita",
-                "Rigveda",
-                "Samveda",
-                "Atharvaveda"
+                "Nishkama Karma (Selfless action)",
+                "Ahimsa (Non-violence)",
+                "Moksha (Liberation from the cycle of birth and death)",
+                "Bhakti (Devotion to God)"
             ]
         },
         {
             id: 16,
-            q: "Krishna ne kis rani se vivah kiya?",
+            q: "If the Dahi Handi tradition symbolizes unity and team effort, which Indian freedom movement tactic does it most closely resemble?",
             options: [
-                "Rukmini",
-                "Sita",
-                "Draupadi",
-                "Jambavati"
+                "Salt March",
+                "Swadeshi Movement",
+                "Quit India Movement",
+                "Non-Cooperation Movement"
             ]
         },
         {
             id: 17,
-            q: "Krishna ke kitne pramukh patra the Mahabharat me?",
+            q: "Imagine Janmashtami and Independence Day fall on the same day. A school decides to host a combined event. Which of the following themes would best represent both occasions?",
             options: [
-                "Bahut",
-                "Ek",
-                "Teen",
-                "Paanch"
+                "Patriotism through mythological storytelling",
+                "Political debates on colonialism",
+                "Folk dances of different states",
+                "Essay writing on modern politics"
             ]
         },
         {
             id: 18,
-            q: "Krishna ka janm raat ko hua tha ya din me?",
+            q: "Krishna is often seen breaking societal norms in the Mahabharata. Which Indian freedom fighter’s methods best mirror this kind of 'divine rebellion'?",
             options: [
-                "Raat",
-                "Din",
-                "Subah",
-                "Shaam"
+                "Subhas Chandra Bose",
+                "Jawaharlal Nehru",
+                "B. R. Ambedkar",
+                "Bal Gangadhar Tilak"
             ]
         },
         {
             id: 19,
-            q: "Krishna ko kis naam se bhi jana jata hai?",
+            q: "If Lord Krishna’s role in the Mahabharata symbolizes strategic guidance in chaos, what role does the Indian Constitution play post-independence in a similar context?",
             options: [
-                "Govind",
-                "Vishnu",
-                "Indra",
-                "Murlidhar"
+                "As a weapon of justice",
+                "As a spiritual text",
+                "As a guiding charioteer",
+                "As a religious law"
             ]
         },
         {
             id: 20,
-            q: "Janmashtami ke din log kya karte hain?",
+            q: "If the Makhan (butter) Krishna stole symbolized wealth or resources, what could be the parallel action in the Indian freedom struggle?",
             options: [
-                "Upvaas",
-                "Yudh",
-                "Shikar",
-                "Dahi Handi"
+                "Boycott of British goods",
+                "Adoption of Khadi",
+                "Salt-making in Dandi",
+                "Seizing of British institutions"
+            ]
+        },
+        {
+            id: 21,
+            q: "Suppose Krishna was born in colonial India in 1947. Which social issue would he most likely challenge first, based on his historical actions?",
+            options: [
+                "Partition",
+                "Caste discrimination",
+                "Economic exploitation",
+                "Religious conversion"
+            ]
+        },
+        {
+            id: 22,
+            q: "Which principle from Krishna’s life could best serve as a moral compass for drafting the Indian Constitution?",
+            options: [
+                "Tactical diplomacy with Kauravas",
+                "Participation in warfare",
+                "Preaching Bhakti",
+                "Emphasis on Dharma over personal ties"
             ]
         }
     ];
@@ -871,15 +891,15 @@ function QuizPage() {
                     children: "📚 Quiz Time"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 165,
+                    lineNumber: 167,
                     columnNumber: 7
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                     style: styles.info,
-                    children: "📢 Quiz will be live between 11:00 AM to 11:30 AM on 15 Aug 2025"
+                    children: "📢 Quiz will be live between 12:00 PM to 02:00 PM on 15 Aug 2025"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 166,
+                    lineNumber: 168,
                     columnNumber: 7
                 }, this),
                 now < quizStartTime || now > quizEndTime ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -890,7 +910,7 @@ function QuizPage() {
                     children: "⛔ Quiz is not live right now!"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 170,
+                    lineNumber: 172,
                     columnNumber: 9
                 }, this) : null,
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -907,7 +927,7 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 175,
+                            lineNumber: 177,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -921,7 +941,7 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 182,
+                            lineNumber: 184,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -935,7 +955,7 @@ function QuizPage() {
                                 })
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 189,
+                            lineNumber: 191,
                             columnNumber: 9
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -946,13 +966,13 @@ function QuizPage() {
                             children: "🚀 Start Quiz"
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 196,
+                            lineNumber: 198,
                             columnNumber: 9
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 174,
+                    lineNumber: 176,
                     columnNumber: 7
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("footer", {
@@ -971,13 +991,13 @@ function QuizPage() {
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 211,
+                    lineNumber: 213,
                     columnNumber: 7
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 164,
+            lineNumber: 166,
             columnNumber: 5
         }, this);
     }
@@ -992,12 +1012,12 @@ function QuizPage() {
                 children: "🎉 Dhanyavaad! Aapka quiz submit ho gaya!"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 231,
+                lineNumber: 233,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 230,
+            lineNumber: 232,
             columnNumber: 7
         }, this);
     }
@@ -1012,7 +1032,7 @@ function QuizPage() {
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 238,
+                lineNumber: 240,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1031,12 +1051,12 @@ function QuizPage() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/QuizPage.js",
-                                    lineNumber: 245,
+                                    lineNumber: 247,
                                     columnNumber: 16
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 245,
+                                lineNumber: 247,
                                 columnNumber: 13
                             }, this),
                             q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1050,7 +1070,7 @@ function QuizPage() {
                                             checked: answers[q.id] === opt
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/QuizPage.js",
-                                            lineNumber: 248,
+                                            lineNumber: 250,
                                             columnNumber: 17
                                         }, this),
                                         " ",
@@ -1058,18 +1078,18 @@ function QuizPage() {
                                     ]
                                 }, opt, true, {
                                     fileName: "[project]/src/components/QuizPage.js",
-                                    lineNumber: 247,
+                                    lineNumber: 249,
                                     columnNumber: 15
                                 }, this))
                         ]
                     }, q.id, true, {
                         fileName: "[project]/src/components/QuizPage.js",
-                        lineNumber: 244,
+                        lineNumber: 246,
                         columnNumber: 11
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 242,
+                lineNumber: 244,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1080,17 +1100,17 @@ function QuizPage() {
                 children: "✅ Submit"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
-                lineNumber: 255,
+                lineNumber: 257,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 237,
+        lineNumber: 239,
         columnNumber: 5
     }, this);
 }
-_s(QuizPage, "G0S8bh8H8UjDNxpbkulF1Zz2OIo=");
+_s(QuizPage, "CyBAL/3hd5hVsPTmK6LcPUqrTa8=");
 _c = QuizPage;
 var _c;
 __turbopack_context__.k.register(_c, "QuizPage");

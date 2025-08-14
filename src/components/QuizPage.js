@@ -7,33 +7,35 @@ export default function QuizPage() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(1800); // 30 min timer
+  const [timeLeft, setTimeLeft] = useState(300); // 30 min timer
 
   // Quiz live time range (11:00 AM - 11:30 AM on 15 Aug 2025)
-  const quizStartTime = new Date("2025-08-14T11:00:00");
-  const quizEndTime = new Date("2025-08-15T18:30:00");
+  const quizStartTime = new Date("2025-08-15T12:00:01");
+  const quizEndTime = new Date("2025-08-15T14:00:00");
 
-    const questions = [
-  { id: 1, q: "Krishna Janmashtami kis devta ke janm din ke roop me manai jati hai?", options: ["Shiva", "Vishnu ke avatar Krishna", "Brahma", "Indra"] },
-  { id: 2, q: "Krishna ka janm kis nagar me hua tha?", options: ["Mathura", "Dwarka", "Vrindavan", "Gokul"] },
-  { id: 3, q: "Krishna ke pita kaun the?", options: ["Vasudeva", "Nanda", "Dasharatha", "Parikshit"] },
-  { id: 4, q: "Krishna ki maa kaun thi?", options: ["Devaki", "Yashoda", "Kaikeyi", "Kunti"] },
-  { id: 5, q: "Krishna ko kis raja ne kaid me rakha tha?", options: ["Kansa", "Ravana", "Hiranyakashipu", "Duryodhana"] },
-  { id: 6, q: "Krishna ka rang kaunsa tha?", options: ["Shyam (dark blue)", "Gora", "Peela", "Sawla"] },
-  { id: 7, q: "Krishna ka vishesh vadya kaunsa tha?", options: ["Bansuri", "Veena", "Sitar", "Mridang"] },
-  { id: 8, q: "Krishna ka priy bhojan kya tha?", options: ["Makhan", "Kheer", "Puri", "Laddu"] },
-  { id: 9, q: "Krishna ke bade bhai kaun the?", options: ["Balarama", "Shatrughna", "Lakshmana", "Bharata"] },
-  { id: 10, q: "Krishna ne kis nag ko daman kiya tha?", options: ["Kaliya Naag", "Vasuki", "Takshaka", "Sheshnaag"] },
-  { id: 11, q: "Janmashtami kis tithi ko manai jati hai?", options: ["Ashtami", "Purnima", "Chaturthi", "Amavasya"] },
-  { id: 12, q: "Krishna ka bachpan kis gaon me bita?", options: ["Vrindavan", "Ayodhya", "Hastinapur", "Mathura"] },
-  { id: 13, q: "Krishna ke pradhan mitra kaun the?", options: ["Sudama", "Karna", "Arjun", "Uddhav"] },
-  { id: 14, q: "Krishna kis yudh me saarathi bane?", options: ["Mahabharat", "Ram-Ravan Yudh", "Kurukshetra ke bahar", "Dasharatha ka Yudh"] },
-  { id: 15, q: "Krishna ka priy geet kaunsa tha?", options: ["Bhagavad Gita", "Rigveda", "Samveda", "Atharvaveda"] },
-  { id: 16, q: "Krishna ne kis rani se vivah kiya?", options: ["Rukmini", "Sita", "Draupadi", "Jambavati"] },
-  { id: 17, q: "Krishna ke kitne pramukh patra the Mahabharat me?", options: ["Bahut", "Ek", "Teen", "Paanch"] },
-  { id: 18, q: "Krishna ka janm raat ko hua tha ya din me?", options: ["Raat", "Din", "Subah", "Shaam"] },
-  { id: 19, q: "Krishna ko kis naam se bhi jana jata hai?", options: ["Govind", "Vishnu", "Indra", "Murlidhar"] },
-  { id: 20, q: "Janmashtami ke din log kya karte hain?", options: ["Upvaas", "Yudh", "Shikar", "Dahi Handi"] },
+  const questions = [
+  { id: 1, q: "Who was the Prime Minister of India when the country got independence in 1947?", options: ["Sardar Vallabhbhai Patel", "Jawaharlal Nehru", "Subhas Chandra Bose", "Mahatma Gandhi"] },
+  { id: 2, q: "Lord Krishna was born in which prison?", options: ["Mathura", "Dwarka", "Vrindavan", "Kurukshetra"] },
+  { id: 3, q: "What is the name of the demon king who tried to kill baby Krishna?", options: ["Kans", "Ravan", "Hiranyakashipu", "Duryodhan"] },
+  { id: 4, q: "How many years of independence did India celebrate in 2025?", options: ["74", "75", "78", "79"] },
+  { id: 5, q: "What was Lord Krishna’s role in the Mahabharata?", options: ["Warrior", "Sage", "Charioteer and guide", "King of Hastinapur"] },
+  { id: 6, q: "Who wrote the Indian National Anthem?", options: ["Bankim Chandra Chatterjee", "Subhas Chandra Bose", "Rabindranath Tagore", "Sarojini Naidu"] },
+  { id: 7, q: "According to the Bhagavata Purana, at what exact time was Lord Krishna born?", options: ["Midnight on Ashtami of Krishna Paksha in Shravana month", "Noon on Navami of Krishna Paksha in Ashadha month", "Midnight on Navami of Shukla Paksha in Bhadrapada month", "Sunrise on Ashtami of Shukla Paksha in Shravan month"] },
+  { id: 8, q: "Who was the Governor-General of India at the time of Indian independence in 1947?", options: ["Lord Wavell", "Lord Linlithgow", "Lord Mountbatten", "Lord Curzon"] },
+  { id: 9, q: "In which Upanishad is Krishna mentioned as the Supreme Personality of Godhead?", options: ["Chandogya Upanishad", "Katha Upanishad", "Gopala-tapani Upanishad", "Mandukya Upanishad"] },
+  { id: 10, q: "The famous slogan 'Aaram haram hai' was given by which Indian freedom fighter after independence?", options: ["Lal Bahadur Shastri", "Mahatma Gandhi", "Jawaharlal Nehru", "Sardar Patel"] },
+  { id: 11, q: "Who was the British Prime Minister when India became independent in 1947?", options: ["Winston Churchill", "Neville Chamberlain", "Clement Attlee", "Harold Macmillan"] },
+  { id: 12, q: "What was the real name of Krishna’s foster mother in Gokul?", options: ["Radha", "Yashoda", "Devaki", "Rohini"] },
+  { id: 13, q: "What philosophical doctrine did Krishna reveal to Arjuna in the Bhagavad Gita?", options: ["Advaita Vedanta", "Karma Yoga and Bhakti Yoga", "Buddhism", "Jainism"] },
+  { id: 14, q: "The Indian National Flag was adopted in its present form on which date?", options: ["15 August 1947", "26 January 1950", "22 July 1947", "10 August 1947"] },
+  { id: 15, q: "If Lord Krishna were to advise Mahatma Gandhi during the Quit India Movement, which principle from the Bhagavad Gita would most align with Gandhi’s philosophy?", options: ["Nishkama Karma (Selfless action)", "Ahimsa (Non-violence)", "Moksha (Liberation from the cycle of birth and death)", "Bhakti (Devotion to God)"] },
+  { id: 16, q: "If the Dahi Handi tradition symbolizes unity and team effort, which Indian freedom movement tactic does it most closely resemble?", options: ["Salt March", "Swadeshi Movement", "Quit India Movement", "Non-Cooperation Movement"] },
+  { id: 17, q: "Imagine Janmashtami and Independence Day fall on the same day. A school decides to host a combined event. Which of the following themes would best represent both occasions?", options: ["Patriotism through mythological storytelling", "Political debates on colonialism", "Folk dances of different states", "Essay writing on modern politics"] },
+  { id: 18, q: "Krishna is often seen breaking societal norms in the Mahabharata. Which Indian freedom fighter’s methods best mirror this kind of 'divine rebellion'?", options: ["Subhas Chandra Bose", "Jawaharlal Nehru", "B. R. Ambedkar", "Bal Gangadhar Tilak"] },
+  { id: 19, q: "If Lord Krishna’s role in the Mahabharata symbolizes strategic guidance in chaos, what role does the Indian Constitution play post-independence in a similar context?", options: ["As a weapon of justice", "As a spiritual text", "As a guiding charioteer", "As a religious law"] },
+  { id: 20, q: "If the Makhan (butter) Krishna stole symbolized wealth or resources, what could be the parallel action in the Indian freedom struggle?", options: ["Boycott of British goods", "Adoption of Khadi", "Salt-making in Dandi", "Seizing of British institutions"] },
+  { id: 21, q: "Suppose Krishna was born in colonial India in 1947. Which social issue would he most likely challenge first, based on his historical actions?", options: ["Partition", "Caste discrimination", "Economic exploitation", "Religious conversion"] },
+  { id: 22, q: "Which principle from Krishna’s life could best serve as a moral compass for drafting the Indian Constitution?", options: ["Tactical diplomacy with Kauravas", "Participation in warfare", "Preaching Bhakti", "Emphasis on Dharma over personal ties"] },
 ];
 
 
@@ -164,7 +166,7 @@ export default function QuizPage() {
     <div style={styles.container}>
       <h1 style={styles.header}>📚 Quiz Time</h1>
       <h3 style={styles.info}>
-        📢 Quiz will be live between 11:00 AM to 11:30 AM on 15 Aug 2025
+        📢 Quiz will be live between 12:00 PM to 02:00 PM on 15 Aug 2025
       </h3>
       {now < quizStartTime || now > quizEndTime ? (
         <p style={{ color: "red", textAlign: "center" }}>
