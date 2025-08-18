@@ -77,7 +77,7 @@ export default function QuizPage() {
       return;
     }
     if (now < quizStartTime || now > quizEndTime) {
-      alert("Quiz is not live right now!");
+      alert("Please wait for next quiz!!!!");
       return;
     }
     setQuizStarted(true);
@@ -166,7 +166,7 @@ export default function QuizPage() {
     <div style={styles.container}>
       <h1 style={styles.header}>📚 Quiz Time</h1>
       <h3 style={styles.info}>
-        📢 Quiz will be live between 12:00 PM to 02:00 PM on 15 Aug 2025
+        📢 This quiz is over, Kindly wait for next quiz!!!!!!!!
       </h3>
       {now < quizStartTime || now > quizEndTime ? (
         <p style={{ color: "red", textAlign: "center" }}>
