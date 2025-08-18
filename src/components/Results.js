@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export default function Results() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState(null);
+  const [viewAllAnswers, setViewAllAnswers] = useState(false);
 
   // Password state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -94,6 +97,36 @@ export default function Results() {
     printWindow.print();
   };
 
+  // ✅ Export all results to Excel
+  const exportToExcel = () => {
+    if (results.length === 0) return;
+
+    // Find max questions count
+    const maxQuestions = Math.max(...results.map((u) => Object.keys(u.answers || {}).length));
+
+    const data = results.map((user) => {
+      const row = {
+        Name: user.name,
+        Department: user.employeeId,
+        EmployeeID: user.email,
+      };
+
+      for (let i = 1; i <= maxQuestions; i++) {
+        row[`Ans ${i}`] = user.answers?.[i] || "";
+      }
+
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Quiz Results");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const fileData = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(fileData, "Quiz_Results.xlsx");
+  };
+
   if (!isAuthenticated) {
     return (
       <div style={styles.loginContainer}>
@@ -154,6 +187,42 @@ export default function Results() {
               ))}
             </tbody>
           </table>
+        )}
+        
+        <button 
+          style={{ ...styles.button, marginTop: "15px", background: "purple" }} 
+          onClick={() => setViewAllAnswers(true)}
+        >
+          View All Answers
+        </button>
+
+        <button 
+          style={{ ...styles.button, marginTop: "15px", background: "darkgreen", marginLeft: "10px" }} 
+          onClick={exportToExcel}
+        >
+          📊 Export to Excel
+        </button>
+
+        {viewAllAnswers && (
+          <div style={styles.modalOverlay}>
+            <div style={styles.modal}>
+              <h2>All Users Answers</h2>
+              {results.map((user) => (
+                <div key={user.id} style={{ marginBottom: "20px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
+                  <p><b>Name:</b> {user.name}</p>
+                  <p><b>Email:</b> {user.email}</p>
+                  <p><b>Department:</b> {user.employeeId}</p>
+                  <p><b>Submitted At:</b> {user.submittedAt?.toDate ? user.submittedAt.toDate().toLocaleString() : "N/A"}</p>
+                  <ul>
+                    {Object.entries(user.answers).map(([qId, ans]) => (
+                      <li key={qId}><b>Q{qId}:</b> {ans}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <button style={styles.closeButton} onClick={() => setViewAllAnswers(false)}>Close</button>
+            </div>
+          </div>
         )}
 
         {selectedAnswers && (

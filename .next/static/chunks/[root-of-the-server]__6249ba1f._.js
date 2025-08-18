@@ -511,8 +511,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$ind
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$firebase$2e$js__$5b$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/firebase.js [client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$firebase$2f$firestore$2f$dist$2f$esm$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/node_modules/firebase/firestore/dist/esm/index.esm.js [client] (ecmascript) <module evaluation>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$firebase$2f$firestore$2f$dist$2f$index$2e$esm$2e$js__$5b$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@firebase/firestore/dist/index.esm.js [client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$xlsx$2f$xlsx$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/xlsx/xlsx.mjs [client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$file$2d$saver$2f$dist$2f$FileSaver$2e$min$2e$js__$5b$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/file-saver/dist/FileSaver.min.js [client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
+;
+;
 ;
 ;
 ;
@@ -522,6 +526,7 @@ function Results() {
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [selectedAnswers, setSelectedAnswers] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [viewAllAnswers, setViewAllAnswers] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
     // Password state
     const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [passwordInput, setPasswordInput] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])("");
@@ -607,6 +612,36 @@ function Results() {
         printWindow.document.close();
         printWindow.print();
     };
+    // ✅ Export all results to Excel
+    const exportToExcel = ()=>{
+        if (results.length === 0) return;
+        // Find max questions count
+        const maxQuestions = Math.max(...results.map((u)=>Object.keys(u.answers || {}).length));
+        const data = results.map((user)=>{
+            const row = {
+                Name: user.name,
+                Department: user.employeeId,
+                EmployeeID: user.email
+            };
+            for(let i = 1; i <= maxQuestions; i++){
+                row[`Ans ${i}`] = user.answers?.[i] || "";
+            }
+            return row;
+        });
+        const worksheet = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$xlsx$2f$xlsx$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["utils"].json_to_sheet(data);
+        const workbook = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$xlsx$2f$xlsx$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["utils"].book_new();
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$xlsx$2f$xlsx$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["utils"].book_append_sheet(workbook, worksheet, "Quiz Results");
+        const excelBuffer = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$xlsx$2f$xlsx$2e$mjs__$5b$client$5d$__$28$ecmascript$29$__["write"])(workbook, {
+            bookType: "xlsx",
+            type: "array"
+        });
+        const fileData = new Blob([
+            excelBuffer
+        ], {
+            type: "application/octet-stream"
+        });
+        (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$file$2d$saver$2f$dist$2f$FileSaver$2e$min$2e$js__$5b$client$5d$__$28$ecmascript$29$__["saveAs"])(fileData, "Quiz_Results.xlsx");
+    };
     if (!isAuthenticated) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             style: styles.loginContainer,
@@ -617,7 +652,7 @@ function Results() {
                         children: "🔐 Enter Password to View Results"
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 101,
+                        lineNumber: 134,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -628,7 +663,7 @@ function Results() {
                         style: styles.passwordInput
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 102,
+                        lineNumber: 135,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -637,7 +672,7 @@ function Results() {
                         children: "Submit"
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 109,
+                        lineNumber: 142,
                         columnNumber: 11
                     }, this),
                     passwordError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -647,18 +682,18 @@ function Results() {
                         children: passwordError
                     }, void 0, false, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 112,
+                        lineNumber: 145,
                         columnNumber: 29
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/Results.js",
-                lineNumber: 100,
+                lineNumber: 133,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/components/Results.js",
-            lineNumber: 99,
+            lineNumber: 132,
             columnNumber: 7
         }, this);
     }
@@ -669,7 +704,7 @@ function Results() {
         children: "Loading results..."
     }, void 0, false, {
         fileName: "[project]/src/components/Results.js",
-        lineNumber: 118,
+        lineNumber: 151,
         columnNumber: 23
     }, this);
     if (error) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -683,7 +718,7 @@ function Results() {
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/Results.js",
-        lineNumber: 119,
+        lineNumber: 152,
         columnNumber: 21
     }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -696,7 +731,7 @@ function Results() {
                     children: "📊 Quiz Results"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Results.js",
-                    lineNumber: 124,
+                    lineNumber: 157,
                     columnNumber: 9
                 }, this),
                 results.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -704,7 +739,7 @@ function Results() {
                     children: "No results yet"
                 }, void 0, false, {
                     fileName: "[project]/src/components/Results.js",
-                    lineNumber: 126,
+                    lineNumber: 159,
                     columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
                     style: {
@@ -720,7 +755,7 @@ function Results() {
                                         children: "Name"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 131,
+                                        lineNumber: 164,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -728,7 +763,7 @@ function Results() {
                                         children: "Email"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 132,
+                                        lineNumber: 165,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -736,7 +771,7 @@ function Results() {
                                         children: "Department"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 133,
+                                        lineNumber: 166,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -744,7 +779,7 @@ function Results() {
                                         children: "Submitted At"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 134,
+                                        lineNumber: 167,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -752,18 +787,18 @@ function Results() {
                                         children: "Actions"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 135,
+                                        lineNumber: 168,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/Results.js",
-                                lineNumber: 130,
+                                lineNumber: 163,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/Results.js",
-                            lineNumber: 129,
+                            lineNumber: 162,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -774,7 +809,7 @@ function Results() {
                                             children: r.name
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Results.js",
-                                            lineNumber: 141,
+                                            lineNumber: 174,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -782,7 +817,7 @@ function Results() {
                                             children: r.email
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Results.js",
-                                            lineNumber: 142,
+                                            lineNumber: 175,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -790,7 +825,7 @@ function Results() {
                                             children: r.employeeId
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Results.js",
-                                            lineNumber: 143,
+                                            lineNumber: 176,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -798,7 +833,7 @@ function Results() {
                                             children: r.submittedAt?.toDate ? r.submittedAt.toDate().toLocaleString() : "N/A"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/Results.js",
-                                            lineNumber: 144,
+                                            lineNumber: 177,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -813,7 +848,7 @@ function Results() {
                                                     children: "View"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Results.js",
-                                                    lineNumber: 150,
+                                                    lineNumber: 183,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -825,30 +860,197 @@ function Results() {
                                                     children: "🖨 Print"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/Results.js",
-                                                    lineNumber: 151,
+                                                    lineNumber: 184,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/Results.js",
-                                            lineNumber: 149,
+                                            lineNumber: 182,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, r.id, true, {
                                     fileName: "[project]/src/components/Results.js",
-                                    lineNumber: 140,
+                                    lineNumber: 173,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/src/components/Results.js",
-                            lineNumber: 138,
+                            lineNumber: 171,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/Results.js",
-                    lineNumber: 128,
+                    lineNumber: 161,
+                    columnNumber: 11
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                    style: {
+                        ...styles.button,
+                        marginTop: "15px",
+                        background: "purple"
+                    },
+                    onClick: ()=>setViewAllAnswers(true),
+                    children: "View All Answers"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 192,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                    style: {
+                        ...styles.button,
+                        marginTop: "15px",
+                        background: "darkgreen",
+                        marginLeft: "10px"
+                    },
+                    onClick: exportToExcel,
+                    children: "📊 Export to Excel"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 199,
+                    columnNumber: 9
+                }, this),
+                viewAllAnswers && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    style: styles.modalOverlay,
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        style: styles.modal,
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                children: "All Users Answers"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Results.js",
+                                lineNumber: 209,
+                                columnNumber: 15
+                            }, this),
+                            results.map((user)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    style: {
+                                        marginBottom: "20px",
+                                        borderBottom: "1px solid #ccc",
+                                        paddingBottom: "10px"
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Name:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Results.js",
+                                                    lineNumber: 212,
+                                                    columnNumber: 22
+                                                }, this),
+                                                " ",
+                                                user.name
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 212,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Email:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Results.js",
+                                                    lineNumber: 213,
+                                                    columnNumber: 22
+                                                }, this),
+                                                " ",
+                                                user.email
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 213,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Department:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Results.js",
+                                                    lineNumber: 214,
+                                                    columnNumber: 22
+                                                }, this),
+                                                " ",
+                                                user.employeeId
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 214,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                    children: "Submitted At:"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/Results.js",
+                                                    lineNumber: 215,
+                                                    columnNumber: 22
+                                                }, this),
+                                                " ",
+                                                user.submittedAt?.toDate ? user.submittedAt.toDate().toLocaleString() : "N/A"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 215,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                            children: Object.entries(user.answers).map(([qId, ans])=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                            children: [
+                                                                "Q",
+                                                                qId,
+                                                                ":"
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/src/components/Results.js",
+                                                            lineNumber: 218,
+                                                            columnNumber: 37
+                                                        }, this),
+                                                        " ",
+                                                        ans
+                                                    ]
+                                                }, qId, true, {
+                                                    fileName: "[project]/src/components/Results.js",
+                                                    lineNumber: 218,
+                                                    columnNumber: 23
+                                                }, this))
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/Results.js",
+                                            lineNumber: 216,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, user.id, true, {
+                                    fileName: "[project]/src/components/Results.js",
+                                    lineNumber: 211,
+                                    columnNumber: 17
+                                }, this)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                style: styles.closeButton,
+                                onClick: ()=>setViewAllAnswers(false),
+                                children: "Close"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/Results.js",
+                                lineNumber: 223,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/Results.js",
+                        lineNumber: 208,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Results.js",
+                    lineNumber: 207,
                     columnNumber: 11
                 }, this),
                 selectedAnswers && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -860,7 +1062,7 @@ function Results() {
                                 children: "User Answers"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Results.js",
-                                lineNumber: 162,
+                                lineNumber: 231,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -874,7 +1076,7 @@ function Results() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/Results.js",
-                                                lineNumber: 165,
+                                                lineNumber: 234,
                                                 columnNumber: 33
                                             }, this),
                                             " ",
@@ -882,12 +1084,12 @@ function Results() {
                                         ]
                                     }, qId, true, {
                                         fileName: "[project]/src/components/Results.js",
-                                        lineNumber: 165,
+                                        lineNumber: 234,
                                         columnNumber: 19
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Results.js",
-                                lineNumber: 163,
+                                lineNumber: 232,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -896,33 +1098,33 @@ function Results() {
                                 children: "Close"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/Results.js",
-                                lineNumber: 168,
+                                lineNumber: 237,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/Results.js",
-                        lineNumber: 161,
+                        lineNumber: 230,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/Results.js",
-                    lineNumber: 160,
+                    lineNumber: 229,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/Results.js",
-            lineNumber: 123,
+            lineNumber: 156,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/Results.js",
-        lineNumber: 122,
+        lineNumber: 155,
         columnNumber: 5
     }, this);
 }
-_s(Results, "0W/6XE/kjm2nBuc+u5X/8wWnPWg=");
+_s(Results, "5mGTzJGg2FOJ3u+CJmDdFsWSBF0=");
 _c = Results;
 const styles = {
     loginContainer: {

@@ -528,8 +528,8 @@ function QuizPage() {
     const [submitted, setSubmitted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(300); // 30 min timer
     // Quiz live time range (11:00 AM - 11:30 AM on 15 Aug 2025)
-    const quizStartTime = new Date("2025-08-14T18:00:01+05:30");
-    const quizEndTime = new Date("2025-08-15T18:03:00+05:30");
+    const quizStartTime = new Date("2025-08-15T12:00:01");
+    const quizEndTime = new Date("2025-08-15T14:00:00");
     const questions = [
         {
             id: 1,
@@ -801,7 +801,7 @@ function QuizPage() {
             return;
         }
         if (now < quizStartTime || now > quizEndTime) {
-            alert("Quiz is not live right now!");
+            alert("Please wait for next quiz!!!!");
             return;
         }
         setQuizStarted(true);
@@ -896,7 +896,7 @@ function QuizPage() {
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                     style: styles.info,
-                    children: "📢 Quiz will be live between 12:00 PM to 02:00 PM on 15 Aug 2025"
+                    children: "📢 This quiz is over, Kindly wait for next quiz!!!!!!!!"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
                     lineNumber: 168,
