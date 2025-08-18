@@ -11,7 +11,7 @@ export default function QuizPage() {
 
   // Quiz live time range (11:00 AM - 11:30 AM on 15 Aug 2025)
   const quizStartTime = new Date("2025-08-15T12:00:01");
-  const quizEndTime = new Date("2025-08-15T14:00:00");
+  const quizEndTime = new Date("2025-08-19T14:00:00");
 
   const questions = [
   { id: 1, q: "Who was the Prime Minister of India when the country got independence in 1947?", options: ["Sardar Vallabhbhai Patel", "Jawaharlal Nehru", "Subhas Chandra Bose", "Mahatma Gandhi"] },
