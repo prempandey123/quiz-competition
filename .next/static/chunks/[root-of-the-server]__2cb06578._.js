@@ -529,7 +529,7 @@ function QuizPage() {
     const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(300); // 30 min timer
     // Quiz live time range (11:00 AM - 11:30 AM on 15 Aug 2025)
     const quizStartTime = new Date("2025-08-15T12:00:01");
-    const quizEndTime = new Date("2025-08-15T14:00:00");
+    const quizEndTime = new Date("2025-08-19T14:00:00");
     const questions = [
         {
             id: 1,
