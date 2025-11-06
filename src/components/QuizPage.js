@@ -183,7 +183,7 @@ export default function QuizPage() {
       <div style={styles.container}>
         <h1 style={styles.header}>🏭 5S & Kaizen Training Program – Quiz</h1>
         <h3 style={{ textAlign: "center", color: "#555" }}>📅 Session Date: 10 September 2025</h3>
-        <h3 style={{ textAlign: "center", color: "#555" }}>👨‍🏫 Trainer: Mr. Ankur Dhir</h3>
+        <h3 style={{ textAlign: "center", color: "#555" }}>👨‍🏫 Trainer Name: Mr. Ankur Dhir</h3>
 
         {isAfterSix ? (
           <h3 style={{ color: "red", textAlign: "center" }}>⛔ Quiz is closed after 6 PM. Please contact your trainer.</h3>
@@ -234,7 +234,7 @@ export default function QuizPage() {
         📄 <b>Total Marks:</b> 25 | <b>Minimum Required:</b> 10
       </h3>
       <p style={{ textAlign: "center", color: "#7f8c8d" }}>
-        (Sections A–C = 1 mark each | Section D = 2 marks each)
+        (Sections A to C = 1 mark each | Section D = 2 marks each)
       </p>
 
       {[{ title: "🅰️ Section A – Multiple Choice", data: sectionA },
