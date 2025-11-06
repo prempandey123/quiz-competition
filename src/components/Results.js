@@ -11,15 +11,15 @@ export default function Results() {
   const [selectedAnswers, setSelectedAnswers] = useState(null);
   const [viewAllAnswers, setViewAllAnswers] = useState(false);
 
-  // Password state
+  // Password auth
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
-  const allowedPasswords = ["admin123", "secret456"]; // Change these
+  const allowedPasswords = ["admin123", "secret456"];
 
   useEffect(() => {
     if (!isAuthenticated) return;
+
     const fetchResults = async () => {
       try {
         const q = query(collection(db, "quizResults"), orderBy("submittedAt", "desc"));
@@ -33,7 +33,8 @@ export default function Results() {
             return {
               id: doc.id,
               name: data.name || "N/A",
-              email: data.email || "N/A",
+              department: data.department || "N/A",
+              designation: data.designation || "N/A",
               employeeId: data.employeeId || "N/A",
               answers: data.answers || {},
               submittedAt: data.submittedAt || null,
@@ -60,7 +61,7 @@ export default function Results() {
     }
   };
 
-  // Print single user's answers
+  // 🖨 Print single user's answers
   const handlePrintSingle = (user) => {
     const printWindow = window.open("", "_blank");
     const formattedDate = user.submittedAt?.toDate
@@ -82,7 +83,9 @@ export default function Results() {
         <body>
           <h2>Quiz Submission Details</h2>
           <p><b>Name:</b> ${user.name}</p>
-          <p><b>Department:</b> ${user.employeeId}</p>
+          <p><b>Department:</b> ${user.department}</p>
+          <p><b>Designation:</b> ${user.designation}</p>
+          <p><b>Employee ID:</b> ${user.employeeId}</p>
           <p><b>Submitted At:</b> ${formattedDate}</p>
           <h3>Answers:</h3>
           <ul>
@@ -101,20 +104,18 @@ export default function Results() {
   const exportToExcel = () => {
     if (results.length === 0) return;
 
-    // Find max questions count
     const maxQuestions = Math.max(...results.map((u) => Object.keys(u.answers || {}).length));
 
     const data = results.map((user) => {
       const row = {
         Name: user.name,
-        Department: user.employeeId,
-        EmployeeID: user.email,
+        Department: user.department,
+        Designation: user.designation,
+        EmployeeID: user.employeeId,
       };
-
       for (let i = 1; i <= maxQuestions; i++) {
-        row[`Ans ${i}`] = user.answers?.[i] || "";
+        row[`Q${i}`] = user.answers?.[i] || "";
       }
-
       return row;
     });
 
@@ -139,9 +140,7 @@ export default function Results() {
             placeholder="Enter password"
             style={styles.passwordInput}
           />
-          <button onClick={handleLogin} style={styles.button}>
-            Submit
-          </button>
+          <button onClick={handleLogin} style={styles.button}>Submit</button>
           {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
         </div>
       </div>
@@ -162,8 +161,9 @@ export default function Results() {
             <thead>
               <tr>
                 <th style={styles.th}>Name</th>
-                <th style={styles.th}>Email</th>
                 <th style={styles.th}>Department</th>
+                <th style={styles.th}>Designation</th>
+                <th style={styles.th}>Employee ID</th>
                 <th style={styles.th}>Submitted At</th>
                 <th style={styles.th}>Actions</th>
               </tr>
@@ -172,7 +172,8 @@ export default function Results() {
               {results.map((r) => (
                 <tr key={r.id}>
                   <td style={styles.td}>{r.name}</td>
-                  <td style={styles.td}>{r.email}</td>
+                  <td style={styles.td}>{r.department}</td>
+                  <td style={styles.td}>{r.designation}</td>
                   <td style={styles.td}>{r.employeeId}</td>
                   <td style={styles.td}>
                     {r.submittedAt?.toDate
@@ -180,29 +181,40 @@ export default function Results() {
                       : "N/A"}
                   </td>
                   <td style={styles.td}>
-                    <button style={{ ...styles.button, marginRight: "5px" }} onClick={() => setSelectedAnswers(r.answers)}>View</button>
-                    <button style={{ ...styles.button, background: "green" }} onClick={() => handlePrintSingle(r)}>🖨 Print</button>
+                    <button
+                      style={{ ...styles.button, marginRight: "5px" }}
+                      onClick={() => setSelectedAnswers(r)}
+                    >
+                      View
+                    </button>
+                    <button
+                      style={{ ...styles.button, background: "green" }}
+                      onClick={() => handlePrintSingle(r)}
+                    >
+                      🖨 Print
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-        
-        <button 
-          style={{ ...styles.button, marginTop: "15px", background: "purple" }} 
+
+        <button
+          style={{ ...styles.button, marginTop: "15px", background: "purple" }}
           onClick={() => setViewAllAnswers(true)}
         >
           View All Answers
         </button>
 
-        <button 
-          style={{ ...styles.button, marginTop: "15px", background: "darkgreen", marginLeft: "10px" }} 
+        <button
+          style={{ ...styles.button, marginTop: "15px", background: "darkgreen", marginLeft: "10px" }}
           onClick={exportToExcel}
         >
           📊 Export to Excel
         </button>
 
+        {/* View all answers modal */}
         {viewAllAnswers && (
           <div style={styles.modalOverlay}>
             <div style={styles.modal}>
@@ -210,8 +222,9 @@ export default function Results() {
               {results.map((user) => (
                 <div key={user.id} style={{ marginBottom: "20px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
                   <p><b>Name:</b> {user.name}</p>
-                  <p><b>Email:</b> {user.email}</p>
-                  <p><b>Department:</b> {user.employeeId}</p>
+                  <p><b>Department:</b> {user.department}</p>
+                  <p><b>Designation:</b> {user.designation}</p>
+                  <p><b>Employee ID:</b> {user.employeeId}</p>
                   <p><b>Submitted At:</b> {user.submittedAt?.toDate ? user.submittedAt.toDate().toLocaleString() : "N/A"}</p>
                   <ul>
                     {Object.entries(user.answers).map(([qId, ans]) => (
@@ -225,12 +238,17 @@ export default function Results() {
           </div>
         )}
 
+        {/* View single user's answers */}
         {selectedAnswers && (
           <div style={styles.modalOverlay}>
             <div style={styles.modal}>
               <h2>User Answers</h2>
+              <p><b>Name:</b> {selectedAnswers.name}</p>
+              <p><b>Department:</b> {selectedAnswers.department}</p>
+              <p><b>Designation:</b> {selectedAnswers.designation}</p>
+              <p><b>Employee ID:</b> {selectedAnswers.employeeId}</p>
               <ul>
-                {Object.entries(selectedAnswers).map(([qId, ans]) => (
+                {Object.entries(selectedAnswers.answers).map(([qId, ans]) => (
                   <li key={qId}><b>Q{qId}:</b> {ans}</li>
                 ))}
               </ul>
@@ -280,7 +298,7 @@ const styles = {
     boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
     textAlign: "center",
     width: "100%",
-    maxWidth: "900px",
+    maxWidth: "1000px",
     overflowX: "auto",
   },
   heading: { marginBottom: "15px", fontSize: "28px", color: "#333" },
