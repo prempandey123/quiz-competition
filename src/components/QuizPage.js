@@ -12,26 +12,29 @@ export default function QuizPage() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes = 600 sec
+  const [timeLeft, setTimeLeft] = useState(60); // 10 minutes
 
-  // 🧭 Timer effect
+  // 🧭 Timer effect — counts down and auto-submits
   useEffect(() => {
     if (quizStarted && timeLeft > 0 && !submitted) {
       const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
       return () => clearInterval(timer);
     }
-    if (timeLeft === 0 && !submitted) {
-      handleSubmit(); // auto-submit on timeout
+
+    // auto-submit when timer hits 0
+    if (timeLeft === 0 && quizStarted && !submitted) {
+      handleSubmit();
     }
   }, [quizStarted, timeLeft, submitted]);
 
+  // Format timer for display
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Sections
+  // Quiz content
   const sectionA = [
     {
       id: 1,
@@ -124,23 +127,42 @@ export default function QuizPage() {
   };
 
   const handleSubmit = async () => {
-    await addDoc(collection(db, "quizResults"), {
-      name: userData.name,
-      department: userData.department,
-      designation: userData.designation,
-      employeeId: userData.empId,
-      answers,
-      submittedAt: serverTimestamp(),
-    });
-    setSubmitted(true);
-    setQuizStarted(false);
+    // Prevent re-submit
+    if (submitted) return;
+
+    try {
+      await addDoc(collection(db, "quizResults"), {
+        name: userData.name,
+        department: userData.department,
+        designation: userData.designation,
+        employeeId: userData.empId,
+        answers,
+        submittedAt: serverTimestamp(),
+      });
+      setSubmitted(true);
+      setQuizStarted(false);
+      alert("⏰ Time is up! Your answers have been submitted successfully.");
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+    }
   };
 
   const handleStart = () => {
+    // Check if after 6 PM
+    const now = new Date();
+    const sixPM = new Date();
+    sixPM.setHours(18, 0, 0, 0); // 6:00 PM
+
+    if (now > sixPM) {
+      alert("⛔ Quiz is closed for today! Please contact your trainer.");
+      return;
+    }
+
     if (!userData.name || !userData.empId || !userData.department || !userData.designation) {
       alert("Please fill all details before starting!");
       return;
     }
+
     setQuizStarted(true);
   };
 
@@ -150,8 +172,8 @@ export default function QuizPage() {
     info: { textAlign: "center", color: "#8e44ad", fontSize: "18px", marginBottom: "20px" },
     timer: {
       position: "fixed",
-      top: "0",
-      left: "0",
+      top: 0,
+      left: 0,
       width: "100%",
       background: "#ffcccc",
       color: "#e74c3c",
@@ -219,28 +241,39 @@ export default function QuizPage() {
     option: { display: "block", marginTop: "6px", cursor: "pointer" },
   };
 
-  // 👇 Start screen
-  if (!quizStarted) {
+  // Start screen
+  if (!quizStarted && !submitted) {
+    const now = new Date();
+    const sixPM = new Date();
+    sixPM.setHours(18, 0, 0, 0);
+
+    const isAfterSix = now > sixPM;
+
     return (
       <div style={styles.container}>
         <h1 style={styles.header}>🏭 5S & Kaizen Training Program – Quiz</h1>
         <h3 style={{ textAlign: "center", color: "#555" }}>📅 Date: 10 September 2025</h3>
         <h3 style={{ textAlign: "center", color: "#555" }}>👨‍🏫 Trainer: Mr. Ankur Dhir</h3>
 
-        <h3 style={styles.info}>🧠 Welcome! Please fill in your details to begin.</h3>
+        {isAfterSix ? (
+          <h3 style={{ color: "red", textAlign: "center" }}>⛔ Quiz is closed after 6 PM. Please contact your trainer.</h3>
+        ) : (
+          <>
+            <h3 style={styles.info}>🧠 Welcome! Please fill in your details to begin.</h3>
+            <div style={styles.card}>
+              <input style={styles.input} type="text" placeholder="Full Name"
+                value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
+              <input style={styles.input} type="text" placeholder="Department"
+                value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
+              <input style={styles.input} type="text" placeholder="Designation"
+                value={userData.designation} onChange={(e) => setUserData({ ...userData, designation: e.target.value })} />
+              <input style={styles.input} type="text" placeholder="Employee ID"
+                value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
 
-        <div style={styles.card}>
-          <input style={styles.input} type="text" placeholder="Full Name"
-            value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
-          <input style={styles.input} type="text" placeholder="Department"
-            value={userData.department} onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
-          <input style={styles.input} type="text" placeholder="Designation"
-            value={userData.designation} onChange={(e) => setUserData({ ...userData, designation: e.target.value })} />
-          <input style={styles.input} type="text" placeholder="Employee ID"
-            value={userData.empId} onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
-
-          <button style={styles.button} onClick={handleStart}>🚀 Start Quiz</button>
-        </div>
+              <button style={styles.button} onClick={handleStart}>🚀 Start Quiz</button>
+            </div>
+          </>
+        )}
 
         <footer style={{ marginTop: "30px", padding: "10px", textAlign: "center", fontSize: "14px", color: "#7f8c8d" }}>
           © {new Date().getFullYear()} Hero Steels Limited, IT Department — All Rights Reserved
@@ -249,7 +282,7 @@ export default function QuizPage() {
     );
   }
 
-  // ✅ Thank-you screen
+  // Thank-you page
   if (submitted) {
     return (
       <div style={styles.container}>
@@ -260,60 +293,50 @@ export default function QuizPage() {
     );
   }
 
-  // 🧾 Quiz page
+  // Quiz page
   return (
     <div style={styles.container}>
       <div style={styles.timer}>⏳ Time Left: {formatTime(timeLeft)}</div>
       <h3 style={{ textAlign: "center", marginTop: "50px" }}>
-        📄 <b>Total Marks:</b> 25 | <b>Minimum Required:</b> 10  
+        📄 <b>Total Marks:</b> 25 | <b>Minimum Required:</b> 10
       </h3>
       <p style={{ textAlign: "center", color: "#7f8c8d" }}>
         (Sections A–C = 1 mark each | Section D = 2 marks each)
       </p>
 
-      <div style={styles.sectionTitle}>🅰️ Section A: Multiple Choice Questions</div>
-      {sectionA.map((q) => (
-        <div key={q.id} style={styles.question}>
-          <p><b>{q.id}. {q.q}</b></p>
-          {q.options.map((opt) => (
-            <label key={opt} style={styles.option}>
-              <input type="radio" name={q.id} value={opt}
-                onChange={() => handleChange(q.id, opt)}
-                checked={answers[q.id] === opt} /> {opt}
-            </label>
+      {/* Render sections */}
+      {[{ title: "🅰️ Section A: Multiple Choice Questions", data: sectionA },
+        { title: "🅱️ Section B: True or False", data: sectionB },
+        { title: "🅲 Section C: Fill in the Blanks", data: sectionC },
+        { title: "🅳 Section D: Scenario-Based / Short Answer", data: sectionD }].map(({ title, data }) => (
+        <div key={title}>
+          <div style={styles.sectionTitle}>{title}</div>
+          {data.map((q) => (
+            <div key={q.id} style={styles.question}>
+              <p><b>{q.id}. {q.q}</b></p>
+              {q.options ? (
+                q.options.map((opt) => (
+                  <label key={opt} style={styles.option}>
+                    <input
+                      type="radio"
+                      name={q.id}
+                      value={opt}
+                      onChange={() => handleChange(q.id, opt)}
+                      checked={answers[q.id] === opt}
+                    />{" "}
+                    {opt}
+                  </label>
+                ))
+              ) : (
+                <textarea
+                  style={q.id < 16 ? styles.input : styles.textarea}
+                  placeholder="Type your answer here"
+                  value={answers[q.id] || ""}
+                  onChange={(e) => handleChange(q.id, e.target.value)}
+                />
+              )}
+            </div>
           ))}
-        </div>
-      ))}
-
-      <div style={styles.sectionTitle}>🅱️ Section B: True or False</div>
-      {sectionB.map((q) => (
-        <div key={q.id} style={styles.question}>
-          <p><b>{q.id}. {q.q}</b></p>
-          {q.options.map((opt) => (
-            <label key={opt} style={styles.option}>
-              <input type="radio" name={q.id} value={opt}
-                onChange={() => handleChange(q.id, opt)}
-                checked={answers[q.id] === opt} /> {opt}
-            </label>
-          ))}
-        </div>
-      ))}
-
-      <div style={styles.sectionTitle}>🅲 Section C: Fill in the Blanks</div>
-      {sectionC.map((q) => (
-        <div key={q.id} style={styles.question}>
-          <p><b>{q.id}. {q.q}</b></p>
-          <input type="text" style={styles.input} placeholder="Type your answer here"
-            value={answers[q.id] || ""} onChange={(e) => handleChange(q.id, e.target.value)} />
-        </div>
-      ))}
-
-      <div style={styles.sectionTitle}>🅳 Section D: Scenario-Based / Short Answer</div>
-      {sectionD.map((q) => (
-        <div key={q.id} style={styles.question}>
-          <p><b>{q.id}. {q.q}</b></p>
-          <textarea style={styles.textarea} placeholder="Type your answer here"
-            value={answers[q.id] || ""} onChange={(e) => handleChange(q.id, e.target.value)} />
         </div>
       ))}
 
