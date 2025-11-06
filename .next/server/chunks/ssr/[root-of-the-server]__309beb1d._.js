@@ -106,7 +106,7 @@ function QuizPage() {
     const [quizStarted, setQuizStarted] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(false);
     const [answers, setAnswers] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])({});
     const [submitted, setSubmitted] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(false);
-    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(60); // 10 minutes
+    const [timeLeft, setTimeLeft] = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useState"])(600); // 10 minutes
     // 🧭 Timer effect — counts down and auto-submits
     (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useEffect"])(()=>{
         if (quizStarted && timeLeft > 0 && !submitted) {
@@ -420,7 +420,7 @@ function QuizPage() {
                         textAlign: "center",
                         color: "#555"
                     },
-                    children: "📅 Date: 10 September 2025"
+                    children: "📅 Session Date: 10 September 2025"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
                     lineNumber: 255,
@@ -431,7 +431,7 @@ function QuizPage() {
                         textAlign: "center",
                         color: "#555"
                     },
-                    children: "👨‍🏫 Trainer: Mr. Ankur Dhir"
+                    children: "👨‍🏫 Trainer Name: Mr. Ankur Dhir"
                 }, void 0, false, {
                     fileName: "[project]/src/components/QuizPage.js",
                     lineNumber: 256,
@@ -567,7 +567,7 @@ function QuizPage() {
                     color: "#27ae60",
                     textAlign: "center"
                 },
-                children: "🎉 Dhanyavaad! Aapka quiz submit ho gaya!"
+                children: "🎉 Thank you! Your quiz is submitted."
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
                 lineNumber: 289,
@@ -610,7 +610,7 @@ function QuizPage() {
                     }, this),
                     " 25 | ",
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
-                        children: "Minimum Required:"
+                        children: "Minimum Required Marks:"
                     }, void 0, false, {
                         fileName: "[project]/src/components/QuizPage.js",
                         lineNumber: 301,
@@ -628,7 +628,7 @@ function QuizPage() {
                     textAlign: "center",
                     color: "#7f8c8d"
                 },
-                children: "(Sections A–C = 1 mark each | Section D = 2 marks each)"
+                children: "(Sections A to C = 1 mark each | Section D = 2 marks each)"
             }, void 0, false, {
                 fileName: "[project]/src/components/QuizPage.js",
                 lineNumber: 303,
