@@ -12,7 +12,7 @@ export default function QuizPage() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60); // 10 minutes
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
   const [loading, setLoading] = useState(false);
 
   // 🕒 Timer logic
