@@ -386,352 +386,327 @@ function QuizPage() {
             submittedAt: (0, __TURBOPACK__imported__module__$5b$externals$5d2f$firebase$2f$firestore__$5b$external$5d$__$28$firebase$2f$firestore$2c$__esm_import$29$__["serverTimestamp"])()
         });
     };
-    // ---------------- STYLES --------------------
+    // ---------------- Styles --------------------
     const styles = {
-        mainBG: {
-            minHeight: "100vh",
-            padding: "40px 20px",
-            background: "linear-gradient(135deg, #0a2a43, #00111a)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-start",
-            color: "#fff",
-            fontFamily: "'Poppins', sans-serif"
+        container: {
+            maxWidth: "750px",
+            margin: "auto",
+            padding: "20px",
+            fontFamily: "'Segoe UI', sans-serif"
         },
-        landingCard: {
-            background: "rgba(255,255,255,0.10)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "15px",
-            padding: "30px",
-            width: "100%",
-            maxWidth: "600px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-            textAlign: "center"
-        },
-        heroTitle: {
-            fontSize: "28px",
-            fontWeight: "700",
-            marginBottom: "10px",
-            letterSpacing: "1px",
-            color: "red",
-            textTransform: "uppercase"
-        },
-        quizTitle: {
-            fontSize: "22px",
-            fontWeight: "600",
-            marginBottom: "15px",
-            color: "#ffffff"
+        header: {
+            textAlign: "center",
+            color: "#2c3e50"
         },
         notice: {
-            background: "rgba(0,255,180,0.15)",
-            color: "#00f7b2",
+            background: "#e8f6e9",
+            color: "#2e7d32",
             textAlign: "center",
-            padding: "10px",
+            padding: "12px",
             borderRadius: "8px",
             marginBottom: "20px",
             fontWeight: "500"
         },
+        timer: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            background: "#ffcccc",
+            color: "#e74c3c",
+            padding: "10px",
+            fontSize: "18px",
+            textAlign: "center",
+            fontWeight: "bold",
+            zIndex: 1000
+        },
+        card: {
+            background: "#fff",
+            padding: "20px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px"
+        },
         input: {
             padding: "12px",
+            fontSize: "16px",
             borderRadius: "8px",
-            border: "none",
+            border: "1px solid #ccc",
             outline: "none",
-            width: "100%",
-            marginBottom: "12px",
-            fontSize: "16px"
+            width: "100%"
         },
         button: {
             padding: "12px",
             fontSize: "16px",
             border: "none",
             borderRadius: "8px",
-            background: "#00b4ff",
+            background: "#3498db",
             color: "#fff",
             cursor: "pointer",
-            fontWeight: "bold",
-            width: "100%"
+            fontWeight: "bold"
+        },
+        question: {
+            background: "#f7f9fc",
+            padding: "15px",
+            borderRadius: "8px",
+            border: "1px solid #ddd",
+            marginBottom: "12px"
+        },
+        option: {
+            display: "block",
+            marginTop: "6px",
+            cursor: "pointer"
         }
     };
     // ---------------- Submitted Screen --------------------
     if (submitted) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-        style: styles.mainBG,
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-            style: styles.landingCard,
-            children: [
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
-                    style: {
-                        color: "#00ffae"
-                    },
-                    children: "🎉 Quiz Submitted Successfully!"
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 188,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
-                    children: [
-                        "Your Score: ",
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
-                            children: [
-                                marks,
-                                " / 20"
-                            ]
-                        }, void 0, true, {
-                            fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 189,
-                            columnNumber: 27
-                        }, this)
-                    ]
-                }, void 0, true, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 189,
-                    columnNumber: 11
-                }, this)
-            ]
-        }, void 0, true, {
-            fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 187,
-            columnNumber: 9
-        }, this)
-    }, void 0, false, {
+        style: styles.container,
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
+                style: {
+                    color: "#27ae60",
+                    textAlign: "center"
+                },
+                children: "🎉 Quiz Submitted Successfully!"
+            }, void 0, false, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 182,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
+                style: {
+                    textAlign: "center"
+                },
+                children: [
+                    "Your Score: ",
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
+                        children: [
+                            marks,
+                            " / 20"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 184,
+                        columnNumber: 23
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 183,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 186,
+        lineNumber: 181,
         columnNumber: 7
     }, this);
     // ---------------- Landing Screen --------------------
     if (!quizStarted) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-        style: styles.mainBG,
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-            style: styles.landingCard,
-            children: [
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h1", {
-                    style: styles.heroTitle,
-                    children: "HERO STEELS LIMITED"
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 200,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
-                    style: styles.quizTitle,
-                    children: quizTitle
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 201,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-                    style: styles.notice,
-                    children: "Fill your details to start quiz"
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 203,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
-                    style: styles.input,
-                    placeholder: "Full Name",
-                    onChange: (e)=>setUserData({
-                            ...userData,
-                            name: e.target.value
-                        })
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 205,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
-                    style: styles.input,
-                    placeholder: "Department",
-                    onChange: (e)=>setUserData({
-                            ...userData,
-                            department: e.target.value
-                        })
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 208,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
-                    style: styles.input,
-                    placeholder: "Designation",
-                    onChange: (e)=>setUserData({
-                            ...userData,
-                            designation: e.target.value
-                        })
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 211,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
-                    style: styles.input,
-                    placeholder: "Employee ID",
-                    onChange: (e)=>setUserData({
-                            ...userData,
-                            empId: e.target.value
-                        })
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 214,
-                    columnNumber: 11
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
-                    style: styles.button,
-                    onClick: handleStart,
-                    children: loading ? "Checking..." : "🚀 Start Quiz"
-                }, void 0, false, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 217,
-                    columnNumber: 11
-                }, this)
-            ]
-        }, void 0, true, {
-            fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 198,
-            columnNumber: 9
-        }, this)
-    }, void 0, false, {
+        style: styles.container,
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
+                style: {
+                    textAlign: "center",
+                    color: "red",
+                    marginBottom: "10px"
+                },
+                children: "HERO STEELS LIMITED"
+            }, void 0, false, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 193,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h1", {
+                style: styles.header,
+                children: [
+                    "📝 ",
+                    quizTitle
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 197,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                style: styles.notice,
+                children: "Fill your details and start test"
+            }, void 0, false, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 199,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                style: styles.card,
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
+                        style: styles.input,
+                        placeholder: "Full Name",
+                        onChange: (e)=>setUserData({
+                                ...userData,
+                                name: e.target.value
+                            })
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 202,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
+                        style: styles.input,
+                        placeholder: "Department",
+                        onChange: (e)=>setUserData({
+                                ...userData,
+                                department: e.target.value
+                            })
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 208,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
+                        style: styles.input,
+                        placeholder: "Designation",
+                        onChange: (e)=>setUserData({
+                                ...userData,
+                                designation: e.target.value
+                            })
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 214,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
+                        style: styles.input,
+                        placeholder: "Employee ID",
+                        onChange: (e)=>setUserData({
+                                ...userData,
+                                empId: e.target.value
+                            })
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 220,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
+                        style: styles.button,
+                        onClick: handleStart,
+                        children: loading ? "Checking..." : "🚀 Start Quiz"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 226,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 201,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 197,
+        lineNumber: 192,
         columnNumber: 7
     }, this);
     // ---------------- Quiz Screen --------------------
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-        style: styles.mainBG,
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-            style: {
-                width: "100%",
-                maxWidth: "750px"
-            },
-            children: [
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-                    style: {
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        background: "#ff5252",
-                        color: "#fff",
-                        padding: "10px",
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                        textAlign: "center",
-                        zIndex: 10
-                    },
+        style: styles.container,
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                style: styles.timer,
+                children: [
+                    "⏳ Time Left: ",
+                    formatTime(timeLeft)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 236,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
+                style: {
+                    textAlign: "center",
+                    marginTop: "50px"
+                },
+                children: [
+                    "📄 ",
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
+                        children: "Total Marks:"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/QuizPage.js",
+                        lineNumber: 239,
+                        columnNumber: 12
+                    }, this),
+                    " 20"
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 238,
+                columnNumber: 7
+            }, this),
+            questions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                    style: styles.question,
                     children: [
-                        "⏳ Time Left: ",
-                        formatTime(timeLeft)
-                    ]
-                }, void 0, true, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 230,
-                    columnNumber: 9
-                }, this),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
-                    style: {
-                        textAlign: "center",
-                        marginTop: "60px",
-                        marginBottom: "20px"
-                    },
-                    children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
-                            children: "Total Marks:"
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
+                                children: [
+                                    q.id,
+                                    ". ",
+                                    q.q
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/QuizPage.js",
+                                lineNumber: 245,
+                                columnNumber: 13
+                            }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/QuizPage.js",
-                            lineNumber: 246,
+                            lineNumber: 244,
                             columnNumber: 11
                         }, this),
-                        " 20"
-                    ]
-                }, void 0, true, {
-                    fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 245,
-                    columnNumber: 9
-                }, this),
-                questions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
-                        style: {
-                            background: "rgba(255,255,255,0.15)",
-                            padding: "15px",
-                            borderRadius: "10px",
-                            marginBottom: "12px"
-                        },
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("b", {
-                                    children: [
-                                        q.id,
-                                        ". ",
-                                        q.q
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/src/components/QuizPage.js",
-                                    lineNumber: 256,
-                                    columnNumber: 16
-                                }, this)
-                            }, void 0, false, {
+                        q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("label", {
+                                style: styles.option,
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
+                                        type: "radio",
+                                        name: q.id,
+                                        value: opt,
+                                        checked: answers[q.id] === opt,
+                                        onChange: ()=>handleChange(q.id, opt)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/QuizPage.js",
+                                        lineNumber: 250,
+                                        columnNumber: 15
+                                    }, this),
+                                    " ",
+                                    opt
+                                ]
+                            }, opt, true, {
                                 fileName: "[project]/src/components/QuizPage.js",
-                                lineNumber: 256,
+                                lineNumber: 249,
                                 columnNumber: 13
-                            }, this),
-                            q.options.map((opt)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("label", {
-                                    style: {
-                                        display: "block",
-                                        marginTop: "6px"
-                                    },
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("input", {
-                                            type: "radio",
-                                            name: q.id,
-                                            value: opt,
-                                            checked: answers[q.id] === opt,
-                                            onChange: ()=>handleChange(q.id, opt)
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/QuizPage.js",
-                                            lineNumber: 260,
-                                            columnNumber: 17
-                                        }, this),
-                                        " ",
-                                        opt
-                                    ]
-                                }, opt, true, {
-                                    fileName: "[project]/src/components/QuizPage.js",
-                                    lineNumber: 259,
-                                    columnNumber: 15
-                                }, this))
-                        ]
-                    }, q.id, true, {
-                        fileName: "[project]/src/components/QuizPage.js",
-                        lineNumber: 250,
-                        columnNumber: 11
-                    }, this)),
-                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
-                    style: {
-                        padding: "15px",
-                        width: "100%",
-                        background: "#00c9ff",
-                        border: "none",
-                        color: "#fff",
-                        fontSize: "18px",
-                        borderRadius: "8px",
-                        marginTop: "20px"
-                    },
-                    onClick: handleSubmit,
-                    children: "✅ Submit"
-                }, void 0, false, {
+                            }, this))
+                    ]
+                }, q.id, true, {
                     fileName: "[project]/src/components/QuizPage.js",
-                    lineNumber: 269,
+                    lineNumber: 243,
                     columnNumber: 9
-                }, this)
-            ]
-        }, void 0, true, {
-            fileName: "[project]/src/components/QuizPage.js",
-            lineNumber: 228,
-            columnNumber: 7
-        }, this)
-    }, void 0, false, {
+                }, this)),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
+                style: styles.button,
+                onClick: handleSubmit,
+                children: "✅ Submit"
+            }, void 0, false, {
+                fileName: "[project]/src/components/QuizPage.js",
+                lineNumber: 263,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
         fileName: "[project]/src/components/QuizPage.js",
-        lineNumber: 227,
+        lineNumber: 235,
         columnNumber: 5
     }, this);
 }

@@ -107,181 +107,162 @@ export default function QuizPage() {
     });
   };
 
-  // ---------------- STYLES --------------------
+  // ---------------- Styles --------------------
   const styles = {
-    mainBG: {
-      minHeight: "100vh",
-      padding: "40px 20px",
-      background: "linear-gradient(135deg, #0a2a43, #00111a)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "flex-start",
-      color: "#fff",
-      fontFamily: "'Poppins', sans-serif",
+    container: {
+      maxWidth: "750px",
+      margin: "auto",
+      padding: "20px",
+      fontFamily: "'Segoe UI', sans-serif",
     },
-
-    landingCard: {
-      background: "rgba(255,255,255,0.10)",
-      backdropFilter: "blur(10px)",
-      borderRadius: "15px",
-      padding: "30px",
-      width: "100%",
-      maxWidth: "600px",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-      textAlign: "center",
-    },
-
-    heroTitle: {
-      fontSize: "28px",
-      fontWeight: "700",
-      marginBottom: "10px",
-      letterSpacing: "1px",
-      color: "red",
-      textTransform: "uppercase",
-    },
-
-    quizTitle: {
-      fontSize: "22px",
-      fontWeight: "600",
-      marginBottom: "15px",
-      color: "#ffffff",
-    },
-
+    header: { textAlign: "center", color: "#2c3e50" },
     notice: {
-      background: "rgba(0,255,180,0.15)",
-      color: "#00f7b2",
+      background: "#e8f6e9",
+      color: "#2e7d32",
       textAlign: "center",
-      padding: "10px",
+      padding: "12px",
       borderRadius: "8px",
       marginBottom: "20px",
       fontWeight: "500"
     },
-
+    timer: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      background: "#ffcccc",
+      color: "#e74c3c",
+      padding: "10px",
+      fontSize: "18px",
+      textAlign: "center",
+      fontWeight: "bold",
+      zIndex: 1000
+    },
+    card: {
+      background: "#fff",
+      padding: "20px",
+      borderRadius: "12px",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px"
+    },
     input: {
       padding: "12px",
-      borderRadius: "8px",
-      border: "none",
-      outline: "none",
-      width: "100%",
-      marginBottom: "12px",
       fontSize: "16px",
+      borderRadius: "8px",
+      border: "1px solid #ccc",
+      outline: "none",
+      width: "100%"
     },
-
     button: {
       padding: "12px",
       fontSize: "16px",
       border: "none",
       borderRadius: "8px",
-      background: "#00b4ff",
+      background: "#3498db",
       color: "#fff",
       cursor: "pointer",
-      fontWeight: "bold",
-      width: "100%",
-    }
+      fontWeight: "bold"
+    },
+    question: {
+      background: "#f7f9fc",
+      padding: "15px",
+      borderRadius: "8px",
+      border: "1px solid #ddd",
+      marginBottom: "12px"
+    },
+    option: { display: "block", marginTop: "6px", cursor: "pointer" }
   };
 
   // ---------------- Submitted Screen --------------------
   if (submitted)
     return (
-      <div style={styles.mainBG}>
-        <div style={styles.landingCard}>
-          <h2 style={{ color: "#00ffae" }}>🎉 Quiz Submitted Successfully!</h2>
-          <h3>Your Score: <b>{marks} / 20</b></h3>
-        </div>
+      <div style={styles.container}>
+        <h2 style={{ color: "#27ae60", textAlign: "center" }}>🎉 Quiz Submitted Successfully!</h2>
+        <h3 style={{ textAlign: "center" }}>
+          Your Score: <b>{marks} / 20</b>
+        </h3>
       </div>
     );
 
   // ---------------- Landing Screen --------------------
   if (!quizStarted)
     return (
-      <div style={styles.mainBG}>
-        <div style={styles.landingCard}>
+      <div style={styles.container}>
+        <h2 style={{ textAlign: "center", color: "red", marginBottom: "10px" }}>
+          HERO STEELS LIMITED
+        </h2>
 
-          <h1 style={styles.heroTitle}>HERO STEELS LIMITED</h1>
-          <h2 style={styles.quizTitle}>{quizTitle}</h2>
+        <h1 style={styles.header}>📝 {quizTitle}</h1>
 
-          <div style={styles.notice}>Fill your details to start quiz</div>
+        <div style={styles.notice}>Fill your details and start test</div>
 
-          <input style={styles.input} placeholder="Full Name"
-            onChange={(e) => setUserData({ ...userData, name: e.target.value })} />
+        <div style={styles.card}>
+          <input
+            style={styles.input}
+            placeholder="Full Name"
+            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+          />
 
-          <input style={styles.input} placeholder="Department"
-            onChange={(e) => setUserData({ ...userData, department: e.target.value })} />
+          <input
+            style={styles.input}
+            placeholder="Department"
+            onChange={(e) => setUserData({ ...userData, department: e.target.value })}
+          />
 
-          <input style={styles.input} placeholder="Designation"
-            onChange={(e) => setUserData({ ...userData, designation: e.target.value })} />
+          <input
+            style={styles.input}
+            placeholder="Designation"
+            onChange={(e) => setUserData({ ...userData, designation: e.target.value })}
+          />
 
-          <input style={styles.input} placeholder="Employee ID"
-            onChange={(e) => setUserData({ ...userData, empId: e.target.value })} />
+          <input
+            style={styles.input}
+            placeholder="Employee ID"
+            onChange={(e) => setUserData({ ...userData, empId: e.target.value })}
+          />
 
           <button style={styles.button} onClick={handleStart}>
             {loading ? "Checking..." : "🚀 Start Quiz"}
           </button>
-
         </div>
       </div>
     );
 
   // ---------------- Quiz Screen --------------------
   return (
-    <div style={styles.mainBG}>
-      <div style={{ width: "100%", maxWidth: "750px" }}>
+    <div style={styles.container}>
+      <div style={styles.timer}>⏳ Time Left: {formatTime(timeLeft)}</div>
 
-        <div style={{ 
-          position: "fixed",
-          top: 0, left: 0,
-          width: "100%",
-          background: "#ff5252",
-          color: "#fff",
-          padding: "10px",
-          fontSize: "20px",
-          fontWeight: "bold",
-          textAlign: "center",
-          zIndex: 10
-        }}>
-          ⏳ Time Left: {formatTime(timeLeft)}
+      <h3 style={{ textAlign: "center", marginTop: "50px" }}>
+        📄 <b>Total Marks:</b> 20
+      </h3>
+
+      {questions.map((q) => (
+        <div key={q.id} style={styles.question}>
+          <p>
+            <b>{q.id}. {q.q}</b>
+          </p>
+
+          {q.options.map((opt) => (
+            <label key={opt} style={styles.option}>
+              <input
+                type="radio"
+                name={q.id}
+                value={opt}
+                checked={answers[q.id] === opt}
+                onChange={() => handleChange(q.id, opt)}
+              />{" "}
+              {opt}
+            </label>
+          ))}
         </div>
+      ))}
 
-        <h2 style={{ textAlign: "center", marginTop: "60px", marginBottom: "20px" }}>
-          <b>Total Marks:</b> 20
-        </h2>
-
-        {questions.map((q) => (
-          <div key={q.id} style={{
-            background: "rgba(255,255,255,0.15)",
-            padding: "15px",
-            borderRadius: "10px",
-            marginBottom: "12px",
-          }}>
-            <p><b>{q.id}. {q.q}</b></p>
-
-            {q.options.map((opt) => (
-              <label key={opt} style={{ display: "block", marginTop: "6px" }}>
-                <input type="radio" name={q.id} value={opt}
-                  checked={answers[q.id] === opt}
-                  onChange={() => handleChange(q.id, opt)} />{" "}
-                {opt}
-              </label>
-            ))}
-          </div>
-        ))}
-
-        <button style={{
-          padding: "15px",
-          width: "100%",
-          background: "#00c9ff",
-          border: "none",
-          color: "#fff",
-          fontSize: "18px",
-          borderRadius: "8px",
-          marginTop: "20px"
-        }}
-          onClick={handleSubmit}
-        >
-          ✅ Submit
-        </button>
-
-      </div>
+      <button style={styles.button} onClick={handleSubmit}>
+        ✅ Submit
+      </button>
     </div>
   );
 }
