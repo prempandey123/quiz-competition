@@ -1,9 +1,6 @@
 {
+  "/": "pages/index.js",
   "/_app": "pages/_app.js",
-  "/admin": "pages/admin.html",
-  "/": "pages/index.html",
-  "/_error": "pages/_error.js",
-  "/results": "pages/results.html",
   "/_document": "pages/_document.js",
-  "/404": "pages/404.html"
+  "/results": "pages/results.js"
 }

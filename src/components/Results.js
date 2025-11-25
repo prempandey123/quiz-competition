@@ -16,15 +16,11 @@ export default function Results() {
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // Allowed admin passwords
   const allowedPasswords = ["admin123", "secret456"];
 
-  // Normalize all titles (Remove invisible unicode spaces)
   const cleanText = (t) => (t || "").replace(/\s+/g, " ").trim();
 
-  // -------------------------------
-  // 🔐 LOGIN FUNCTION
-  // -------------------------------
+  // ---------------- LOGIN ----------------
   const handleLogin = () => {
     if (allowedPasswords.includes(passwordInput.trim())) {
       setIsAuthenticated(true);
@@ -34,13 +30,9 @@ export default function Results() {
     }
   };
 
-  // -------------------------------
-  // 🔎 Fetch all unique titles
-  // ★ FIXED — Clean all spaces
-  // -------------------------------
+  // ---------------- FETCH QUIZ TITLES ----------------
   const fetchQuizTitles = async () => {
     setLoading(true);
-
     try {
       const snapshot = await getDocs(collection(db, "quizResults"));
       const titles = new Set();
@@ -54,30 +46,19 @@ export default function Results() {
     } catch (err) {
       console.error("Error fetching titles:", err);
     }
-
     setLoading(false);
   };
 
-  // -------------------------------
-  // 📌 Fetch filtered results
-  // ★ FIX — Clean selected title before query
-  // -------------------------------
+  // ---------------- FETCH RESULTS ----------------
   const fetchResultsByTitle = async () => {
-    if (!selectedQuizTitle) {
-      alert("Please select a quiz title.");
-      return;
-    }
+    if (!selectedQuizTitle) return alert("Please select a quiz title.");
 
     setLoading(true);
 
     try {
       const cleanedTitle = cleanText(selectedQuizTitle);
 
-      const q = query(
-        collection(db, "quizResults"),
-        where("quizTitle", "==", cleanedTitle)
-      );
-
+      const q = query(collection(db, "quizResults"), where("quizTitle", "==", cleanedTitle));
       const snapshot = await getDocs(q);
 
       const list = snapshot.docs.map((doc) => ({
@@ -85,7 +66,7 @@ export default function Results() {
         ...doc.data(),
       }));
 
-      // Sort by submittedAt DESC
+      // sort DESC by submission time
       list.sort((a, b) => {
         if (!a.submittedAt || !b.submittedAt) return 0;
         return b.submittedAt.seconds - a.submittedAt.seconds;
@@ -99,9 +80,7 @@ export default function Results() {
     setLoading(false);
   };
 
-  // -------------------------------
-  // 📤 Export to Excel
-  // -------------------------------
+  // ---------------- EXPORT EXCEL ----------------
   const exportToExcel = () => {
     if (!results.length) return alert("No data to export!");
 
@@ -114,6 +93,7 @@ export default function Results() {
         Department: u.department,
         Designation: u.designation,
         EmployeeID: u.employeeId,
+        Marks: `${u.marks} / ${maxQ}`,   // ⭐ ADD TOTAL MARKS
       };
 
       for (let i = 1; i <= maxQ; i++) {
@@ -130,15 +110,15 @@ export default function Results() {
     saveAs(new Blob([buf], { type: "application/octet-stream" }), `${selectedQuizTitle}_Results.xlsx`);
   };
 
-  // -------------------------------
-  // 🖨 Print a single user
-  // -------------------------------
+  // ---------------- PRINT SINGLE ENTRY ----------------
   const handlePrintSingle = (user) => {
     const win = window.open("", "_blank");
 
     const date = user.submittedAt?.toDate
       ? user.submittedAt.toDate().toLocaleString()
       : "N/A";
+
+    const totalQuestions = Object.keys(user.answers).length;
 
     win.document.write(`
       <html>
@@ -151,11 +131,13 @@ export default function Results() {
       </head>
       <body>
         <h2>Quiz Submission Details</h2>
+
         <p><b>Quiz Title:</b> ${cleanText(user.quizTitle)}</p>
         <p><b>Name:</b> ${user.name}</p>
         <p><b>Department:</b> ${user.department}</p>
         <p><b>Designation:</b> ${user.designation}</p>
         <p><b>Employee ID:</b> ${user.employeeId}</p>
+        <p><b>Marks:</b> ${user.marks} / ${totalQuestions}</p>
         <p><b>Submitted At:</b> ${date}</p>
 
         <h3>Answers:</h3>
@@ -164,6 +146,7 @@ export default function Results() {
             .map(([id, ans]) => `<li><b>Q${id}:</b> ${ans}</li>`)
             .join("")}
         </ul>
+
       </body>
       </html>
     `);
@@ -172,9 +155,7 @@ export default function Results() {
     win.print();
   };
 
-  // -------------------------------
-  // UI
-  // -------------------------------
+  // ---------------- UI ----------------
   if (!isAuthenticated)
     return (
       <div style={styles.loginContainer}>
@@ -238,40 +219,46 @@ export default function Results() {
                   <th style={styles.th}>Department</th>
                   <th style={styles.th}>Designation</th>
                   <th style={styles.th}>Employee ID</th>
+                  <th style={styles.th}>Marks Obtained</th> {/* ⭐ NEW */}
                   <th style={styles.th}>Submitted At</th>
                   <th style={styles.th}>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {results.map((r) => (
-                  <tr key={r.id}>
-                    <td style={styles.td}>{r.name}</td>
-                    <td style={styles.td}>{r.department}</td>
-                    <td style={styles.td}>{r.designation}</td>
-                    <td style={styles.td}>{r.employeeId}</td>
-                    <td style={styles.td}>
-                      {r.submittedAt?.toDate
-                        ? r.submittedAt.toDate().toLocaleString()
-                        : "N/A"}
-                    </td>
-                    <td style={styles.td}>
-                      <button
-                        style={{ ...styles.button, marginRight: "5px" }}
-                        onClick={() => setSelectedAnswers(r)}
-                      >
-                        View
-                      </button>
+                {results.map((r) => {
+                  const totalQ = Object.keys(r.answers || {}).length;
 
-                      <button
-                        style={{ ...styles.button, background: "black" }}
-                        onClick={() => handlePrintSingle(r)}
-                      >
-                        🖨 Print
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                  return (
+                    <tr key={r.id}>
+                      <td style={styles.td}>{r.name}</td>
+                      <td style={styles.td}>{r.department}</td>
+                      <td style={styles.td}>{r.designation}</td>
+                      <td style={styles.td}>{r.employeeId}</td>
+                      <td style={styles.td}><b>{r.marks} / {totalQ}</b></td> {/* ⭐ NEW */}
+                      <td style={styles.td}>
+                        {r.submittedAt?.toDate
+                          ? r.submittedAt.toDate().toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td style={styles.td}>
+                        <button
+                          style={{ ...styles.button, marginRight: "5px" }}
+                          onClick={() => setSelectedAnswers(r)}
+                        >
+                          View
+                        </button>
+
+                        <button
+                          style={{ ...styles.button, background: "black" }}
+                          onClick={() => handlePrintSingle(r)}
+                        >
+                          🖨 Print
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
@@ -284,7 +271,7 @@ export default function Results() {
           </>
         )}
 
-        {/* ANSWER MODAL */}
+        {/* MODAL */}
         {selectedAnswers && (
           <div style={styles.modalOverlay}>
             <div style={styles.modal}>
@@ -294,6 +281,8 @@ export default function Results() {
               <p><b>Department:</b> {selectedAnswers.department}</p>
               <p><b>Designation:</b> {selectedAnswers.designation}</p>
               <p><b>Employee ID:</b> {selectedAnswers.employeeId}</p>
+
+              <p><b>Marks:</b> {selectedAnswers.marks} / {Object.keys(selectedAnswers.answers).length}</p>
 
               <ul>
                 {Object.entries(selectedAnswers.answers).map(([q, ans]) => (
