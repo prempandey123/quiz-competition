@@ -66,7 +66,6 @@ export default function Results() {
         ...doc.data(),
       }));
 
-      // sort DESC by submission time
       list.sort((a, b) => {
         if (!a.submittedAt || !b.submittedAt) return 0;
         return b.submittedAt.seconds - a.submittedAt.seconds;
@@ -74,7 +73,7 @@ export default function Results() {
 
       setResults(list);
     } catch (err) {
-      console.error("Error fetching results:", err);
+      console.error("Error:", err);
     }
 
     setLoading(false);
@@ -84,22 +83,17 @@ export default function Results() {
   const exportToExcel = () => {
     if (!results.length) return alert("No data to export!");
 
-    const maxQ = Math.max(...results.map((u) => Object.keys(u.answers || {}).length));
-
     const rows = results.map((u) => {
-      const row = {
+      const attempted = Object.keys(u.answers || {}).length;
+
+      return {
         QuizTitle: cleanText(u.quizTitle),
         Name: u.name,
         Department: u.department,
         Designation: u.designation,
         EmployeeID: u.employeeId,
-        Marks: `${u.marks} / ${maxQ}`,   // ⭐ ADD TOTAL MARKS
+        Marks: `${u.marks} / ${attempted} / 20`,
       };
-
-      for (let i = 1; i <= maxQ; i++) {
-        row[`Q${i}`] = u.answers?.[i] || "";
-      }
-      return row;
     });
 
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -110,7 +104,7 @@ export default function Results() {
     saveAs(new Blob([buf], { type: "application/octet-stream" }), `${selectedQuizTitle}_Results.xlsx`);
   };
 
-  // ---------------- PRINT SINGLE ENTRY ----------------
+  // ---------------- PRINT SINGLE ----------------
   const handlePrintSingle = (user) => {
     const win = window.open("", "_blank");
 
@@ -118,7 +112,7 @@ export default function Results() {
       ? user.submittedAt.toDate().toLocaleString()
       : "N/A";
 
-    const totalQuestions = Object.keys(user.answers).length;
+    const attempted = Object.keys(user.answers).length;
 
     win.document.write(`
       <html>
@@ -137,7 +131,8 @@ export default function Results() {
         <p><b>Department:</b> ${user.department}</p>
         <p><b>Designation:</b> ${user.designation}</p>
         <p><b>Employee ID:</b> ${user.employeeId}</p>
-        <p><b>Marks:</b> ${user.marks} / ${totalQuestions}</p>
+
+        <p><b>Marks:</b> ${user.marks} / ${attempted} / 20</p>
         <p><b>Submitted At:</b> ${date}</p>
 
         <h3>Answers:</h3>
@@ -209,7 +204,7 @@ export default function Results() {
         {loading ? (
           <p>Loading...</p>
         ) : results.length === 0 ? (
-          <p>No results found for this quiz.</p>
+          <p>No results found.</p>
         ) : (
           <>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -219,7 +214,7 @@ export default function Results() {
                   <th style={styles.th}>Department</th>
                   <th style={styles.th}>Designation</th>
                   <th style={styles.th}>Employee ID</th>
-                  <th style={styles.th}>Marks Obtained</th> {/* ⭐ NEW */}
+                  <th style={styles.th}>Marks/Attempted/Total</th>
                   <th style={styles.th}>Submitted At</th>
                   <th style={styles.th}>Actions</th>
                 </tr>
@@ -227,7 +222,7 @@ export default function Results() {
 
               <tbody>
                 {results.map((r) => {
-                  const totalQ = Object.keys(r.answers || {}).length;
+                  const attempted = Object.keys(r.answers || {}).length;
 
                   return (
                     <tr key={r.id}>
@@ -235,12 +230,17 @@ export default function Results() {
                       <td style={styles.td}>{r.department}</td>
                       <td style={styles.td}>{r.designation}</td>
                       <td style={styles.td}>{r.employeeId}</td>
-                      <td style={styles.td}><b>{r.marks} / {totalQ}</b></td> {/* ⭐ NEW */}
+
+                      <td style={styles.td}>
+                        <b>{r.marks} / {attempted} / 20</b>
+                      </td>
+
                       <td style={styles.td}>
                         {r.submittedAt?.toDate
                           ? r.submittedAt.toDate().toLocaleString()
                           : "N/A"}
                       </td>
+
                       <td style={styles.td}>
                         <button
                           style={{ ...styles.button, marginRight: "5px" }}
@@ -282,7 +282,9 @@ export default function Results() {
               <p><b>Designation:</b> {selectedAnswers.designation}</p>
               <p><b>Employee ID:</b> {selectedAnswers.employeeId}</p>
 
-              <p><b>Marks:</b> {selectedAnswers.marks} / {Object.keys(selectedAnswers.answers).length}</p>
+              <p>
+                <b>Marks:</b> {selectedAnswers.marks} / {Object.keys(selectedAnswers.answers).length} / 20
+              </p>
 
               <ul>
                 {Object.entries(selectedAnswers.answers).map(([q, ans]) => (
@@ -327,7 +329,7 @@ const styles = {
   },
   container: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #00c6ff, #1a1b1d)",
+    background: "#f0f2f5",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
