@@ -196,7 +196,7 @@ export default function QuizPage() {
 
         <h1 style={styles.header}>📝 {quizTitle}</h1>
 
-        <div style={styles.notice}>Fill your details and start test</div>
+        <div style={styles.notice}>Please fill your details to start the quiz</div>
 
         <div style={styles.card}>
           <input
