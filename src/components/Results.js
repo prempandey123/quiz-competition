@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+  writeBatch,
+} from "firebase/firestore";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -15,6 +23,10 @@ export default function Results() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  // delete loaders
+  const [deletingId, setDeletingId] = useState(null);
+  const [deletingQuiz, setDeletingQuiz] = useState(false);
 
   const allowedPasswords = ["admin123", "secret456"];
 
@@ -37,12 +49,12 @@ export default function Results() {
       const snapshot = await getDocs(collection(db, "quizResults"));
       const titles = new Set();
 
-      snapshot.docs.forEach((doc) => {
-        const data = doc.data();
+      snapshot.docs.forEach((d) => {
+        const data = d.data();
         if (data.quizTitle) titles.add(cleanText(data.quizTitle));
       });
 
-      setQuizTitles([...titles]);
+      setQuizTitles([...titles].sort((a, b) => a.localeCompare(b)));
     } catch (err) {
       console.error("Error fetching titles:", err);
     }
@@ -58,12 +70,15 @@ export default function Results() {
     try {
       const cleanedTitle = cleanText(selectedQuizTitle);
 
-      const q = query(collection(db, "quizResults"), where("quizTitle", "==", cleanedTitle));
+      const q = query(
+        collection(db, "quizResults"),
+        where("quizTitle", "==", cleanedTitle)
+      );
       const snapshot = await getDocs(q);
 
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const list = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
       }));
 
       list.sort((a, b) => {
@@ -101,7 +116,10 @@ export default function Results() {
     XLSX.utils.book_append_sheet(wb, ws, "Results");
 
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf], { type: "application/octet-stream" }), `${selectedQuizTitle}_Results.xlsx`);
+    saveAs(
+      new Blob([buf], { type: "application/octet-stream" }),
+      `${selectedQuizTitle}_Results.xlsx`
+    );
   };
 
   // ---------------- PRINT SINGLE ----------------
@@ -112,36 +130,37 @@ export default function Results() {
       ? user.submittedAt.toDate().toLocaleString()
       : "N/A";
 
-    const attempted = Object.keys(user.answers).length;
+    const attempted = Object.keys(user.answers || {}).length;
 
     win.document.write(`
       <html>
       <head>
         <title>Print Quiz Answers</title>
         <style>
-          body { font-family: Arial; padding: 20px; }
+          body { font-family: Arial; padding: 20px; line-height: 1.6; }
           h2 { margin-bottom: 10px; }
+          .box { border: 1px solid #ddd; padding: 14px; border-radius: 10px; }
+          li { margin: 6px 0; }
         </style>
       </head>
       <body>
         <h2>Quiz Submission Details</h2>
+        <div class="box">
+          <p><b>Quiz Title:</b> ${cleanText(user.quizTitle)}</p>
+          <p><b>Name:</b> ${user.name}</p>
+          <p><b>Department:</b> ${user.department}</p>
+          <p><b>Designation:</b> ${user.designation}</p>
+          <p><b>Employee ID:</b> ${user.employeeId}</p>
+          <p><b>Marks:</b> ${user.marks} / ${attempted} / 20</p>
+          <p><b>Submitted At:</b> ${date}</p>
+        </div>
 
-        <p><b>Quiz Title:</b> ${cleanText(user.quizTitle)}</p>
-        <p><b>Name:</b> ${user.name}</p>
-        <p><b>Department:</b> ${user.department}</p>
-        <p><b>Designation:</b> ${user.designation}</p>
-        <p><b>Employee ID:</b> ${user.employeeId}</p>
-
-        <p><b>Marks:</b> ${user.marks} / ${attempted} / 20</p>
-        <p><b>Submitted At:</b> ${date}</p>
-
-        <h3>Answers:</h3>
+        <h3 style="margin-top:16px;">Answers:</h3>
         <ul>
-          ${Object.entries(user.answers)
+          ${Object.entries(user.answers || {})
             .map(([id, ans]) => `<li><b>Q${id}:</b> ${ans}</li>`)
             .join("")}
         </ul>
-
       </body>
       </html>
     `);
@@ -150,71 +169,225 @@ export default function Results() {
     win.print();
   };
 
+  // ---------------- DELETE SINGLE ----------------
+  const handleDeleteSingle = async (user) => {
+    const ok = window.confirm(
+      `Delete this result?\n\nName: ${user.name}\nEmployee ID: ${user.employeeId}\nQuiz: ${cleanText(
+        user.quizTitle
+      )}`
+    );
+    if (!ok) return;
+
+    try {
+      setDeletingId(user.id);
+
+      await deleteDoc(doc(db, "quizResults", user.id));
+
+      // UI update
+      setResults((prev) => prev.filter((r) => r.id !== user.id));
+      if (selectedAnswers?.id === user.id) setSelectedAnswers(null);
+    } catch (err) {
+      console.error("Delete single error:", err);
+      alert("Failed to delete. Check console.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // ---------------- DELETE QUIZ WISE ----------------
+  const handleDeleteQuizWise = async () => {
+    if (!selectedQuizTitle) return alert("Select a quiz title first!");
+
+    const ok = window.confirm(
+      `⚠️ This will delete ALL results for:\n\n"${cleanText(
+        selectedQuizTitle
+      )}"\n\nThis action cannot be undone. Continue?`
+    );
+    if (!ok) return;
+
+    setDeletingQuiz(true);
+
+    try {
+      const cleanedTitle = cleanText(selectedQuizTitle);
+      const q = query(
+        collection(db, "quizResults"),
+        where("quizTitle", "==", cleanedTitle)
+      );
+
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        alert("No results found to delete for this quiz.");
+        setDeletingQuiz(false);
+        return;
+      }
+
+      // Firestore batch supports up to 500 ops per batch
+      let batch = writeBatch(db);
+      let opCount = 0;
+      let totalDeleted = 0;
+
+      for (const d of snap.docs) {
+        batch.delete(d.ref);
+        opCount += 1;
+        totalDeleted += 1;
+
+        if (opCount === 500) {
+          await batch.commit();
+          batch = writeBatch(db);
+          opCount = 0;
+        }
+      }
+
+      if (opCount > 0) {
+        await batch.commit();
+      }
+
+      // UI reset
+      setResults([]);
+      setSelectedAnswers(null);
+
+      // refresh titles (optional but good)
+      await fetchQuizTitles();
+
+      alert(`Deleted ${totalDeleted} results for "${cleanedTitle}".`);
+    } catch (err) {
+      console.error("Delete quiz wise error:", err);
+      alert("Failed to delete quiz results. Check console.");
+    }
+
+    setDeletingQuiz(false);
+  };
+
   // ---------------- UI ----------------
   if (!isAuthenticated)
     return (
       <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
-          <h2>🔐 Admin Login</h2>
+          <div style={styles.brandRow}>
+            <div style={styles.brandLogo}>QZ</div>
+            <div>
+              <h2 style={{ margin: 0 }}>Admin Login</h2>
+              <p style={styles.subText}>Secure access for results dashboard</p>
+            </div>
+          </div>
 
           <input
             type="password"
             placeholder="Enter Password"
             value={passwordInput}
-            onChange={(e) => setPasswordInput(e.target.value)}
+            onChange={(e) => {
+              setPasswordInput(e.target.value);
+              setPasswordError("");
+            }}
             style={styles.passwordInput}
           />
 
-          <button onClick={handleLogin} style={styles.button}>Login</button>
+          <button onClick={handleLogin} style={styles.primaryBtn}>
+            Login
+          </button>
 
-          {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
+          {passwordError && <p style={styles.errorText}>{passwordError}</p>}
         </div>
       </div>
     );
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        
-        {/* QUIZ SELECTOR */}
-        <div style={{ marginBottom: "20px" }}>
-          <select
-            value={selectedQuizTitle}
-            onChange={(e) => setSelectedQuizTitle(e.target.value)}
-            style={styles.dropdown}
+    <div style={styles.page}>
+      <div style={styles.topBar}>
+        <div>
+          <div style={styles.titleRow}>
+            <h1 style={styles.pageTitle}>📊 Quiz Results</h1>
+            <span style={styles.badge}>
+              {selectedQuizTitle ? cleanText(selectedQuizTitle) : "No Quiz Selected"}
+            </span>
+          </div>
+          <p style={styles.subText2}>
+            Load results, view answers, print, export, and delete securely.
+          </p>
+        </div>
+
+        <div style={styles.actionsRight}>
+          <button
+            style={{
+              ...styles.dangerBtn,
+              opacity: deletingQuiz || loading ? 0.6 : 1,
+              cursor: deletingQuiz || loading ? "not-allowed" : "pointer",
+            }}
+            onClick={handleDeleteQuizWise}
+            disabled={deletingQuiz || loading}
+            title="Delete all results for selected quiz"
           >
-            <option value="">-- Select Quiz Title --</option>
-            {quizTitles.map((title) => (
-              <option key={title} value={title}>
-                {cleanText(title)}
-              </option>
-            ))}
-          </select>
+            {deletingQuiz ? "Deleting Quiz..." : "🗑 Delete Quiz Results"}
+          </button>
+        </div>
+      </div>
+
+      <div style={styles.card}>
+        {/* QUIZ SELECTOR */}
+        <div style={styles.filters}>
+          <div style={styles.selectWrap}>
+            <span style={styles.label}>Quiz Title</span>
+            <select
+              value={selectedQuizTitle}
+              onChange={(e) => setSelectedQuizTitle(e.target.value)}
+              style={styles.dropdown}
+            >
+              <option value="">-- Select Quiz Title --</option>
+              {quizTitles.map((title) => (
+                <option key={title} value={title}>
+                  {cleanText(title)}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <button
-            style={{ ...styles.button, marginLeft: "10px", background: "green" }}
+            style={{
+              ...styles.primaryBtn,
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
             onClick={fetchResultsByTitle}
+            disabled={loading}
           >
-            Load Results
+            {loading ? "Loading..." : "Load Results"}
+          </button>
+
+          <button
+            style={{
+              ...styles.secondaryBtn,
+              opacity: results.length === 0 ? 0.5 : 1,
+              cursor: results.length === 0 ? "not-allowed" : "pointer",
+            }}
+            onClick={exportToExcel}
+            disabled={results.length === 0}
+          >
+            ⬇ Export Excel
           </button>
         </div>
 
-        <h1 style={{ marginBottom: "20px" }}>📊 Quiz Results</h1>
-
+        {/* CONTENT */}
         {loading ? (
-          <p>Loading...</p>
+          <p style={styles.infoText}>Loading...</p>
         ) : results.length === 0 ? (
-          <p>No results found.</p>
+          <div style={styles.emptyState}>
+            <div style={styles.emptyIcon}>📄</div>
+            <h3 style={{ margin: "6px 0" }}>No results found</h3>
+            <p style={styles.muted}>
+              Select a quiz title and click <b>Load Results</b>.
+            </p>
+          </div>
         ) : (
-          <>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={styles.tableWrap}>
+            <table style={styles.table}>
               <thead>
                 <tr>
                   <th style={styles.th}>Name</th>
                   <th style={styles.th}>Department</th>
                   <th style={styles.th}>Designation</th>
                   <th style={styles.th}>Employee ID</th>
-                  <th style={styles.th}>Marks/Attempted/Total</th>
+                  <th style={styles.th}>Marks</th>
                   <th style={styles.th}>Submitted At</th>
                   <th style={styles.th}>Actions</th>
                 </tr>
@@ -225,14 +398,27 @@ export default function Results() {
                   const attempted = Object.keys(r.answers || {}).length;
 
                   return (
-                    <tr key={r.id}>
-                      <td style={styles.td}>{r.name}</td>
+                    <tr key={r.id} style={styles.tr}>
+                      <td style={styles.tdStrong}>
+                        <div style={styles.nameCell}>
+                          <div style={styles.avatar}>
+                            {(r.name || "U").trim().charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={styles.nameText}>{r.name}</div>
+                            <div style={styles.smallText}>{r.employeeId}</div>
+                          </div>
+                        </div>
+                      </td>
+
                       <td style={styles.td}>{r.department}</td>
                       <td style={styles.td}>{r.designation}</td>
                       <td style={styles.td}>{r.employeeId}</td>
 
                       <td style={styles.td}>
-                        <b>{r.marks} / {attempted} / 20</b>
+                        <span style={styles.marksPill}>
+                          {r.marks} / {attempted} / 20
+                        </span>
                       </td>
 
                       <td style={styles.td}>
@@ -242,63 +428,122 @@ export default function Results() {
                       </td>
 
                       <td style={styles.td}>
-                        <button
-                          style={{ ...styles.button, marginRight: "5px" }}
-                          onClick={() => setSelectedAnswers(r)}
-                        >
-                          View
-                        </button>
+                        <div style={styles.btnRow}>
+                          <button
+                            style={styles.viewBtn}
+                            onClick={() => setSelectedAnswers(r)}
+                          >
+                            View
+                          </button>
 
-                        <button
-                          style={{ ...styles.button, background: "black" }}
-                          onClick={() => handlePrintSingle(r)}
-                        >
-                          🖨 Print
-                        </button>
+                          <button
+                            style={styles.printBtn}
+                            onClick={() => handlePrintSingle(r)}
+                          >
+                            🖨 Print
+                          </button>
+
+                          <button
+                            style={{
+                              ...styles.deleteBtn,
+                              opacity: deletingId === r.id ? 0.6 : 1,
+                              cursor: deletingId === r.id ? "not-allowed" : "pointer",
+                            }}
+                            onClick={() => handleDeleteSingle(r)}
+                            disabled={deletingId === r.id}
+                            title="Delete this result"
+                          >
+                            {deletingId === r.id ? "Deleting..." : "🗑 Delete"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-
-            <button
-              style={{ ...styles.button, background: "darkblue", marginTop: "15px" }}
-              onClick={exportToExcel}
-            >
-              Export to Excel
-            </button>
-          </>
+          </div>
         )}
 
         {/* MODAL */}
         {selectedAnswers && (
-          <div style={styles.modalOverlay}>
-            <div style={styles.modal}>
-              <h2>User Answers</h2>
+          <div style={styles.modalOverlay} onClick={() => setSelectedAnswers(null)}>
+            <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+              <div style={styles.modalHeader}>
+                <div>
+                  <h2 style={{ margin: 0 }}>User Answers</h2>
+                  <p style={styles.muted}>
+                    {selectedAnswers.name} • {selectedAnswers.employeeId}
+                  </p>
+                </div>
 
-              <p><b>Name:</b> {selectedAnswers.name}</p>
-              <p><b>Department:</b> {selectedAnswers.department}</p>
-              <p><b>Designation:</b> {selectedAnswers.designation}</p>
-              <p><b>Employee ID:</b> {selectedAnswers.employeeId}</p>
+                <button style={styles.xBtn} onClick={() => setSelectedAnswers(null)}>
+                  ✕
+                </button>
+              </div>
 
-              <p>
-                <b>Marks:</b> {selectedAnswers.marks} / {Object.keys(selectedAnswers.answers).length} / 20
-              </p>
+              <div style={styles.modalBody}>
+                <div style={styles.metaGrid}>
+                  <div style={styles.metaCard}>
+                    <div style={styles.metaLabel}>Department</div>
+                    <div style={styles.metaValue}>{selectedAnswers.department}</div>
+                  </div>
+                  <div style={styles.metaCard}>
+                    <div style={styles.metaLabel}>Designation</div>
+                    <div style={styles.metaValue}>{selectedAnswers.designation}</div>
+                  </div>
+                  <div style={styles.metaCard}>
+                    <div style={styles.metaLabel}>Marks</div>
+                    <div style={styles.metaValue}>
+                      {selectedAnswers.marks} / {Object.keys(selectedAnswers.answers || {}).length} / 20
+                    </div>
+                  </div>
+                </div>
 
-              <ul>
-                {Object.entries(selectedAnswers.answers).map(([q, ans]) => (
-                  <li key={q}><b>Q{q}:</b> {ans}</li>
-                ))}
-              </ul>
+                <div style={styles.answersBox}>
+                  <h3 style={{ marginTop: 0 }}>Answers</h3>
+                  <ul style={styles.answerList}>
+                    {Object.entries(selectedAnswers.answers || {}).map(([q, ans]) => (
+                      <li key={q} style={styles.answerItem}>
+                        <span style={styles.qBadge}>Q{q}</span>
+                        <span>{ans}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-              <button style={styles.closeButton} onClick={() => setSelectedAnswers(null)}>
-                Close
-              </button>
+                <div style={styles.modalFooter}>
+                  <button
+                    style={styles.printBtn}
+                    onClick={() => handlePrintSingle(selectedAnswers)}
+                  >
+                    🖨 Print
+                  </button>
+
+                  <button
+                    style={{
+                      ...styles.deleteBtn,
+                      opacity: deletingId === selectedAnswers.id ? 0.6 : 1,
+                      cursor: deletingId === selectedAnswers.id ? "not-allowed" : "pointer",
+                    }}
+                    onClick={() => handleDeleteSingle(selectedAnswers)}
+                    disabled={deletingId === selectedAnswers.id}
+                  >
+                    {deletingId === selectedAnswers.id ? "Deleting..." : "🗑 Delete Result"}
+                  </button>
+
+                  <button style={styles.secondaryBtn} onClick={() => setSelectedAnswers(null)}>
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
+      </div>
 
+      <div style={styles.footerNote}>
+        Tip: Quiz-wise delete is powerful — use it only when needed. ✅
       </div>
     </div>
   );
@@ -306,53 +551,213 @@ export default function Results() {
 
 // -------------------- STYLES ------------------------
 const styles = {
-  loginContainer: {
+  // Page
+  page: {
     minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "linear-gradient(135deg, #31394eff, #2d2d2dff)",
+    background: "radial-gradient(circle at 10% 10%, #0f172a 0%, #111827 35%, #0b1220 100%)",
+    padding: "26px",
+    color: "#e5e7eb",
   },
-  loginCard: {
-    background: "#fff",
-    padding: "30px",
+  topBar: {
+    maxWidth: "1250px",
+    margin: "0 auto 16px auto",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "14px",
+  },
+  titleRow: { display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" },
+  pageTitle: { margin: 0, fontSize: "28px", letterSpacing: "0.2px" },
+  badge: {
+    padding: "6px 10px",
+    borderRadius: "999px",
+    background: "rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    fontSize: "12px",
+  },
+  subText2: { margin: "6px 0 0 0", color: "rgba(229,231,235,0.75)", fontSize: "13px" },
+
+  actionsRight: { display: "flex", gap: "10px", alignItems: "center" },
+
+  // Card
+  card: {
+    maxWidth: "1250px",
+    margin: "0 auto",
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: "18px",
+    padding: "18px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+    backdropFilter: "blur(10px)",
+  },
+
+  // Filters row
+  filters: {
+    display: "flex",
+    gap: "12px",
+    alignItems: "flex-end",
+    flexWrap: "wrap",
+    paddingBottom: "14px",
+    borderBottom: "1px solid rgba(255,255,255,0.10)",
+    marginBottom: "14px",
+  },
+  selectWrap: { display: "flex", flexDirection: "column", gap: "6px" },
+  label: { fontSize: "12px", color: "rgba(229,231,235,0.7)" },
+  dropdown: {
+    padding: "12px 12px",
+    width: "320px",
     borderRadius: "12px",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    outline: "none",
+    background: "rgba(17,24,39,0.55)",
+    color: "#e5e7eb",
+  },
+
+  // Buttons
+  primaryBtn: {
+    padding: "12px 14px",
+    borderRadius: "12px",
+    border: "1px solid rgba(59,130,246,0.35)",
+    background: "linear-gradient(135deg, rgba(59,130,246,0.95), rgba(37,99,235,0.85))",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: 700,
+  },
+  secondaryBtn: {
+    padding: "12px 14px",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.14)",
+    background: "rgba(255,255,255,0.06)",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: 700,
+  },
+  dangerBtn: {
+    padding: "12px 14px",
+    borderRadius: "12px",
+    border: "1px solid rgba(239,68,68,0.35)",
+    background: "linear-gradient(135deg, rgba(239,68,68,0.95), rgba(220,38,38,0.85))",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: 800,
+  },
+
+  // Table
+  tableWrap: { width: "100%", overflowX: "auto" },
+  table: {
+    width: "100%",
+    borderCollapse: "separate",
+    borderSpacing: "0",
+    overflow: "hidden",
+    borderRadius: "14px",
+  },
+  th: {
+    textAlign: "left",
+    padding: "14px 12px",
+    fontWeight: 800,
+    fontSize: "13px",
+    background: "rgba(255,255,255,0.08)",
+    borderBottom: "1px solid rgba(255,255,255,0.10)",
+    position: "sticky",
+    top: 0,
+    backdropFilter: "blur(10px)",
+    color: "rgba(255,255,255,0.92)",
+  },
+  tr: {
+    background: "rgba(255,255,255,0.03)",
+  },
+  td: {
+    padding: "12px",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    color: "rgba(229,231,235,0.92)",
+    fontSize: "13px",
+    verticalAlign: "middle",
+  },
+  tdStrong: {
+    padding: "12px",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    color: "#fff",
+    fontSize: "13px",
+    verticalAlign: "middle",
+    fontWeight: 700,
+  },
+
+  nameCell: { display: "flex", alignItems: "center", gap: "10px" },
+  avatar: {
+    height: "36px",
+    width: "36px",
+    borderRadius: "12px",
+    display: "grid",
+    placeItems: "center",
+    background: "linear-gradient(135deg, rgba(16,185,129,0.9), rgba(59,130,246,0.8))",
+    color: "#fff",
+    fontWeight: 900,
+    border: "1px solid rgba(255,255,255,0.20)",
+  },
+  nameText: { fontWeight: 800, lineHeight: 1.1 },
+  smallText: { fontSize: "12px", color: "rgba(229,231,235,0.65)", marginTop: "2px" },
+
+  marksPill: {
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: "999px",
+    background: "rgba(59,130,246,0.16)",
+    border: "1px solid rgba(59,130,246,0.25)",
+    fontWeight: 800,
+    color: "#dbeafe",
+    fontSize: "12px",
+  },
+
+  btnRow: { display: "flex", gap: "8px", flexWrap: "wrap" },
+  viewBtn: {
+    padding: "8px 10px",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.14)",
+    background: "rgba(255,255,255,0.06)",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: 800,
+  },
+  printBtn: {
+    padding: "8px 10px",
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.14)",
+    background: "rgba(17,24,39,0.55)",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: 800,
+  },
+  deleteBtn: {
+    padding: "8px 10px",
+    borderRadius: "10px",
+    border: "1px solid rgba(239,68,68,0.35)",
+    background: "rgba(239,68,68,0.18)",
+    color: "#fecaca",
+    cursor: "pointer",
+    fontWeight: 900,
+  },
+
+  // Empty
+  emptyState: {
+    padding: "34px 10px",
     textAlign: "center",
   },
-  passwordInput: {
-    padding: "10px",
-    width: "220px",
-    margin: "10px 0",
-    borderRadius: "6px",
-    border: "1px solid #aaa",
+  emptyIcon: {
+    fontSize: "34px",
+    width: "60px",
+    height: "60px",
+    borderRadius: "18px",
+    margin: "0 auto 10px auto",
+    display: "grid",
+    placeItems: "center",
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.10)",
   },
-  container: {
-    minHeight: "100vh",
-    background: "#f0f2f5",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "20px",
-  },
-  dropdown: {
-    padding: "10px",
-    width: "260px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-  },
-  card: {
-    background: "#fff",
-    padding: "30px",
-    borderRadius: "15px",
-    width: "100%",
-    maxWidth: "1200px",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-    overflowX: "auto",
-  },
-  th: { border: "1px solid #ddd", padding: "10px", background: "#f2f2f2", fontWeight: 600 },
-  td: { border: "1px solid #ddd", padding: "8px" },
-  button: { padding: "8px 12px", background: "blue", borderRadius: "5px", border: "none", color: "#fff", cursor: "pointer" },
+  muted: { color: "rgba(229,231,235,0.65)", margin: 0 },
+
+  infoText: { color: "rgba(229,231,235,0.75)" },
+
+  // Modal
   modalOverlay: {
     position: "fixed",
     top: 0,
@@ -363,22 +768,134 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    padding: "16px",
+    zIndex: 50,
   },
   modal: {
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "10px",
-    width: "400px",
-    maxHeight: "80vh",
-    overflowY: "auto",
+    width: "min(720px, 100%)",
+    background: "rgba(17,24,39,0.88)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "18px",
+    boxShadow: "0 25px 80px rgba(0,0,0,0.55)",
+    overflow: "hidden",
+    color: "#e5e7eb",
   },
-  closeButton: {
-    marginTop: "15px",
-    padding: "10px",
-    background: "red",
-    border: "none",
-    borderRadius: "6px",
+  modalHeader: {
+    padding: "14px 16px",
+    borderBottom: "1px solid rgba(255,255,255,0.10)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "12px",
+  },
+  xBtn: {
+    width: "40px",
+    height: "40px",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(255,255,255,0.06)",
     color: "#fff",
     cursor: "pointer",
+    fontWeight: 900,
+  },
+  modalBody: { padding: "16px" },
+  metaGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: "10px",
+    marginBottom: "14px",
+  },
+  metaCard: {
+    padding: "12px",
+    borderRadius: "14px",
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.10)",
+  },
+  metaLabel: { fontSize: "12px", color: "rgba(229,231,235,0.65)" },
+  metaValue: { fontSize: "13px", fontWeight: 900, marginTop: "4px" },
+
+  answersBox: {
+    padding: "12px",
+    borderRadius: "14px",
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.10)",
+  },
+  answerList: { margin: 0, paddingLeft: "0", listStyle: "none" },
+  answerItem: {
+    display: "flex",
+    gap: "10px",
+    padding: "10px",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.08)",
+    background: "rgba(0,0,0,0.12)",
+    marginBottom: "8px",
+    alignItems: "flex-start",
+  },
+  qBadge: {
+    padding: "4px 10px",
+    borderRadius: "999px",
+    background: "rgba(16,185,129,0.18)",
+    border: "1px solid rgba(16,185,129,0.28)",
+    color: "#bbf7d0",
+    fontWeight: 900,
+    fontSize: "12px",
+    whiteSpace: "nowrap",
+    marginTop: "1px",
+  },
+  modalFooter: {
+    display: "flex",
+    gap: "10px",
+    justifyContent: "flex-end",
+    flexWrap: "wrap",
+    marginTop: "14px",
+  },
+
+  // Login
+  loginContainer: {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "radial-gradient(circle at 20% 10%, #111827, #0b1220)",
+    padding: "16px",
+  },
+  loginCard: {
+    width: "min(420px, 100%)",
+    background: "rgba(255,255,255,0.92)",
+    padding: "26px",
+    borderRadius: "18px",
+    boxShadow: "0 18px 60px rgba(0,0,0,0.35)",
+    border: "1px solid rgba(0,0,0,0.08)",
+  },
+  brandRow: { display: "flex", gap: "12px", alignItems: "center", marginBottom: "14px" },
+  brandLogo: {
+    width: "46px",
+    height: "46px",
+    borderRadius: "16px",
+    background: "linear-gradient(135deg, #2563eb, #10b981)",
+    color: "#fff",
+    display: "grid",
+    placeItems: "center",
+    fontWeight: 900,
+    letterSpacing: "0.5px",
+  },
+  subText: { margin: "4px 0 0 0", color: "rgba(0,0,0,0.55)", fontSize: "13px" },
+  passwordInput: {
+    padding: "12px",
+    width: "100%",
+    margin: "12px 0",
+    borderRadius: "12px",
+    border: "1px solid rgba(0,0,0,0.18)",
+    outline: "none",
+    fontSize: "14px",
+  },
+  errorText: { color: "#dc2626", marginTop: "10px", fontWeight: 700 },
+
+  footerNote: {
+    maxWidth: "1250px",
+    margin: "10px auto 0 auto",
+    color: "rgba(229,231,235,0.6)",
+    fontSize: "12px",
+    textAlign: "center",
   },
 };
