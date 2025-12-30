@@ -17,7 +17,7 @@ export default function QuizPage() {
     designation: "",
   });
 
-  const quizTitle = "CQI-9 Awareness QUIZ";
+  const quizTitle = "CQI-9 AWARENESS QUIZ";
 
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
