@@ -3,10 +3,10 @@ __turbopack_load_page_chunks__("/", [
   "static/chunks/node_modules_react_1cad9b0b._.js",
   "static/chunks/node_modules_react-dom_cjs_react-dom_development_ab7e073c.js",
   "static/chunks/node_modules_react-dom_f14d0471._.js",
-  "static/chunks/node_modules_@firebase_auth_dist_esm_5de3fe95._.js",
+  "static/chunks/d9ef2_@firebase_auth_dist_esm_5361ed51._.js",
   "static/chunks/node_modules_@firebase_firestore_dist_index_esm_f4851282.js",
   "static/chunks/node_modules_0b861ec7._.js",
   "static/chunks/[root-of-the-server]__2cb06578._.js",
   "static/chunks/src_pages_index_5771e187._.js",
-  "static/chunks/src_pages_index_7a89d97f._.js"
+  "static/chunks/src_pages_index_980c0095._.js"
 ])
