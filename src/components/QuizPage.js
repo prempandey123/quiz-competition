@@ -23,8 +23,18 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [marks, setMarks] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
+  const [timeLeft, setTimeLeft] = useState(120);
   const [loading, setLoading] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  // ---------------- Detect Mobile --------------------
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const questions = [
     {
@@ -186,6 +196,7 @@ export default function QuizPage() {
       return () => clearInterval(timer);
     }
     if (timeLeft === 0 && quizStarted && !submitted) handleSubmit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizStarted, timeLeft, submitted]);
 
   const formatTime = (sec) =>
@@ -253,14 +264,18 @@ export default function QuizPage() {
       minHeight: "100vh",
       background:
         "radial-gradient(circle at 10% 10%, rgba(231,76,60,0.10), transparent 35%), radial-gradient(circle at 90% 20%, rgba(52,152,219,0.12), transparent 40%), linear-gradient(180deg, #fbfbfb, #f2f4f7)",
-      padding: "28px 14px",
+      padding: isMobile ? "18px 12px" : "28px 14px",
       fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+      WebkitTextSizeAdjust: "100%",
     },
+
     container: {
       maxWidth: "820px",
       margin: "0 auto",
-      padding: "18px",
+      padding: isMobile ? "10px" : "18px",
+      paddingTop: quizStarted ? (isMobile ? "68px" : "74px") : undefined, // space for timer
     },
+
     brand: {
       textAlign: "center",
       fontWeight: 900,
@@ -268,29 +283,35 @@ export default function QuizPage() {
       color: "#c0392b",
       marginBottom: "8px",
       textTransform: "uppercase",
-      fontSize: "18px",
+      fontSize: isMobile ? "14px" : "18px",
     },
+
     titleWrap: {
       background: "linear-gradient(135deg, #ffffff, #fff7f7)",
       border: "1px solid rgba(192,57,43,0.15)",
       borderRadius: "16px",
-      padding: "18px",
+      padding: isMobile ? "14px" : "18px",
       boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
       marginBottom: "14px",
     },
+
     header: {
       textAlign: "center",
       color: "#2c3e50",
       margin: 0,
-      fontSize: "26px",
+      fontSize: isMobile ? "20px" : "26px",
       fontWeight: 900,
+      lineHeight: 1.2,
     },
+
     subHeader: {
       textAlign: "center",
       marginTop: "6px",
       color: "#566573",
-      fontSize: "14px",
+      fontSize: isMobile ? "12px" : "14px",
+      lineHeight: 1.4,
     },
+
     badgeRow: {
       display: "flex",
       gap: "10px",
@@ -298,41 +319,45 @@ export default function QuizPage() {
       flexWrap: "wrap",
       marginTop: "12px",
     },
+
     badge: {
       background: "rgba(231,76,60,0.10)",
       border: "1px solid rgba(231,76,60,0.20)",
       color: "#c0392b",
       padding: "8px 12px",
       borderRadius: "999px",
-      fontSize: "13px",
+      fontSize: isMobile ? "12px" : "13px",
       fontWeight: 700,
     },
+
     badgeBlue: {
       background: "rgba(52,152,219,0.10)",
       border: "1px solid rgba(52,152,219,0.20)",
       color: "#1f6fb2",
       padding: "8px 12px",
       borderRadius: "999px",
-      fontSize: "13px",
+      fontSize: isMobile ? "12px" : "13px",
       fontWeight: 700,
     },
+
     notice: {
       background: "linear-gradient(135deg, #e8f6ff, #f7fbff)",
       border: "1px solid rgba(52,152,219,0.25)",
       color: "#1f6fb2",
       textAlign: "left",
-      padding: "14px",
+      padding: isMobile ? "12px" : "14px",
       borderRadius: "14px",
       marginBottom: "14px",
       fontWeight: 600,
       lineHeight: 1.45,
     },
-    noticeTitle: { fontSize: "14px", fontWeight: 900, marginBottom: "6px" },
-    rules: { margin: 0, paddingLeft: "18px", fontWeight: 600, fontSize: "13px" },
+
+    noticeTitle: { fontSize: isMobile ? "13px" : "14px", fontWeight: 900, marginBottom: "6px" },
+    rules: { margin: 0, paddingLeft: "18px", fontWeight: 600, fontSize: isMobile ? "12px" : "13px" },
 
     card: {
       background: "#fff",
-      padding: "18px",
+      padding: isMobile ? "14px" : "18px",
       borderRadius: "16px",
       boxShadow: "0 12px 30px rgba(0,0,0,0.08)",
       border: "1px solid rgba(0,0,0,0.06)",
@@ -340,28 +365,36 @@ export default function QuizPage() {
       flexDirection: "column",
       gap: "12px",
     },
-    row2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" },
+
+    row2: {
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      gap: "12px",
+    },
 
     input: {
-      padding: "12px 12px",
-      fontSize: "15px",
+      padding: "13px 12px",
+      fontSize: isMobile ? "16px" : "15px", // iOS zoom fix (>=16px)
       borderRadius: "12px",
       border: "1px solid rgba(0,0,0,0.12)",
       outline: "none",
       width: "100%",
       transition: "0.2s",
       background: "#fcfcfd",
+      boxSizing: "border-box",
     },
+
     helper: {
-      fontSize: "12px",
+      fontSize: isMobile ? "12px" : "12px",
       color: "#6c7a89",
       marginTop: "-6px",
       marginBottom: "2px",
+      lineHeight: 1.4,
     },
 
     button: {
-      padding: "12px",
-      fontSize: "16px",
+      padding: isMobile ? "14px 12px" : "12px",
+      fontSize: isMobile ? "16px" : "16px",
       border: "none",
       borderRadius: "12px",
       background: "linear-gradient(135deg, #c0392b, #e74c3c)",
@@ -370,6 +403,8 @@ export default function QuizPage() {
       fontWeight: 900,
       boxShadow: "0 10px 18px rgba(231,76,60,0.25)",
       transition: "0.2s",
+      width: "100%",
+      touchAction: "manipulation",
     },
 
     timer: {
@@ -379,36 +414,53 @@ export default function QuizPage() {
       width: "100%",
       background: "linear-gradient(90deg, #fff0f0, #ffe3e3)",
       color: "#c0392b",
-      padding: "10px",
-      fontSize: "16px",
+      padding: "12px 10px",
+      fontSize: isMobile ? "14px" : "16px",
       textAlign: "center",
       fontWeight: 900,
       zIndex: 1000,
       borderBottom: "1px solid rgba(192,57,43,0.18)",
+      paddingTop: "calc(10px + env(safe-area-inset-top))", // iOS notch safe area
     },
 
     question: {
       background: "linear-gradient(135deg, #ffffff, #fbfcff)",
-      padding: "14px",
+      padding: isMobile ? "12px" : "14px",
       borderRadius: "14px",
       border: "1px solid rgba(0,0,0,0.08)",
       marginBottom: "12px",
       boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
     },
-    qTitle: { margin: 0, marginBottom: "10px", color: "#2c3e50" },
+
+    qTitle: {
+      margin: 0,
+      marginBottom: "10px",
+      color: "#2c3e50",
+      fontSize: isMobile ? "14px" : "15px",
+      lineHeight: 1.35,
+    },
+
     option: {
       display: "flex",
-      alignItems: "center",
+      alignItems: "flex-start",
       gap: "10px",
-      padding: "10px 10px",
+      padding: isMobile ? "12px 10px" : "10px 10px",
       borderRadius: "12px",
       border: "1px solid rgba(0,0,0,0.08)",
       marginTop: "8px",
       cursor: "pointer",
       background: "#fff",
+      lineHeight: 1.3,
+      touchAction: "manipulation",
     },
+
+    radio: {
+      marginTop: "2px",
+      transform: isMobile ? "scale(1.1)" : "scale(1)",
+    },
+
     submitBtn: {
-      padding: "12px",
+      padding: isMobile ? "14px 12px" : "12px",
       fontSize: "16px",
       border: "none",
       borderRadius: "12px",
@@ -417,6 +469,8 @@ export default function QuizPage() {
       cursor: "pointer",
       fontWeight: 900,
       boxShadow: "0 10px 18px rgba(46,204,113,0.25)",
+      width: "100%",
+      touchAction: "manipulation",
     },
   };
 
@@ -436,6 +490,7 @@ export default function QuizPage() {
                 marginTop: 10,
                 color: "#2c3e50",
                 fontWeight: 700,
+                lineHeight: 1.4,
               }}
             >
               Your Score: <span style={{ fontSize: 22 }}>{marks}</span> / {questions.length}
@@ -464,14 +519,21 @@ export default function QuizPage() {
             </div>
           </div>
 
-          {/* English Instructions */}
           <div style={styles.notice}>
             <div style={styles.noticeTitle}>⚠️ Important Instructions</div>
             <ul style={styles.rules}>
-              <li>This quiz is <b>2 minutes</b> long — the timer starts immediately after you click Start.</li>
-              <li>Each question has <b>only one correct answer</b>.</li>
-              <li>When time runs out, the quiz will be <b>auto-submitted</b>.</li>
-              <li>The same Employee ID <b>cannot attempt</b> this quiz again.</li>
+              <li>
+                This quiz is <b>2 minutes</b> long — the timer starts immediately after you click Start.
+              </li>
+              <li>
+                Each question has <b>only one correct answer</b>.
+              </li>
+              <li>
+                When time runs out, the quiz will be <b>auto-submitted</b>.
+              </li>
+              <li>
+                The same Employee ID <b>cannot attempt</b> this quiz again.
+              </li>
             </ul>
           </div>
 
@@ -481,11 +543,15 @@ export default function QuizPage() {
                 style={styles.input}
                 placeholder="Full Name"
                 onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+                value={userData.name}
+                inputMode="text"
               />
               <input
                 style={styles.input}
                 placeholder="Employee ID"
                 onChange={(e) => setUserData({ ...userData, empId: e.target.value })}
+                value={userData.empId}
+                inputMode="text"
               />
             </div>
 
@@ -494,11 +560,15 @@ export default function QuizPage() {
                 style={styles.input}
                 placeholder="Department"
                 onChange={(e) => setUserData({ ...userData, department: e.target.value })}
+                value={userData.department}
+                inputMode="text"
               />
               <input
                 style={styles.input}
                 placeholder="Designation"
                 onChange={(e) => setUserData({ ...userData, designation: e.target.value })}
+                value={userData.designation}
+                inputMode="text"
               />
             </div>
 
@@ -522,7 +592,9 @@ export default function QuizPage() {
       <div style={styles.container}>
         <div style={styles.titleWrap}>
           <div style={styles.brand}>HERO STEELS LIMITED</div>
-          <h2 style={{ ...styles.header, fontSize: "22px" }}>{quizTitle}</h2>
+          <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
+            {quizTitle}
+          </h2>
           <div style={styles.badgeRow}>
             <div style={styles.badgeBlue}>📄 Total Marks: {questions.length}</div>
             <div style={styles.badge}>⏱ Duration: 2 Minutes</div>
@@ -541,12 +613,13 @@ export default function QuizPage() {
               <label key={opt} style={styles.option}>
                 <input
                   type="radio"
-                  name={q.id}
+                  name={String(q.id)}
                   value={opt}
                   checked={answers[q.id] === opt}
                   onChange={() => handleChange(q.id, opt)}
+                  style={styles.radio}
                 />
-                <span>{opt}</span>
+                <span style={{ fontSize: isMobile ? "14px" : "15px" }}>{opt}</span>
               </label>
             ))}
           </div>

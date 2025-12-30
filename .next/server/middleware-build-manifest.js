@@ -1,50 +1,45 @@
 globalThis.__BUILD_MANIFEST = {
   "pages": {
     "/": [
-      "static/chunks/node_modules_next_dist_756b85fa._.js",
-      "static/chunks/node_modules_react_1cad9b0b._.js",
-      "static/chunks/node_modules_react-dom_cjs_react-dom_development_ab7e073c.js",
-      "static/chunks/node_modules_react-dom_f14d0471._.js",
-      "static/chunks/d9ef2_@firebase_auth_dist_esm_5361ed51._.js",
-      "static/chunks/node_modules_@firebase_firestore_dist_index_esm_f4851282.js",
-      "static/chunks/node_modules_0b861ec7._.js",
-      "static/chunks/[root-of-the-server]__2cb06578._.js",
-      "static/chunks/src_pages_index_5771e187._.js",
-      "static/chunks/src_pages_index_980c0095._.js"
+      "static/chunks/138a3661fbdc8f8b.js",
+      "static/chunks/0bee80f7c2887cbf.js",
+      "static/chunks/6e3b894acf1c48be.js",
+      "static/chunks/9779008cba43b9e7.js",
+      "static/chunks/turbopack-5f688d9d6920bc58.js"
     ],
     "/_app": [
-      "static/chunks/[root-of-the-server]__e2c08166._.js",
-      "static/chunks/node_modules_react_b2385d85._.js",
-      "static/chunks/node_modules_react-dom_cjs_react-dom_development_ab7e073c.js",
-      "static/chunks/node_modules_react-dom_f14d0471._.js",
-      "static/chunks/node_modules_3bfdc6a4._.js",
-      "static/chunks/[root-of-the-server]__f5f356b3._.js",
-      "static/chunks/src_pages__app_5771e187._.js",
-      "static/chunks/src_pages__app_987028c6._.js"
+      "static/chunks/7cece1e9858e9c1b.js",
+      "static/chunks/9779008cba43b9e7.js",
+      "static/chunks/0bee80f7c2887cbf.js",
+      "static/chunks/turbopack-93036456684bd641.js"
+    ],
+    "/_error": [
+      "static/chunks/8155b9868fa4acb9.js",
+      "static/chunks/9779008cba43b9e7.js",
+      "static/chunks/0bee80f7c2887cbf.js",
+      "static/chunks/turbopack-c4ee405c5f3553a0.js"
+    ],
+    "/admin": [
+      "static/chunks/57e1e7487e3a025b.js",
+      "static/chunks/9779008cba43b9e7.js",
+      "static/chunks/0bee80f7c2887cbf.js",
+      "static/chunks/turbopack-a2bbe849301b3a38.js"
     ],
     "/results": [
-      "static/chunks/node_modules_next_dist_756b85fa._.js",
-      "static/chunks/node_modules_react_1cad9b0b._.js",
-      "static/chunks/node_modules_react-dom_cjs_react-dom_development_ab7e073c.js",
-      "static/chunks/node_modules_react-dom_f14d0471._.js",
-      "static/chunks/d9ef2_@firebase_auth_dist_esm_5361ed51._.js",
-      "static/chunks/node_modules_@firebase_firestore_dist_index_esm_f4851282.js",
-      "static/chunks/node_modules_xlsx_xlsx_mjs_f25f9016._.js",
-      "static/chunks/node_modules_fba9d779._.js",
-      "static/chunks/[root-of-the-server]__6249ba1f._.js",
-      "static/chunks/src_pages_results_5771e187._.js",
-      "static/chunks/src_pages_results_0f28f3ad._.js"
+      "static/chunks/abcfe8169a4c06f2.js",
+      "static/chunks/0bee80f7c2887cbf.js",
+      "static/chunks/6e3b894acf1c48be.js",
+      "static/chunks/12cd94c768de5557.js",
+      "static/chunks/9779008cba43b9e7.js",
+      "static/chunks/turbopack-da65712c72cd4d48.js"
     ]
   },
   "devFiles": [],
-  "ampDevFiles": [],
   "polyfillFiles": [],
   "lowPriorityFiles": [],
-  "rootMainFiles": [],
-  "ampFirstPages": []
+  "rootMainFiles": []
 };
 globalThis.__BUILD_MANIFEST.lowPriorityFiles = [
 "/static/" + process.env.__NEXT_BUILD_ID + "/_buildManifest.js",
-,"/static/" + process.env.__NEXT_BUILD_ID + "/_ssgManifest.js",
-
+"/static/" + process.env.__NEXT_BUILD_ID + "/_ssgManifest.js"
 ];
