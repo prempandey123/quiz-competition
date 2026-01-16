@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { db } from "../firebase";
 import {
   collection,
@@ -17,14 +17,26 @@ export default function QuizPage() {
     designation: "",
   });
 
-  const quizTitle = "CQI-9 AWARENESS QUIZ";
+  // ✅ Updated Quiz Title
+  const quizTitle = "Maintenance, Optimization and CRM Operations";
+
+  // ✅ Duration: 20 Minutes
+  const QUIZ_DURATION_MIN = 5;
+  const QUIZ_DURATION_SEC = QUIZ_DURATION_MIN * 60;
+
+  // ✅ Total Questions / Marks: 20
+  const TOTAL_QUESTIONS_DISPLAY = 20;
+  const TOTAL_MARKS_DISPLAY = 20;
 
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [marks, setMarks] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(120);
+  const [timeLeft, setTimeLeft] = useState(QUIZ_DURATION_SEC);
   const [loading, setLoading] = useState(false);
+
+  // ✅ Extra button after submission
+  const [showReview, setShowReview] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -36,158 +48,252 @@ export default function QuizPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const questions = [
-    {
-      id: 1,
-      q: "What is the main purpose of the CQI-9 standard?",
-      options: [
-        "Improve marketing strategy",
-        "Ensure quality and control of heat treatment processes",
-        "Increase raw material purchasing",
-        "Design product aesthetics",
-      ],
-      answer: "Ensure quality and control of heat treatment processes",
-    },
-    {
-      id: 2,
-      q: "CQI-9 is primarily associated with which industry?",
-      options: ["Textile", "Automotive", "Food processing", "Pharmaceutical"],
-      answer: "Automotive",
-    },
-    {
-      id: 3,
-      q: "Which of the following is not a requirement emphasized by CQI-9?",
-      options: [
-        "Process monitoring and control",
-        "Employee training",
-        "Marketing analysis reports",
-        "Equipment calibration",
-      ],
-      answer: "Marketing analysis reports",
-    },
-    {
-      id: 4,
-      q: "How often must a CQI-9 Heat Treat System Assessment typically be conducted?",
-      options: [
-        "Once every five years",
-        "Only at project start",
-        "At least annually",
-        "Only during audits",
-      ],
-      answer: "At least annually",
-    },
-    {
-      id: 5,
-      q: "In CQI-9, what is the role of documentation and traceability?",
-      options: [
-        "Decorative record keeping",
-        "Ensures process traceability and quality control",
-        "Improves sales forecasts",
-        "Replaces training records",
-      ],
-      answer: "Ensures process traceability and quality control",
-    },
-    {
-      id: 6,
-      q: "Which section of CQI-9 addresses pyrometry requirements?",
-      options: ["Job Audit", "Section 1", "Section 2", "Process Tables"],
-      answer: "Section 2",
-    },
-    {
-      id: 7,
-      q: "What are SAT and TUS related to in CQI-9?",
-      options: [
-        "Sales and transportation reports",
-        "Temperature Uniformity Survey and System Accuracy Test",
-        "Supplier arrival timing",
-        "Supplier audit tools",
-      ],
-      answer: "Temperature Uniformity Survey and System Accuracy Test",
-    },
-    {
-      id: 8,
-      q: "Which of the following heat treat processes is included in CQI-9 process tables?",
-      options: ["Injection molding", "Carburizing", "Painting", "Electroplating"],
-      answer: "Carburizing",
-    },
-    {
-      id: 9,
-      q: "What is the primary focus of Section 1 of the CQI-9 assessment?",
-      options: [
-        "Site sanitation",
-        "Management responsibility and quality planning",
-        "Product packaging",
-        "Sales department roles",
-      ],
-      answer: "Management responsibility and quality planning",
-    },
-    {
-      id: 10,
-      q: "What best describes a Job Audit in CQI-9?",
-      options: [
-        "Test of financial reports",
-        "Product and process audit focused on specific production",
-        "Website security check",
-        "Supplier marketing review",
-      ],
-      answer: "Product and process audit focused on specific production",
-    },
-    {
-      id: 11,
-      q: "Why is equipment calibration important in CQI-9?",
-      options: [
-        "To decorate machinery",
-        "To ensure accurate process control and measurement",
-        "For color coding",
-        "To reduce energy consumption",
-      ],
-      answer: "To ensure accurate process control and measurement",
-    },
-    {
-      id: 12,
-      q: "CQI-9 encourages continuous improvement through:",
-      options: [
-        "Employee vacation plans",
-        "Regular assessments and corrective actions",
-        "Random social events",
-        "Monthly newsletters",
-      ],
-      answer: "Regular assessments and corrective actions",
-    },
-    {
-      id: 13,
-      q: "Thermocouples used in CQI-9 for SAT/TUS must be:",
-      options: [
-        "Chosen freely by staff",
-        "Reliable and appropriate for thermal measurement",
-        "Only digital type",
-        "Ignored after installation",
-      ],
-      answer: "Reliable and appropriate for thermal measurement",
-    },
-    {
-      id: 14,
-      q: "Which of the following is a process control element CQI-9 focuses on?",
-      options: [
-        "Customer satisfaction surveys",
-        "Continuous monitoring of temperature and atmosphere",
-        "Office layout design",
-        "Payroll processing",
-      ],
-      answer: "Continuous monitoring of temperature and atmosphere",
-    },
-    {
-      id: 15,
-      q: "The CQI-9 assessment helps organizations mainly to:",
-      options: [
-        "Increase their advertising budget",
-        "Ensure consistent quality in heat-treated components",
-        "Reduce lunch break times",
-        "Lower employee wages",
-      ],
-      answer: "Ensure consistent quality in heat-treated components",
-    },
-  ];
+  // ✅ 20 Questions (Hindi + English) using answerKey (A/B/C/D)
+  const questions = useMemo(
+    () => [
+      {
+        id: 1,
+        q_en: "What is the first stage in the failure development process?",
+        q_hi: "विफलता (Failure) के विकास की पहली अवस्था क्या होती है?",
+        options: [
+          { key: "A", en: "Wear", hi: "घिसावट" },
+          { key: "B", en: "Breakdown", hi: "खराबी / ब्रेकडाउन" },
+          { key: "C", en: "Overheating", hi: "अधिक गर्म होना" },
+          { key: "D", en: "Normal operation", hi: "सामान्य संचालन" },
+        ],
+        answerKey: "D",
+      },
+      {
+        id: 2,
+        q_en: "Pickling surface stains usually occur due to:",
+        q_hi: "पिक्लिंग में सतह पर दाग आमतौर पर किस कारण से होते हैं?",
+        options: [
+          { key: "A", en: "Operator mistake", hi: "ऑपरेटर की गलती" },
+          { key: "B", en: "Sensor fault", hi: "सेंसर की खराबी" },
+          { key: "C", en: "Improper acid circulation", hi: "एसिड का सही प्रवाह न होना" },
+          { key: "D", en: "Motor failure", hi: "मोटर की खराबी" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 3,
+        q_en: "Drive trips mostly indicate:",
+        q_hi: "ड्राइव ट्रिप होने का सामान्य संकेत क्या होता है?",
+        options: [
+          { key: "A", en: "Software bug", hi: "सॉफ्टवेयर त्रुटि" },
+          { key: "B", en: "Cable problem", hi: "केबल की समस्या" },
+          { key: "C", en: "Mechanical overload", hi: "यांत्रिक ओवरलोड" },
+          { key: "D", en: "PLC error", hi: "PLC त्रुटि" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 4,
+        q_en: "Which maintenance type follows calendar or running hours?",
+        q_hi: "कौन-सा मेंटेनेंस कैलेंडर या रनिंग आवर्स के अनुसार किया जाता है?",
+        options: [
+          { key: "A", en: "Predictive", hi: "प्रिडिक्टिव" },
+          { key: "B", en: "Preventive", hi: "प्रिवेंटिव" },
+          { key: "C", en: "Proactive", hi: "प्रोएक्टिव" },
+          { key: "D", en: "Breakdown", hi: "ब्रेकडाउन" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 5,
+        q_en: "Predictive maintenance mainly depends on:",
+        q_hi: "प्रिडिक्टिव मेंटेनेंस मुख्य रूप से किस पर आधारित होता है?",
+        options: [
+          { key: "A", en: "Technician experience", hi: "तकनीशियन का अनुभव" },
+          { key: "B", en: "OEM manuals", hi: "OEM मैनुअल" },
+          { key: "C", en: "Machine condition data", hi: "मशीन की स्थिति का डेटा" },
+          { key: "D", en: "Production plan", hi: "उत्पादन योजना" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 6,
+        q_en: "“Machines whisper before they scream” means:",
+        q_hi: "“मशीनें खराब होने से पहले संकेत देती हैं” का क्या अर्थ है?",
+        options: [
+          { key: "A", en: "Noise increases suddenly", hi: "अचानक शोर बढ़ जाता है" },
+          { key: "B", en: "Failure happens without warning", hi: "बिना चेतावनी के खराबी होती है" },
+          { key: "C", en: "Early symptoms appear before failure", hi: "खराबी से पहले शुरुआती लक्षण दिखाई देते हैं" },
+          { key: "D", en: "Only sensors detect problems", hi: "केवल सेंसर ही समस्या पहचानते हैं" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 7,
+        q_en: "Which KPI shows equipment reliability?",
+        q_hi: "कौन-सा KPI मशीन की विश्वसनीयता दिखाता है?",
+        options: [
+          { key: "A", en: "MTTR", hi: "MTTR" },
+          { key: "B", en: "Scrap rate", hi: "स्क्रैप रेट" },
+          { key: "C", en: "OEE", hi: "OEE" },
+          { key: "D", en: "MTBF", hi: "MTBF" },
+        ],
+        answerKey: "D",
+      },
+      {
+        id: 8,
+        q_en: "Which maintenance type eliminates root causes?",
+        q_hi: "कौन-सा मेंटेनेंस मूल कारणों को खत्म करता है?",
+        options: [
+          { key: "A", en: "Preventive", hi: "प्रिवेंटिव" },
+          { key: "B", en: "Breakdown", hi: "ब्रेकडाउन" },
+          { key: "C", en: "Proactive", hi: "प्रोएक्टिव" },
+          { key: "D", en: "Predictive", hi: "प्रिडिक्टिव" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 9,
+        q_en: "Which maintenance cost is highest?",
+        q_hi: "कौन-सा मेंटेनेंस खर्च सबसे ज्यादा होता है?",
+        options: [
+          { key: "A", en: "Inspection cost", hi: "निरीक्षण खर्च" },
+          { key: "B", en: "Planned maintenance cost", hi: "नियोजित मेंटेनेंस खर्च" },
+          { key: "C", en: "Emergency breakdown cost", hi: "आपातकालीन ब्रेकडाउन खर्च" },
+          { key: "D", en: "Lubrication cost", hi: "लुब्रिकेशन खर्च" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 10,
+        q_en: "What happens when early symptoms are ignored?",
+        q_hi: "शुरुआती लक्षणों को नजरअंदाज करने पर क्या होता है?",
+        options: [
+          { key: "A", en: "Machine improves", hi: "मशीन बेहतर हो जाती है" },
+          { key: "B", en: "Condition worsens", hi: "स्थिति और खराब हो जाती है" },
+          { key: "C", en: "Cost reduces", hi: "खर्च कम हो जाता है" },
+          { key: "D", en: "No impact", hi: "कोई प्रभाव नहीं" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 11,
+        q_en: "Which KPI shows repair speed?",
+        q_hi: "कौन-सा KPI मरम्मत की गति (Repair Speed) दिखाता है?",
+        options: [
+          { key: "A", en: "MTBF", hi: "MTBF" },
+          { key: "B", en: "Scrap", hi: "स्क्रैप" },
+          { key: "C", en: "MTTR", hi: "MTTR" },
+          { key: "D", en: "OEE", hi: "OEE" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 12,
+        q_en: "Digital maintenance reduces:",
+        q_hi: "डिजिटल मेंटेनेंस क्या कम करता है?",
+        options: [
+          { key: "A", en: "Sensors", hi: "सेंसर" },
+          { key: "B", en: "Data", hi: "डेटा" },
+          { key: "C", en: "Emergency breakdowns", hi: "आपातकालीन ब्रेकडाउन" },
+          { key: "D", en: "Training", hi: "प्रशिक्षण" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 13,
+        q_en: "Which tool identifies top downtime causes?",
+        q_hi: "सबसे ज्यादा डाउनटाइम के कारण पहचानने के लिए कौन-सा टूल उपयोग होता है?",
+        options: [
+          { key: "A", en: "Control chart", hi: "कंट्रोल चार्ट" },
+          { key: "B", en: "Pareto analysis", hi: "पारेतो विश्लेषण" },
+          { key: "C", en: "Histogram", hi: "हिस्टोग्राम" },
+          { key: "D", en: "Scatter diagram", hi: "स्कैटर डायग्राम" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 14,
+        q_en: "Roll misalignment mainly causes:",
+        q_hi: "रोल मिसअलाइनमेंट मुख्य रूप से किस समस्या का कारण बनता है?",
+        options: [
+          { key: "A", en: "Oil leakage", hi: "तेल का रिसाव" },
+          { key: "B", en: "Sensor failure", hi: "सेंसर खराबी" },
+          { key: "C", en: "Shape deviation", hi: "आकार में विचलन" },
+          { key: "D", en: "Motor overheating", hi: "मोटर का अधिक गर्म होना" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 15,
+        q_en: "Which symptom indicates bearing deterioration?",
+        q_hi: "कौन-सा लक्षण बेयरिंग की खराबी दर्शाता है?",
+        options: [
+          { key: "A", en: "Smoke", hi: "धुआं" },
+          { key: "B", en: "Vibration", hi: "वाइब्रेशन" },
+          { key: "C", en: "Light flicker", hi: "लाइट का झपकना" },
+          { key: "D", en: "Color change", hi: "रंग बदलना" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 16,
+        q_en: "Which method finds root cause?",
+        q_hi: "कौन-सी विधि मूल कारण (Root Cause) ढूंढती है?",
+        options: [
+          { key: "A", en: "Reset alarm", hi: "अलार्म रीसेट करना" },
+          { key: "B", en: "Replace part", hi: "पार्ट बदलना" },
+          { key: "C", en: "5-Why analysis", hi: "5-व्हाई विश्लेषण" },
+          { key: "D", en: "Bypass logic", hi: "लॉजिक बायपास करना" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 17,
+        q_en: "Fault isolation means:",
+        q_hi: "फॉल्ट आइसोलेशन का अर्थ क्या है?",
+        options: [
+          { key: "A", en: "Trial and error", hi: "ट्रायल एंड एरर" },
+          { key: "B", en: "Random replacement", hi: "बिना सोचे पार्ट बदलना" },
+          { key: "C", en: "Logical step-by-step checking", hi: "तर्कसंगत क्रमवार जांच" },
+          { key: "D", en: "Guessing", hi: "अनुमान लगाना" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 18,
+        q_en: "Critical spare means:",
+        q_hi: "क्रिटिकल स्पेयर का क्या अर्थ है?",
+        options: [
+          { key: "A", en: "Long lead time & high impact spare", hi: "लंबा लीड टाइम और ज्यादा प्रभाव वाला स्पेयर" },
+          { key: "B", en: "High usage spare", hi: "ज्यादा उपयोग होने वाला स्पेयर" },
+          { key: "C", en: "Cheap spare", hi: "सस्ता स्पेयर" },
+          { key: "D", en: "Local spare", hi: "स्थानीय स्पेयर" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 19,
+        q_en: "ABC analysis is based on:",
+        q_hi: "ABC विश्लेषण किस आधार पर किया जाता है?",
+        options: [
+          { key: "A", en: "Lead time", hi: "लीड टाइम" },
+          { key: "B", en: "Consumption", hi: "खपत" },
+          { key: "C", en: "Cost value", hi: "लागत मूल्य" },
+          { key: "D", en: "Vendor rating", hi: "वेंडर रेटिंग" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 20,
+        q_en: "First step in excellence roadmap:",
+        q_hi: "एक्सीलेंस रोडमैप का पहला चरण क्या है?",
+        options: [
+          { key: "A", en: "Stabilize", hi: "स्थिर करना" },
+          { key: "B", en: "Optimize", hi: "अनुकूलन करना" },
+          { key: "C", en: "Digitize", hi: "डिजिटल बनाना" },
+          { key: "D", en: "Automate", hi: "स्वचालन करना" },
+        ],
+        answerKey: "A",
+      },
+    ],
+    []
+  );
 
   // ---------------- Timer --------------------
   useEffect(() => {
@@ -232,6 +338,7 @@ export default function QuizPage() {
 
     setLoading(false);
     setQuizStarted(true);
+    setTimeLeft(QUIZ_DURATION_SEC);
   };
 
   // ---------------- Submit --------------------
@@ -239,7 +346,7 @@ export default function QuizPage() {
     let score = 0;
 
     questions.forEach((q) => {
-      if (answers[q.id] === q.answer) score++;
+      if (answers[q.id] === q.answerKey) score++;
     });
 
     setMarks(score);
@@ -254,6 +361,7 @@ export default function QuizPage() {
       quizTitle,
       answers,
       marks: score,
+      questions, // ✅ store questions snapshot
       submittedAt: serverTimestamp(),
     });
   };
@@ -273,7 +381,7 @@ export default function QuizPage() {
       maxWidth: "820px",
       margin: "0 auto",
       padding: isMobile ? "10px" : "18px",
-      paddingTop: quizStarted ? (isMobile ? "68px" : "74px") : undefined, // space for timer
+      paddingTop: quizStarted ? (isMobile ? "68px" : "74px") : undefined,
     },
 
     brand: {
@@ -374,7 +482,7 @@ export default function QuizPage() {
 
     input: {
       padding: "13px 12px",
-      fontSize: isMobile ? "16px" : "15px", // iOS zoom fix (>=16px)
+      fontSize: isMobile ? "16px" : "15px",
       borderRadius: "12px",
       border: "1px solid rgba(0,0,0,0.12)",
       outline: "none",
@@ -420,7 +528,7 @@ export default function QuizPage() {
       fontWeight: 900,
       zIndex: 1000,
       borderBottom: "1px solid rgba(192,57,43,0.18)",
-      paddingTop: "calc(10px + env(safe-area-inset-top))", // iOS notch safe area
+      paddingTop: "calc(10px + env(safe-area-inset-top))",
     },
 
     question: {
@@ -472,18 +580,47 @@ export default function QuizPage() {
       width: "100%",
       touchAction: "manipulation",
     },
+
+    reviewBtn: {
+      padding: isMobile ? "14px 12px" : "12px",
+      fontSize: "16px",
+      border: "none",
+      borderRadius: "12px",
+      background: "linear-gradient(135deg, #1f6fb2, #3498db)",
+      color: "#fff",
+      cursor: "pointer",
+      fontWeight: 900,
+      boxShadow: "0 10px 18px rgba(52,152,219,0.25)",
+      width: "100%",
+      touchAction: "manipulation",
+      marginTop: "10px",
+    },
+  };
+
+  // helper to get option label
+  const getOptionText = (q, key) => {
+    const opt = q.options.find((o) => o.key === key);
+    if (!opt) return "";
+    return `${opt.key}. ${opt.en} / ${opt.hi}`;
   };
 
   // ---------------- Submitted Screen --------------------
-  if (submitted)
+  if (submitted) {
     return (
       <div style={styles.page}>
         <div style={styles.container}>
           <div style={styles.titleWrap}>
             <div style={styles.brand}>HERO STEELS LIMITED</div>
-            <h2 style={{ color: "#27ae60", textAlign: "center", margin: 0 }}>
-              🎉 Quiz Submitted Successfully!
+
+            {/* ✅ Title below HERO STEELS LIMITED */}
+            <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
+              📝 {quizTitle}
             </h2>
+
+            <h3 style={{ color: "#27ae60", textAlign: "center", margin: "10px 0 0" }}>
+              🎉 Quiz Submitted Successfully!
+            </h3>
+
             <p
               style={{
                 textAlign: "center",
@@ -493,12 +630,49 @@ export default function QuizPage() {
                 lineHeight: 1.4,
               }}
             >
-              Your Score: <span style={{ fontSize: 22 }}>{marks}</span> / {questions.length}
+              Your Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
             </p>
+
+            
+
+            {showReview && (
+              <div style={{ marginTop: 14 }}>
+                {questions.map((q) => {
+                  const yourKey = answers[q.id];
+                  const isCorrect = yourKey === q.answerKey;
+
+                  return (
+                    <div key={q.id} style={styles.question}>
+                      <p style={styles.qTitle}>
+                        <b>
+                          {q.id}. {q.q_en}
+                        </b>
+                        <br />
+                        <span style={{ color: "#566573", fontWeight: 700 }}>{q.q_hi}</span>
+                      </p>
+
+                      <p style={{ margin: "8px 0 0" }}>
+                        <b>Status:</b> {isCorrect ? "✅ Correct" : "❌ Wrong"}
+                      </p>
+
+                      <p style={{ margin: "6px 0 0" }}>
+                        <b>Your Answer:</b>{" "}
+                        {yourKey ? getOptionText(q, yourKey) : "Not Attempted"}
+                      </p>
+
+                      <p style={{ margin: "6px 0 0" }}>
+                        <b>Correct Answer:</b> {getOptionText(q, q.answerKey)}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
+  }
 
   // ---------------- Landing Screen --------------------
   if (!quizStarted)
@@ -508,14 +682,15 @@ export default function QuizPage() {
           <div style={styles.titleWrap}>
             <div style={styles.brand}>HERO STEELS LIMITED</div>
             <h1 style={styles.header}>📝 {quizTitle}</h1>
+
             <div style={styles.subHeader}>
               Please enter your details carefully — your submission will be recorded.
             </div>
 
             <div style={styles.badgeRow}>
-              <div style={styles.badge}>⏱ Duration: 2 Minutes</div>
-              <div style={styles.badgeBlue}>✅ Questions: {questions.length}</div>
-              <div style={styles.badge}>📌 Total Marks: {questions.length}</div>
+              <div style={styles.badge}>⏱ Duration: {QUIZ_DURATION_MIN} Minutes</div>
+              <div style={styles.badgeBlue}>✅ Questions: {TOTAL_QUESTIONS_DISPLAY}</div>
+              <div style={styles.badge}>📌 Total Marks: {TOTAL_MARKS_DISPLAY}</div>
             </div>
           </div>
 
@@ -523,7 +698,7 @@ export default function QuizPage() {
             <div style={styles.noticeTitle}>⚠️ Important Instructions</div>
             <ul style={styles.rules}>
               <li>
-                This quiz is <b>2 minutes</b> long — the timer starts immediately after you click Start.
+                This quiz is <b>{QUIZ_DURATION_MIN} minutes</b> long — the timer starts immediately after you click Start.
               </li>
               <li>
                 Each question has <b>only one correct answer</b>.
@@ -592,12 +767,16 @@ export default function QuizPage() {
       <div style={styles.container}>
         <div style={styles.titleWrap}>
           <div style={styles.brand}>HERO STEELS LIMITED</div>
+
+          {/* ✅ Title below HERO STEELS LIMITED */}
           <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
-            {quizTitle}
+            📝 {quizTitle}
           </h2>
+
           <div style={styles.badgeRow}>
-            <div style={styles.badgeBlue}>📄 Total Marks: {questions.length}</div>
-            <div style={styles.badge}>⏱ Duration: 2 Minutes</div>
+            <div style={styles.badgeBlue}>📄 Total Marks: {TOTAL_MARKS_DISPLAY}</div>
+            <div style={styles.badge}>⏱ Duration: {QUIZ_DURATION_MIN} Minutes</div>
+            <div style={styles.badgeBlue}>✅ Questions: {TOTAL_QUESTIONS_DISPLAY}</div>
           </div>
         </div>
 
@@ -605,21 +784,27 @@ export default function QuizPage() {
           <div key={q.id} style={styles.question}>
             <p style={styles.qTitle}>
               <b>
-                {q.id}. {q.q}
+                {q.id}. {q.q_en}
               </b>
+              <br />
+              <span style={{ color: "#566573", fontWeight: 700 }}>{q.q_hi}</span>
             </p>
 
             {q.options.map((opt) => (
-              <label key={opt} style={styles.option}>
+              <label key={opt.key} style={styles.option}>
                 <input
                   type="radio"
                   name={String(q.id)}
-                  value={opt}
-                  checked={answers[q.id] === opt}
-                  onChange={() => handleChange(q.id, opt)}
+                  value={opt.key}
+                  checked={answers[q.id] === opt.key}
+                  onChange={() => handleChange(q.id, opt.key)}
                   style={styles.radio}
                 />
-                <span style={{ fontSize: isMobile ? "14px" : "15px" }}>{opt}</span>
+                <span style={{ fontSize: isMobile ? "14px" : "15px" }}>
+                  <b>{opt.key}.</b> {opt.en}
+                  <br />
+                  <span style={{ color: "#566573", fontWeight: 700 }}>{opt.hi}</span>
+                </span>
               </label>
             ))}
           </div>

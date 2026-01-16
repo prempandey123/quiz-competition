@@ -20,6 +20,9 @@ export default function Results() {
   const [loading, setLoading] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState(null);
 
+  // ✅ toggle for questions view (inside modal)
+  const [showQuestions, setShowQuestions] = useState(false);
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -132,6 +135,67 @@ export default function Results() {
 
     const attempted = Object.keys(user.answers || {}).length;
 
+    const hasQuestions = Array.isArray(user.questions) && user.questions.length > 0;
+
+    // ✅ supports both old (q.answer + string options) and new (q.answerKey + object options)
+    const questionsHtml = hasQuestions
+      ? user.questions
+          .map((q) => {
+            const chosen = user.answers?.[q.id];
+
+            const isNewFormat =
+              Array.isArray(q.options) && typeof q.options?.[0] === "object";
+
+            const correctKey = q.answerKey || null;
+
+            const renderOptText = (opt) => {
+              if (typeof opt === "string") return opt; // old
+              return `${opt.key}. ${opt.en} / ${opt.hi}`; // new
+            };
+
+            const optKey = (opt) => {
+              if (typeof opt === "string") return opt;
+              return opt.key;
+            };
+
+            const opts = (q.options || [])
+              .map((opt) => {
+                const key = optKey(opt);
+
+                const isCorrect = isNewFormat ? correctKey === key : q.answer === opt;
+                const isChosen = chosen === key;
+
+                return `<li style="margin:6px 0;">
+                  ${renderOptText(opt)}
+                  ${isCorrect ? " ✅ <b>(Correct)</b>" : ""}
+                  ${isChosen ? " <b>(Your Answer)</b>" : ""}
+                </li>`;
+              })
+              .join("");
+
+            const questionText = q.q || q.q_en || "";
+            const hindiText = q.q_hi ? `<div style="opacity:.8; margin-top:4px;">${q.q_hi}</div>` : "";
+
+            return `
+              <div style="border:1px solid #ddd; padding:12px; border-radius:10px; margin:10px 0;">
+                <p style="margin:0 0 8px 0;"><b>Q${q.id}:</b> ${questionText}${hindiText}</p>
+                <ol style="margin:0 0 8px 18px; padding:0;">
+                  ${opts}
+                </ol>
+                <p style="margin:0;"><b>Your Answer:</b> ${chosen || "Not Answered"}</p>
+              </div>
+            `;
+          })
+          .join("")
+      : `
+        <h3 style="margin-top:16px;">Answers:</h3>
+        <ul>
+          ${Object.entries(user.answers || {})
+            .map(([id, ans]) => `<li><b>Q${id}:</b> ${ans}</li>`)
+            .join("")}
+        </ul>
+      `;
+
     win.document.write(`
       <html>
       <head>
@@ -140,7 +204,6 @@ export default function Results() {
           body { font-family: Arial; padding: 20px; line-height: 1.6; }
           h2 { margin-bottom: 10px; }
           .box { border: 1px solid #ddd; padding: 14px; border-radius: 10px; }
-          li { margin: 6px 0; }
         </style>
       </head>
       <body>
@@ -155,12 +218,8 @@ export default function Results() {
           <p><b>Submitted At:</b> ${date}</p>
         </div>
 
-        <h3 style="margin-top:16px;">Answers:</h3>
-        <ul>
-          ${Object.entries(user.answers || {})
-            .map(([id, ans]) => `<li><b>Q${id}:</b> ${ans}</li>`)
-            .join("")}
-        </ul>
+        <h3 style="margin-top:16px;">${hasQuestions ? "Questions & Answers" : ""}</h3>
+        ${questionsHtml}
       </body>
       </html>
     `);
@@ -247,7 +306,7 @@ export default function Results() {
       setResults([]);
       setSelectedAnswers(null);
 
-      // refresh titles (optional but good)
+      // refresh titles
       await fetchQuizTitles();
 
       alert(`Deleted ${totalDeleted} results for "${cleanedTitle}".`);
@@ -431,9 +490,23 @@ export default function Results() {
                         <div style={styles.btnRow}>
                           <button
                             style={styles.viewBtn}
-                            onClick={() => setSelectedAnswers(r)}
+                            onClick={() => {
+                              setSelectedAnswers(r);
+                              setShowQuestions(false);
+                            }}
                           >
                             View
+                          </button>
+
+                          {/* ✅ NEW: Questions button (only opens modal questions) */}
+                          <button
+                            style={styles.questionsBtn}
+                            onClick={() => {
+                              setSelectedAnswers(r);
+                              setShowQuestions(true);
+                            }}
+                          >
+                            ❓ Questions
                           </button>
 
                           <button
@@ -447,7 +520,8 @@ export default function Results() {
                             style={{
                               ...styles.deleteBtn,
                               opacity: deletingId === r.id ? 0.6 : 1,
-                              cursor: deletingId === r.id ? "not-allowed" : "pointer",
+                              cursor:
+                                deletingId === r.id ? "not-allowed" : "pointer",
                             }}
                             onClick={() => handleDeleteSingle(r)}
                             disabled={deletingId === r.id}
@@ -471,7 +545,9 @@ export default function Results() {
             <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
               <div style={styles.modalHeader}>
                 <div>
-                  <h2 style={{ margin: 0 }}>User Answers</h2>
+                  <h2 style={{ margin: 0 }}>
+                    {showQuestions ? "Questions & Answers" : "User Answers"}
+                  </h2>
                   <p style={styles.muted}>
                     {selectedAnswers.name} • {selectedAnswers.employeeId}
                   </p>
@@ -495,24 +571,118 @@ export default function Results() {
                   <div style={styles.metaCard}>
                     <div style={styles.metaLabel}>Marks</div>
                     <div style={styles.metaValue}>
-                      {selectedAnswers.marks} / {Object.keys(selectedAnswers.answers || {}).length} / 20
+                      {selectedAnswers.marks} /{" "}
+                      {Object.keys(selectedAnswers.answers || {}).length} / 20
                     </div>
                   </div>
                 </div>
 
-                <div style={styles.answersBox}>
-                  <h3 style={{ marginTop: 0 }}>Answers</h3>
-                  <ul style={styles.answerList}>
-                    {Object.entries(selectedAnswers.answers || {}).map(([q, ans]) => (
-                      <li key={q} style={styles.answerItem}>
-                        <span style={styles.qBadge}>Q{q}</span>
-                        <span>{ans}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {/* Answers list */}
+                {!showQuestions && (
+                  <div style={styles.answersBox}>
+                    <h3 style={{ marginTop: 0 }}>Answers</h3>
+                    <ul style={styles.answerList}>
+                      {Object.entries(selectedAnswers.answers || {}).map(([q, ans]) => (
+                        <li key={q} style={styles.answerItem}>
+                          <span style={styles.qBadge}>Q{q}</span>
+                          <span>{ans}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* ✅ Questions view */}
+                {showQuestions && (
+                  <div style={{ ...styles.answersBox, marginTop: "0px" }}>
+                    <h3 style={{ marginTop: 0 }}>Questions & Answers</h3>
+
+                    {Array.isArray(selectedAnswers.questions) ? (
+                      selectedAnswers.questions.map((q) => {
+                        const chosen = selectedAnswers.answers?.[q.id];
+
+                        // supports old format and new format
+                        const isNewFormat =
+                          Array.isArray(q.options) && typeof q.options?.[0] === "object";
+
+                        const correctKey = q.answerKey || null;
+
+                        const renderOptText = (opt) => {
+                          if (typeof opt === "string") return opt;
+                          return `${opt.key}. ${opt.en} / ${opt.hi}`;
+                        };
+
+                        const optKey = (opt) => {
+                          if (typeof opt === "string") return opt;
+                          return opt.key;
+                        };
+
+                        const questionText = q.q || q.q_en || "";
+                        const hindiText = q.q_hi || "";
+
+                        return (
+                          <div key={q.id} style={styles.qBlock}>
+                            <div style={styles.qLine}>
+                              <span style={styles.qBadge}>Q{q.id}</span>
+                              <span style={{ fontWeight: 800 }}>
+                                {questionText}
+                                {hindiText ? (
+                                  <div style={{ marginTop: 4, color: "rgba(229,231,235,0.7)" }}>
+                                    {hindiText}
+                                  </div>
+                                ) : null}
+                              </span>
+                            </div>
+
+                            <div style={{ marginTop: 8 }}>
+                              {(q.options || []).map((opt) => {
+                                const key = optKey(opt);
+                                const isChosen = chosen === key;
+
+                                const isCorrect = isNewFormat
+                                  ? correctKey === key
+                                  : q.answer === opt;
+
+                                return (
+                                  <div
+                                    key={key}
+                                    style={{
+                                      ...styles.optLine,
+                                      ...(isCorrect ? styles.optCorrect : {}),
+                                      ...(isChosen ? styles.optChosen : {}),
+                                    }}
+                                  >
+                                    {renderOptText(opt)}
+                                    {isCorrect ? " ✅" : ""}
+                                    {isChosen && !isCorrect ? " (Your answer)" : ""}
+                                    {isChosen && isCorrect ? " (Your answer)" : ""}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            <div style={styles.answerMeta}>
+                              <b>Your Answer:</b> {chosen || "Not Answered"}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p style={styles.muted}>
+                        Questions not found for this attempt (old records).
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div style={styles.modalFooter}>
+                  <button
+                    style={styles.secondaryBtn}
+                    onClick={() => setShowQuestions((s) => !s)}
+                  >
+                    {showQuestions ? "Hide Questions" : "Show Questions"}
+                  </button>
+
                   <button
                     style={styles.printBtn}
                     onClick={() => handlePrintSingle(selectedAnswers)}
@@ -524,7 +694,10 @@ export default function Results() {
                     style={{
                       ...styles.deleteBtn,
                       opacity: deletingId === selectedAnswers.id ? 0.6 : 1,
-                      cursor: deletingId === selectedAnswers.id ? "not-allowed" : "pointer",
+                      cursor:
+                        deletingId === selectedAnswers.id
+                          ? "not-allowed"
+                          : "pointer",
                     }}
                     onClick={() => handleDeleteSingle(selectedAnswers)}
                     disabled={deletingId === selectedAnswers.id}
@@ -532,7 +705,10 @@ export default function Results() {
                     {deletingId === selectedAnswers.id ? "Deleting..." : "🗑 Delete Result"}
                   </button>
 
-                  <button style={styles.secondaryBtn} onClick={() => setSelectedAnswers(null)}>
+                  <button
+                    style={styles.secondaryBtn}
+                    onClick={() => setSelectedAnswers(null)}
+                  >
                     Close
                   </button>
                 </div>
@@ -551,10 +727,57 @@ export default function Results() {
 
 // -------------------- STYLES ------------------------
 const styles = {
+  // Login
+  loginContainer: {
+    minHeight: "100vh",
+    background:
+      "radial-gradient(circle at 10% 10%, #0f172a 0%, #111827 35%, #0b1220 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "24px",
+    color: "#e5e7eb",
+  },
+  loginCard: {
+    width: "min(520px, 100%)",
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: "18px",
+    padding: "18px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+    backdropFilter: "blur(10px)",
+  },
+  brandRow: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" },
+  brandLogo: {
+    width: "44px",
+    height: "44px",
+    borderRadius: "14px",
+    display: "grid",
+    placeItems: "center",
+    fontWeight: 900,
+    color: "#fff",
+    background: "linear-gradient(135deg, rgba(16,185,129,0.9), rgba(59,130,246,0.8))",
+    border: "1px solid rgba(255,255,255,0.20)",
+  },
+  subText: { margin: "4px 0 0 0", color: "rgba(229,231,235,0.75)", fontSize: "13px" },
+  passwordInput: {
+    width: "100%",
+    padding: "12px 12px",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.12)",
+    outline: "none",
+    background: "rgba(17,24,39,0.55)",
+    color: "#e5e7eb",
+    marginTop: "10px",
+    marginBottom: "10px",
+  },
+  errorText: { color: "#fecaca", marginTop: "10px", fontWeight: 800 },
+
   // Page
   page: {
     minHeight: "100vh",
-    background: "radial-gradient(circle at 10% 10%, #0f172a 0%, #111827 35%, #0b1220 100%)",
+    background:
+      "radial-gradient(circle at 10% 10%, #0f172a 0%, #111827 35%, #0b1220 100%)",
     padding: "26px",
     color: "#e5e7eb",
   },
@@ -663,9 +886,7 @@ const styles = {
     backdropFilter: "blur(10px)",
     color: "rgba(255,255,255,0.92)",
   },
-  tr: {
-    background: "rgba(255,255,255,0.03)",
-  },
+  tr: { background: "rgba(255,255,255,0.03)" },
   td: {
     padding: "12px",
     borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -718,6 +939,15 @@ const styles = {
     cursor: "pointer",
     fontWeight: 800,
   },
+  questionsBtn: {
+    padding: "8px 10px",
+    borderRadius: "10px",
+    border: "1px solid rgba(59,130,246,0.35)",
+    background: "rgba(59,130,246,0.18)",
+    color: "#dbeafe",
+    cursor: "pointer",
+    fontWeight: 900,
+  },
   printBtn: {
     padding: "8px 10px",
     borderRadius: "10px",
@@ -738,10 +968,7 @@ const styles = {
   },
 
   // Empty
-  emptyState: {
-    padding: "34px 10px",
-    textAlign: "center",
-  },
+  emptyState: { padding: "34px 10px", textAlign: "center" },
   emptyIcon: {
     fontSize: "34px",
     width: "60px",
@@ -850,51 +1077,41 @@ const styles = {
     marginTop: "14px",
   },
 
-  // Login
-  loginContainer: {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "radial-gradient(circle at 20% 10%, #111827, #0b1220)",
-    padding: "16px",
-  },
-  loginCard: {
-    width: "min(420px, 100%)",
-    background: "rgba(255,255,255,0.92)",
-    padding: "26px",
-    borderRadius: "18px",
-    boxShadow: "0 18px 60px rgba(0,0,0,0.35)",
-    border: "1px solid rgba(0,0,0,0.08)",
-  },
-  brandRow: { display: "flex", gap: "12px", alignItems: "center", marginBottom: "14px" },
-  brandLogo: {
-    width: "46px",
-    height: "46px",
-    borderRadius: "16px",
-    background: "linear-gradient(135deg, #2563eb, #10b981)",
-    color: "#fff",
-    display: "grid",
-    placeItems: "center",
-    fontWeight: 900,
-    letterSpacing: "0.5px",
-  },
-  subText: { margin: "4px 0 0 0", color: "rgba(0,0,0,0.55)", fontSize: "13px" },
-  passwordInput: {
+  // Questions rendering
+  qBlock: {
     padding: "12px",
-    width: "100%",
-    margin: "12px 0",
-    borderRadius: "12px",
-    border: "1px solid rgba(0,0,0,0.18)",
-    outline: "none",
-    fontSize: "14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(0,0,0,0.10)",
+    marginBottom: "10px",
   },
-  errorText: { color: "#dc2626", marginTop: "10px", fontWeight: 700 },
+  qLine: { display: "flex", gap: "10px", alignItems: "flex-start" },
+  optLine: {
+    padding: "8px 10px",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.08)",
+    background: "rgba(255,255,255,0.04)",
+    marginBottom: "8px",
+    fontSize: "13px",
+  },
+  optCorrect: {
+    border: "1px solid rgba(34,197,94,0.35)",
+    background: "rgba(34,197,94,0.12)",
+  },
+  optChosen: {
+    border: "1px solid rgba(251,191,36,0.35)",
+    background: "rgba(251,191,36,0.10)",
+  },
+  answerMeta: {
+    marginTop: 8,
+    fontSize: "13px",
+    color: "rgba(229,231,235,0.92)",
+  },
 
   footerNote: {
     maxWidth: "1250px",
-    margin: "10px auto 0 auto",
-    color: "rgba(229,231,235,0.6)",
+    margin: "14px auto 0 auto",
+    color: "rgba(229,231,235,0.65)",
     fontSize: "12px",
     textAlign: "center",
   },
