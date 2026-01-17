@@ -17,16 +17,12 @@ export default function QuizPage() {
     designation: "",
   });
 
-  // ✅ Updated Quiz Title
-  const quizTitle = "Maintenance, Optimization and CRM Operations";
+  // ✅ Quiz Title
+  const quizTitle = "Road Safety Awareness Quiz";
 
-  // ✅ Duration: 20 Minutes
+  // ✅ Timing 5 Minutes (as you asked)
   const QUIZ_DURATION_MIN = 5;
   const QUIZ_DURATION_SEC = QUIZ_DURATION_MIN * 60;
-
-  // ✅ Total Questions / Marks: 20
-  const TOTAL_QUESTIONS_DISPLAY = 20;
-  const TOTAL_MARKS_DISPLAY = 20;
 
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
@@ -34,9 +30,6 @@ export default function QuizPage() {
   const [marks, setMarks] = useState(null);
   const [timeLeft, setTimeLeft] = useState(QUIZ_DURATION_SEC);
   const [loading, setLoading] = useState(false);
-
-  // ✅ Extra button after submission
-  const [showReview, setShowReview] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -48,252 +41,258 @@ export default function QuizPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ✅ 20 Questions (Hindi + English) using answerKey (A/B/C/D)
+  // ✅ Questions from your Excel (Road Safety.xlsx)
   const questions = useMemo(
     () => [
       {
         id: 1,
-        q_en: "What is the first stage in the failure development process?",
-        q_hi: "विफलता (Failure) के विकास की पहली अवस्था क्या होती है?",
+        q_en: "What is the correct stopping distance at 60 mph on a dry road?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Wear", hi: "घिसावट" },
-          { key: "B", en: "Breakdown", hi: "खराबी / ब्रेकडाउन" },
-          { key: "C", en: "Overheating", hi: "अधिक गर्म होना" },
-          { key: "D", en: "Normal operation", hi: "सामान्य संचालन" },
+          { key: "A", en: "60 feet", hi: "" },
+          { key: "B", en: "75 feet", hi: "" },
+          { key: "C", en: "120 feet", hi: "" },
+          { key: "D", en: "240 feet", hi: "" },
         ],
-        answerKey: "D",
+        answerKey: "C",
       },
       {
         id: 2,
-        q_en: "Pickling surface stains usually occur due to:",
-        q_hi: "पिक्लिंग में सतह पर दाग आमतौर पर किस कारण से होते हैं?",
+        q_en:
+          "What should a driver do when approaching a pedestrian cross...affic lights where pedestrians are already waiting to cross?**",
+        q_hi: "",
         options: [
-          { key: "A", en: "Operator mistake", hi: "ऑपरेटर की गलती" },
-          { key: "B", en: "Sensor fault", hi: "सेंसर की खराबी" },
-          { key: "C", en: "Improper acid circulation", hi: "एसिड का सही प्रवाह न होना" },
-          { key: "D", en: "Motor failure", hi: "मोटर की खराबी" },
-        ],
-        answerKey: "C",
-      },
-      {
-        id: 3,
-        q_en: "Drive trips mostly indicate:",
-        q_hi: "ड्राइव ट्रिप होने का सामान्य संकेत क्या होता है?",
-        options: [
-          { key: "A", en: "Software bug", hi: "सॉफ्टवेयर त्रुटि" },
-          { key: "B", en: "Cable problem", hi: "केबल की समस्या" },
-          { key: "C", en: "Mechanical overload", hi: "यांत्रिक ओवरलोड" },
-          { key: "D", en: "PLC error", hi: "PLC त्रुटि" },
-        ],
-        answerKey: "C",
-      },
-      {
-        id: 4,
-        q_en: "Which maintenance type follows calendar or running hours?",
-        q_hi: "कौन-सा मेंटेनेंस कैलेंडर या रनिंग आवर्स के अनुसार किया जाता है?",
-        options: [
-          { key: "A", en: "Predictive", hi: "प्रिडिक्टिव" },
-          { key: "B", en: "Preventive", hi: "प्रिवेंटिव" },
-          { key: "C", en: "Proactive", hi: "प्रोएक्टिव" },
-          { key: "D", en: "Breakdown", hi: "ब्रेकडाउन" },
+          { key: "A", en: "Honk the horn to alert pedestrians", hi: "" },
+          { key: "B", en: "Slow down and prepare to stop if necessary", hi: "" },
+          { key: "C", en: "Keep driving at the same speed and ignore pedestrians", hi: "" },
+          { key: "D", en: "Speed up to avoid blocking the crossing", hi: "" },
         ],
         answerKey: "B",
       },
       {
-        id: 5,
-        q_en: "Predictive maintenance mainly depends on:",
-        q_hi: "प्रिडिक्टिव मेंटेनेंस मुख्य रूप से किस पर आधारित होता है?",
+        id: 3,
+        q_en: "When driving in foggy conditions, which lights should you use?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Technician experience", hi: "तकनीशियन का अनुभव" },
-          { key: "B", en: "OEM manuals", hi: "OEM मैनुअल" },
-          { key: "C", en: "Machine condition data", hi: "मशीन की स्थिति का डेटा" },
-          { key: "D", en: "Production plan", hi: "उत्पादन योजना" },
+          { key: "A", en: "High beam headlights", hi: "" },
+          { key: "B", en: "Low beam headlights or fog lights", hi: "" },
+          { key: "C", en: "Parking lights", hi: "" },
+          { key: "D", en: "Hazard lights", hi: "" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 4,
+        q_en: "What is the “Two-Second Rule” in driving?",
+        q_hi: "",
+        options: [
+          { key: "A", en: "The minimum distance you should stay behind another vehicle", hi: "" },
+          { key: "B", en: "The time it takes to check for blind spots before changing lanes", hi: "" },
+          { key: "C", en: "The length of time you should signal before turning", hi: "" },
+          { key: "D", en: "The minimum time a pedestrian has to wait before crossing the road", hi: "" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 5,
+        q_en:
+          "What is the effect of alcohol on your driving abilities, even if you’re under the legal limit?",
+        q_hi: "",
+        options: [
+          { key: "A", en: "It has no effect on driving ability", hi: "" },
+          { key: "B", en: "It improves reaction times", hi: "" },
+          { key: "C", en: "It slows your reaction times and impairs judgment", hi: "" },
+          { key: "D", en: "It only affects your ability to judge distance", hi: "" },
         ],
         answerKey: "C",
       },
       {
         id: 6,
-        q_en: "“Machines whisper before they scream” means:",
-        q_hi: "“मशीनें खराब होने से पहले संकेत देती हैं” का क्या अर्थ है?",
+        q_en: "What should you do if your vehicle starts skidding on a wet road?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Noise increases suddenly", hi: "अचानक शोर बढ़ जाता है" },
-          { key: "B", en: "Failure happens without warning", hi: "बिना चेतावनी के खराबी होती है" },
-          { key: "C", en: "Early symptoms appear before failure", hi: "खराबी से पहले शुरुआती लक्षण दिखाई देते हैं" },
-          { key: "D", en: "Only sensors detect problems", hi: "केवल सेंसर ही समस्या पहचानते हैं" },
-        ],
-        answerKey: "C",
-      },
-      {
-        id: 7,
-        q_en: "Which KPI shows equipment reliability?",
-        q_hi: "कौन-सा KPI मशीन की विश्वसनीयता दिखाता है?",
-        options: [
-          { key: "A", en: "MTTR", hi: "MTTR" },
-          { key: "B", en: "Scrap rate", hi: "स्क्रैप रेट" },
-          { key: "C", en: "OEE", hi: "OEE" },
-          { key: "D", en: "MTBF", hi: "MTBF" },
-        ],
-        answerKey: "D",
-      },
-      {
-        id: 8,
-        q_en: "Which maintenance type eliminates root causes?",
-        q_hi: "कौन-सा मेंटेनेंस मूल कारणों को खत्म करता है?",
-        options: [
-          { key: "A", en: "Preventive", hi: "प्रिवेंटिव" },
-          { key: "B", en: "Breakdown", hi: "ब्रेकडाउन" },
-          { key: "C", en: "Proactive", hi: "प्रोएक्टिव" },
-          { key: "D", en: "Predictive", hi: "प्रिडिक्टिव" },
-        ],
-        answerKey: "C",
-      },
-      {
-        id: 9,
-        q_en: "Which maintenance cost is highest?",
-        q_hi: "कौन-सा मेंटेनेंस खर्च सबसे ज्यादा होता है?",
-        options: [
-          { key: "A", en: "Inspection cost", hi: "निरीक्षण खर्च" },
-          { key: "B", en: "Planned maintenance cost", hi: "नियोजित मेंटेनेंस खर्च" },
-          { key: "C", en: "Emergency breakdown cost", hi: "आपातकालीन ब्रेकडाउन खर्च" },
-          { key: "D", en: "Lubrication cost", hi: "लुब्रिकेशन खर्च" },
-        ],
-        answerKey: "C",
-      },
-      {
-        id: 10,
-        q_en: "What happens when early symptoms are ignored?",
-        q_hi: "शुरुआती लक्षणों को नजरअंदाज करने पर क्या होता है?",
-        options: [
-          { key: "A", en: "Machine improves", hi: "मशीन बेहतर हो जाती है" },
-          { key: "B", en: "Condition worsens", hi: "स्थिति और खराब हो जाती है" },
-          { key: "C", en: "Cost reduces", hi: "खर्च कम हो जाता है" },
-          { key: "D", en: "No impact", hi: "कोई प्रभाव नहीं" },
+          { key: "A", en: "Brake hard and steer sharply", hi: "" },
+          { key: "B", en: "Steer in the direction you want to go and ease off the accelerator", hi: "" },
+          { key: "C", en: "Accelerate quickly to regain control", hi: "" },
+          { key: "D", en: "Turn off the engine immediately", hi: "" },
         ],
         answerKey: "B",
       },
       {
-        id: 11,
-        q_en: "Which KPI shows repair speed?",
-        q_hi: "कौन-सा KPI मरम्मत की गति (Repair Speed) दिखाता है?",
+        id: 7,
+        q_en: "What is the main purpose of road signs?",
+        q_hi: "",
         options: [
-          { key: "A", en: "MTBF", hi: "MTBF" },
-          { key: "B", en: "Scrap", hi: "स्क्रैप" },
-          { key: "C", en: "MTTR", hi: "MTTR" },
-          { key: "D", en: "OEE", hi: "OEE" },
+          { key: "A", en: "To decorate the road", hi: "" },
+          { key: "B", en: "To provide information and regulate traffic", hi: "" },
+          { key: "C", en: "To confuse drivers", hi: "" },
+          { key: "D", en: "To indicate the location of buildings", hi: "" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 8,
+        q_en: "Which of the following is the safest way to use a mobile phone while driving?",
+        q_hi: "",
+        options: [
+          { key: "A", en: "Texting with one hand", hi: "" },
+          { key: "B", en: "Using a hands-free device", hi: "" },
+          { key: "C", en: "Holding the phone and talking", hi: "" },
+          { key: "D", en: "Checking notifications quickly", hi: "" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 9,
+        q_en: "What should you do at a yellow traffic light?",
+        q_hi: "",
+        options: [
+          { key: "A", en: "Speed up to cross quickly", hi: "" },
+          { key: "B", en: "Stop if it is safe to do so", hi: "" },
+          { key: "C", en: "Ignore it and proceed", hi: "" },
+          { key: "D", en: "Honk and move forward", hi: "" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 10,
+        q_en: "What is the most common cause of road accidents?",
+        q_hi: "",
+        options: [
+          { key: "A", en: "Road conditions", hi: "" },
+          { key: "B", en: "Vehicle defects", hi: "" },
+          { key: "C", en: "Human error", hi: "" },
+          { key: "D", en: "Weather conditions", hi: "" },
         ],
         answerKey: "C",
       },
       {
-        id: 12,
-        q_en: "Digital maintenance reduces:",
-        q_hi: "डिजिटल मेंटेनेंस क्या कम करता है?",
+        id: 11,
+        q_en: "Why is wearing a seat belt important?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Sensors", hi: "सेंसर" },
-          { key: "B", en: "Data", hi: "डेटा" },
-          { key: "C", en: "Emergency breakdowns", hi: "आपातकालीन ब्रेकडाउन" },
-          { key: "D", en: "Training", hi: "प्रशिक्षण" },
+          { key: "A", en: "It helps you drive faster", hi: "" },
+          { key: "B", en: "It reduces the risk of injury during an accident", hi: "" },
+          { key: "C", en: "It makes driving comfortable", hi: "" },
+          { key: "D", en: "It is only required on highways", hi: "" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 12,
+        q_en: "What should you do when you see an ambulance with siren on behind you?",
+        q_hi: "",
+        options: [
+          { key: "A", en: "Speed up", hi: "" },
+          { key: "B", en: "Stop immediately in the middle of the road", hi: "" },
+          { key: "C", en: "Move to the side and give way", hi: "" },
+          { key: "D", en: "Ignore and continue driving", hi: "" },
         ],
         answerKey: "C",
       },
       {
         id: 13,
-        q_en: "Which tool identifies top downtime causes?",
-        q_hi: "सबसे ज्यादा डाउनटाइम के कारण पहचानने के लिए कौन-सा टूल उपयोग होता है?",
+        q_en: "What is defensive driving?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Control chart", hi: "कंट्रोल चार्ट" },
-          { key: "B", en: "Pareto analysis", hi: "पारेतो विश्लेषण" },
-          { key: "C", en: "Histogram", hi: "हिस्टोग्राम" },
-          { key: "D", en: "Scatter diagram", hi: "स्कैटर डायग्राम" },
+          { key: "A", en: "Driving aggressively to protect your position", hi: "" },
+          { key: "B", en: "Driving while anticipating potential hazards and avoiding accidents", hi: "" },
+          { key: "C", en: "Driving only at night", hi: "" },
+          { key: "D", en: "Driving only in slow lanes", hi: "" },
         ],
         answerKey: "B",
       },
       {
         id: 14,
-        q_en: "Roll misalignment mainly causes:",
-        q_hi: "रोल मिसअलाइनमेंट मुख्य रूप से किस समस्या का कारण बनता है?",
+        q_en: "What does a red traffic light mean?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Oil leakage", hi: "तेल का रिसाव" },
-          { key: "B", en: "Sensor failure", hi: "सेंसर खराबी" },
-          { key: "C", en: "Shape deviation", hi: "आकार में विचलन" },
-          { key: "D", en: "Motor overheating", hi: "मोटर का अधिक गर्म होना" },
+          { key: "A", en: "Go", hi: "" },
+          { key: "B", en: "Stop", hi: "" },
+          { key: "C", en: "Proceed with caution", hi: "" },
+          { key: "D", en: "Speed up", hi: "" },
         ],
-        answerKey: "C",
+        answerKey: "B",
       },
       {
         id: 15,
-        q_en: "Which symptom indicates bearing deterioration?",
-        q_hi: "कौन-सा लक्षण बेयरिंग की खराबी दर्शाता है?",
+        q_en: "What should you do before changing lanes?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Smoke", hi: "धुआं" },
-          { key: "B", en: "Vibration", hi: "वाइब्रेशन" },
-          { key: "C", en: "Light flicker", hi: "लाइट का झपकना" },
-          { key: "D", en: "Color change", hi: "रंग बदलना" },
+          { key: "A", en: "Honk continuously", hi: "" },
+          { key: "B", en: "Check mirrors and blind spots, and use indicators", hi: "" },
+          { key: "C", en: "Accelerate immediately", hi: "" },
+          { key: "D", en: "Brake suddenly", hi: "" },
         ],
         answerKey: "B",
       },
       {
         id: 16,
-        q_en: "Which method finds root cause?",
-        q_hi: "कौन-सी विधि मूल कारण (Root Cause) ढूंढती है?",
+        q_en: "What is the safest speed while driving near schools?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Reset alarm", hi: "अलार्म रीसेट करना" },
-          { key: "B", en: "Replace part", hi: "पार्ट बदलना" },
-          { key: "C", en: "5-Why analysis", hi: "5-व्हाई विश्लेषण" },
-          { key: "D", en: "Bypass logic", hi: "लॉजिक बायपास करना" },
+          { key: "A", en: "High speed", hi: "" },
+          { key: "B", en: "Moderate speed", hi: "" },
+          { key: "C", en: "Low speed and as per signboards", hi: "" },
+          { key: "D", en: "Any speed is fine", hi: "" },
         ],
         answerKey: "C",
       },
       {
         id: 17,
-        q_en: "Fault isolation means:",
-        q_hi: "फॉल्ट आइसोलेशन का अर्थ क्या है?",
+        q_en: "What should you do if you feel sleepy while driving?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Trial and error", hi: "ट्रायल एंड एरर" },
-          { key: "B", en: "Random replacement", hi: "बिना सोचे पार्ट बदलना" },
-          { key: "C", en: "Logical step-by-step checking", hi: "तर्कसंगत क्रमवार जांच" },
-          { key: "D", en: "Guessing", hi: "अनुमान लगाना" },
+          { key: "A", en: "Open window and continue", hi: "" },
+          { key: "B", en: "Drink coffee and drive faster", hi: "" },
+          { key: "C", en: "Stop at a safe place and take rest", hi: "" },
+          { key: "D", en: "Turn on loud music", hi: "" },
         ],
         answerKey: "C",
       },
       {
         id: 18,
-        q_en: "Critical spare means:",
-        q_hi: "क्रिटिकल स्पेयर का क्या अर्थ है?",
+        q_en: "Which is a safe following distance on highways?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Long lead time & high impact spare", hi: "लंबा लीड टाइम और ज्यादा प्रभाव वाला स्पेयर" },
-          { key: "B", en: "High usage spare", hi: "ज्यादा उपयोग होने वाला स्पेयर" },
-          { key: "C", en: "Cheap spare", hi: "सस्ता स्पेयर" },
-          { key: "D", en: "Local spare", hi: "स्थानीय स्पेयर" },
+          { key: "A", en: "One-second gap", hi: "" },
+          { key: "B", en: "Two-second gap (minimum)", hi: "" },
+          { key: "C", en: "Half-second gap", hi: "" },
+          { key: "D", en: "No gap needed", hi: "" },
         ],
-        answerKey: "A",
+        answerKey: "B",
       },
       {
         id: 19,
-        q_en: "ABC analysis is based on:",
-        q_hi: "ABC विश्लेषण किस आधार पर किया जाता है?",
+        q_en: "What is the first thing you should do in case of an accident?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Lead time", hi: "लीड टाइम" },
-          { key: "B", en: "Consumption", hi: "खपत" },
-          { key: "C", en: "Cost value", hi: "लागत मूल्य" },
-          { key: "D", en: "Vendor rating", hi: "वेंडर रेटिंग" },
+          { key: "A", en: "Run away", hi: "" },
+          { key: "B", en: "Ensure safety, call emergency services, and provide help if possible", hi: "" },
+          { key: "C", en: "Argue with other driver", hi: "" },
+          { key: "D", en: "Continue driving", hi: "" },
         ],
-        answerKey: "C",
+        answerKey: "B",
       },
       {
         id: 20,
-        q_en: "First step in excellence roadmap:",
-        q_hi: "एक्सीलेंस रोडमैप का पहला चरण क्या है?",
+        q_en: "What is the correct way to overtake another vehicle?",
+        q_hi: "",
         options: [
-          { key: "A", en: "Stabilize", hi: "स्थिर करना" },
-          { key: "B", en: "Optimize", hi: "अनुकूलन करना" },
-          { key: "C", en: "Digitize", hi: "डिजिटल बनाना" },
-          { key: "D", en: "Automate", hi: "स्वचालन करना" },
+          { key: "A", en: "Overtake from the left without signal", hi: "" },
+          { key: "B", en: "Overtake from the right when safe and use indicator", hi: "" },
+          { key: "C", en: "Overtake at blind turns", hi: "" },
+          { key: "D", en: "Overtake near zebra crossings", hi: "" },
         ],
-        answerKey: "A",
+        answerKey: "B",
       },
     ],
     []
   );
+
+  // ✅ Auto display counts
+  const TOTAL_QUESTIONS_DISPLAY = questions.length;
+  const TOTAL_MARKS_DISPLAY = questions.length;
 
   // ---------------- Timer --------------------
   useEffect(() => {
@@ -580,28 +579,6 @@ export default function QuizPage() {
       width: "100%",
       touchAction: "manipulation",
     },
-
-    reviewBtn: {
-      padding: isMobile ? "14px 12px" : "12px",
-      fontSize: "16px",
-      border: "none",
-      borderRadius: "12px",
-      background: "linear-gradient(135deg, #1f6fb2, #3498db)",
-      color: "#fff",
-      cursor: "pointer",
-      fontWeight: 900,
-      boxShadow: "0 10px 18px rgba(52,152,219,0.25)",
-      width: "100%",
-      touchAction: "manipulation",
-      marginTop: "10px",
-    },
-  };
-
-  // helper to get option label
-  const getOptionText = (q, key) => {
-    const opt = q.options.find((o) => o.key === key);
-    if (!opt) return "";
-    return `${opt.key}. ${opt.en} / ${opt.hi}`;
   };
 
   // ---------------- Submitted Screen --------------------
@@ -612,7 +589,6 @@ export default function QuizPage() {
           <div style={styles.titleWrap}>
             <div style={styles.brand}>HERO STEELS LIMITED</div>
 
-            {/* ✅ Title below HERO STEELS LIMITED */}
             <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
               📝 {quizTitle}
             </h2>
@@ -632,42 +608,6 @@ export default function QuizPage() {
             >
               Your Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
             </p>
-
-            
-
-            {showReview && (
-              <div style={{ marginTop: 14 }}>
-                {questions.map((q) => {
-                  const yourKey = answers[q.id];
-                  const isCorrect = yourKey === q.answerKey;
-
-                  return (
-                    <div key={q.id} style={styles.question}>
-                      <p style={styles.qTitle}>
-                        <b>
-                          {q.id}. {q.q_en}
-                        </b>
-                        <br />
-                        <span style={{ color: "#566573", fontWeight: 700 }}>{q.q_hi}</span>
-                      </p>
-
-                      <p style={{ margin: "8px 0 0" }}>
-                        <b>Status:</b> {isCorrect ? "✅ Correct" : "❌ Wrong"}
-                      </p>
-
-                      <p style={{ margin: "6px 0 0" }}>
-                        <b>Your Answer:</b>{" "}
-                        {yourKey ? getOptionText(q, yourKey) : "Not Attempted"}
-                      </p>
-
-                      <p style={{ margin: "6px 0 0" }}>
-                        <b>Correct Answer:</b> {getOptionText(q, q.answerKey)}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -698,7 +638,8 @@ export default function QuizPage() {
             <div style={styles.noticeTitle}>⚠️ Important Instructions</div>
             <ul style={styles.rules}>
               <li>
-                This quiz is <b>{QUIZ_DURATION_MIN} minutes</b> long — the timer starts immediately after you click Start.
+                This quiz is <b>{QUIZ_DURATION_MIN} minutes</b> long — the timer starts immediately
+                after you click Start.
               </li>
               <li>
                 Each question has <b>only one correct answer</b>.
@@ -768,7 +709,6 @@ export default function QuizPage() {
         <div style={styles.titleWrap}>
           <div style={styles.brand}>HERO STEELS LIMITED</div>
 
-          {/* ✅ Title below HERO STEELS LIMITED */}
           <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
             📝 {quizTitle}
           </h2>
@@ -786,8 +726,12 @@ export default function QuizPage() {
               <b>
                 {q.id}. {q.q_en}
               </b>
-              <br />
-              <span style={{ color: "#566573", fontWeight: 700 }}>{q.q_hi}</span>
+              {q.q_hi ? (
+                <>
+                  <br />
+                  <span style={{ color: "#566573", fontWeight: 700 }}>{q.q_hi}</span>
+                </>
+              ) : null}
             </p>
 
             {q.options.map((opt) => (
@@ -802,8 +746,12 @@ export default function QuizPage() {
                 />
                 <span style={{ fontSize: isMobile ? "14px" : "15px" }}>
                   <b>{opt.key}.</b> {opt.en}
-                  <br />
-                  <span style={{ color: "#566573", fontWeight: 700 }}>{opt.hi}</span>
+                  {opt.hi ? (
+                    <>
+                      <br />
+                      <span style={{ color: "#566573", fontWeight: 700 }}>{opt.hi}</span>
+                    </>
+                  ) : null}
                 </span>
               </label>
             ))}
