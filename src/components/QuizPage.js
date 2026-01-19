@@ -20,6 +20,9 @@ export default function QuizPage() {
   // ✅ Quiz Title
   const quizTitle = "Road Safety Awareness Quiz";
 
+  // ✅ QUIZ CLOSE (temporary)  ✅✅
+  const QUIZ_OVER = true;
+
   // ✅ Timing 5 Minutes (as you asked)
   const QUIZ_DURATION_MIN = 5;
   const QUIZ_DURATION_SEC = QUIZ_DURATION_MIN * 60;
@@ -64,7 +67,11 @@ export default function QuizPage() {
         options: [
           { key: "A", en: "Honk the horn to alert pedestrians", hi: "" },
           { key: "B", en: "Slow down and prepare to stop if necessary", hi: "" },
-          { key: "C", en: "Keep driving at the same speed and ignore pedestrians", hi: "" },
+          {
+            key: "C",
+            en: "Keep driving at the same speed and ignore pedestrians",
+            hi: "",
+          },
           { key: "D", en: "Speed up to avoid blocking the crossing", hi: "" },
         ],
         answerKey: "B",
@@ -86,10 +93,22 @@ export default function QuizPage() {
         q_en: "What is the “Two-Second Rule” in driving?",
         q_hi: "",
         options: [
-          { key: "A", en: "The minimum distance you should stay behind another vehicle", hi: "" },
-          { key: "B", en: "The time it takes to check for blind spots before changing lanes", hi: "" },
+          {
+            key: "A",
+            en: "The minimum distance you should stay behind another vehicle",
+            hi: "",
+          },
+          {
+            key: "B",
+            en: "The time it takes to check for blind spots before changing lanes",
+            hi: "",
+          },
           { key: "C", en: "The length of time you should signal before turning", hi: "" },
-          { key: "D", en: "The minimum time a pedestrian has to wait before crossing the road", hi: "" },
+          {
+            key: "D",
+            en: "The minimum time a pedestrian has to wait before crossing the road",
+            hi: "",
+          },
         ],
         answerKey: "A",
       },
@@ -112,7 +131,11 @@ export default function QuizPage() {
         q_hi: "",
         options: [
           { key: "A", en: "Brake hard and steer sharply", hi: "" },
-          { key: "B", en: "Steer in the direction you want to go and ease off the accelerator", hi: "" },
+          {
+            key: "B",
+            en: "Steer in the direction you want to go and ease off the accelerator",
+            hi: "",
+          },
           { key: "C", en: "Accelerate quickly to regain control", hi: "" },
           { key: "D", en: "Turn off the engine immediately", hi: "" },
         ],
@@ -132,7 +155,8 @@ export default function QuizPage() {
       },
       {
         id: 8,
-        q_en: "Which of the following is the safest way to use a mobile phone while driving?",
+        q_en:
+          "Which of the following is the safest way to use a mobile phone while driving?",
         q_hi: "",
         options: [
           { key: "A", en: "Texting with one hand", hi: "" },
@@ -196,7 +220,11 @@ export default function QuizPage() {
         q_hi: "",
         options: [
           { key: "A", en: "Driving aggressively to protect your position", hi: "" },
-          { key: "B", en: "Driving while anticipating potential hazards and avoiding accidents", hi: "" },
+          {
+            key: "B",
+            en: "Driving while anticipating potential hazards and avoiding accidents",
+            hi: "",
+          },
           { key: "C", en: "Driving only at night", hi: "" },
           { key: "D", en: "Driving only in slow lanes", hi: "" },
         ],
@@ -220,7 +248,11 @@ export default function QuizPage() {
         q_hi: "",
         options: [
           { key: "A", en: "Honk continuously", hi: "" },
-          { key: "B", en: "Check mirrors and blind spots, and use indicators", hi: "" },
+          {
+            key: "B",
+            en: "Check mirrors and blind spots, and use indicators",
+            hi: "",
+          },
           { key: "C", en: "Accelerate immediately", hi: "" },
           { key: "D", en: "Brake suddenly", hi: "" },
         ],
@@ -268,7 +300,11 @@ export default function QuizPage() {
         q_hi: "",
         options: [
           { key: "A", en: "Run away", hi: "" },
-          { key: "B", en: "Ensure safety, call emergency services, and provide help if possible", hi: "" },
+          {
+            key: "B",
+            en: "Ensure safety, call emergency services, and provide help if possible",
+            hi: "",
+          },
           { key: "C", en: "Argue with other driver", hi: "" },
           { key: "D", en: "Continue driving", hi: "" },
         ],
@@ -581,6 +617,46 @@ export default function QuizPage() {
     },
   };
 
+  // ✅ QUIZ OVER SCREEN (blocks attempts)
+  if (QUIZ_OVER) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.container}>
+          <div style={styles.titleWrap}>
+            <div style={styles.brand}>HERO STEELS LIMITED</div>
+
+            <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
+              📝 {quizTitle}
+            </h2>
+
+            <h3
+              style={{
+                color: "#c0392b",
+                textAlign: "center",
+                margin: "12px 0 0",
+                fontWeight: 900,
+              }}
+            >
+              ✅ Quiz is Over
+            </h3>
+
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: 10,
+                color: "#566573",
+                fontWeight: 700,
+                lineHeight: 1.4,
+              }}
+            >
+              This quiz is currently closed. Please contact HR/Admin.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ---------------- Submitted Screen --------------------
   if (submitted) {
     return (
@@ -641,9 +717,7 @@ export default function QuizPage() {
                 This quiz is <b>{QUIZ_DURATION_MIN} minutes</b> long — the timer starts immediately
                 after you click Start.
               </li>
-              <li>
-                Each question has <b>only one correct answer</b>.
-              </li>
+              <li>Each question has <b>only one correct answer</b>.</li>
               <li>
                 When time runs out, the quiz will be <b>auto-submitted</b>.
               </li>
