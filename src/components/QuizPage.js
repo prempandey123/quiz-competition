@@ -1,29 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { db } from "../firebase";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
-} from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function QuizPage() {
-  const [userData, setUserData] = useState({
-    name: "",
-    empId: "",
-    department: "",
-    designation: "",
-  });
+  const [userData, setUserData] = useState({ name: "" });
 
   // ✅ Quiz Title
-  const quizTitle = "Road Safety Awareness Quiz";
+  const quizTitle = "PCM Quiz (Physics + Chemistry + Mathematics)";
 
-  // ✅ QUIZ CLOSE (temporary)  ✅✅
-  const QUIZ_OVER = true;
+  // ✅ QUIZ LIVE
+  const QUIZ_OVER = false;
 
-  // ✅ Timing 5 Minutes (as you asked)
+  // ✅ Timing 5 Minutes
   const QUIZ_DURATION_MIN = 5;
   const QUIZ_DURATION_SEC = QUIZ_DURATION_MIN * 60;
 
@@ -44,289 +32,367 @@ export default function QuizPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ✅ Questions from your Excel (Road Safety.xlsx)
+  // ✅ Questions (Hindi removed)
   const questions = useMemo(
     () => [
+      // ---------------- PHYSICS (1-10) ----------------
       {
         id: 1,
-        q_en: "What is the correct stopping distance at 60 mph on a dry road?",
-        q_hi: "",
+        q_en:
+          "PHYSICS 1) Two identical metallic spheres carry charges +q and +9q. They are connected by a thin wire and then separated again. The ratio of initial to final electrostatic potential energy is:",
         options: [
-          { key: "A", en: "60 feet", hi: "" },
-          { key: "B", en: "75 feet", hi: "" },
-          { key: "C", en: "120 feet", hi: "" },
-          { key: "D", en: "240 feet", hi: "" },
+          { key: "A", en: "1:1" },
+          { key: "B", en: "5:9" },
+          { key: "C", en: "9:5" },
+          { key: "D", en: "9:25" },
         ],
-        answerKey: "C",
+        answerKey: "D",
       },
       {
         id: 2,
         q_en:
-          "What should a driver do when approaching a pedestrian cross...affic lights where pedestrians are already waiting to cross?**",
-        q_hi: "",
+          "PHYSICS 2) A capacitor is connected to a battery and fully charged. The battery is removed and a dielectric slab completely fills the space. Which quantity remains constant?",
         options: [
-          { key: "A", en: "Honk the horn to alert pedestrians", hi: "" },
-          { key: "B", en: "Slow down and prepare to stop if necessary", hi: "" },
-          {
-            key: "C",
-            en: "Keep driving at the same speed and ignore pedestrians",
-            hi: "",
-          },
-          { key: "D", en: "Speed up to avoid blocking the crossing", hi: "" },
+          { key: "A", en: "Potential difference" },
+          { key: "B", en: "Capacitance" },
+          { key: "C", en: "Electric field" },
+          { key: "D", en: "Charge" },
         ],
-        answerKey: "B",
+        answerKey: "D",
       },
       {
         id: 3,
-        q_en: "When driving in foggy conditions, which lights should you use?",
-        q_hi: "",
+        q_en:
+          "PHYSICS 3) A long straight wire carries current I. Magnetic field at distance r is B. If current becomes 3I and distance becomes 3r, new magnetic field is:",
         options: [
-          { key: "A", en: "High beam headlights", hi: "" },
-          { key: "B", en: "Low beam headlights or fog lights", hi: "" },
-          { key: "C", en: "Parking lights", hi: "" },
-          { key: "D", en: "Hazard lights", hi: "" },
-        ],
-        answerKey: "B",
-      },
-      {
-        id: 4,
-        q_en: "What is the “Two-Second Rule” in driving?",
-        q_hi: "",
-        options: [
-          {
-            key: "A",
-            en: "The minimum distance you should stay behind another vehicle",
-            hi: "",
-          },
-          {
-            key: "B",
-            en: "The time it takes to check for blind spots before changing lanes",
-            hi: "",
-          },
-          { key: "C", en: "The length of time you should signal before turning", hi: "" },
-          {
-            key: "D",
-            en: "The minimum time a pedestrian has to wait before crossing the road",
-            hi: "",
-          },
+          { key: "A", en: "B" },
+          { key: "B", en: "3B" },
+          { key: "C", en: "B/3" },
+          { key: "D", en: "9B" },
         ],
         answerKey: "A",
       },
       {
+        id: 4,
+        q_en:
+          "PHYSICS 4) An electron enters perpendicular to a uniform magnetic field. If its speed is doubled, radius of circular path becomes:",
+        options: [
+          { key: "A", en: "Same" },
+          { key: "B", en: "Half" },
+          { key: "C", en: "Double" },
+          { key: "D", en: "Four times" },
+        ],
+        answerKey: "C",
+      },
+      {
         id: 5,
         q_en:
-          "What is the effect of alcohol on your driving abilities, even if you’re under the legal limit?",
-        q_hi: "",
+          "PHYSICS 5) In Young’s double slit experiment, if wavelength is halved and slit separation doubled, fringe width becomes:",
         options: [
-          { key: "A", en: "It has no effect on driving ability", hi: "" },
-          { key: "B", en: "It improves reaction times", hi: "" },
-          { key: "C", en: "It slows your reaction times and impairs judgment", hi: "" },
-          { key: "D", en: "It only affects your ability to judge distance", hi: "" },
+          { key: "A", en: "Same" },
+          { key: "B", en: "Half" },
+          { key: "C", en: "One-fourth" },
+          { key: "D", en: "Double" },
         ],
         answerKey: "C",
       },
       {
         id: 6,
-        q_en: "What should you do if your vehicle starts skidding on a wet road?",
-        q_hi: "",
+        q_en:
+          "PHYSICS 6) In a series LCR circuit at resonance, which statement is correct?",
         options: [
-          { key: "A", en: "Brake hard and steer sharply", hi: "" },
-          {
-            key: "B",
-            en: "Steer in the direction you want to go and ease off the accelerator",
-            hi: "",
-          },
-          { key: "C", en: "Accelerate quickly to regain control", hi: "" },
-          { key: "D", en: "Turn off the engine immediately", hi: "" },
+          { key: "A", en: "Current minimum" },
+          { key: "B", en: "Impedance maximum" },
+          { key: "C", en: "Power factor zero" },
+          { key: "D", en: "Voltage across L and C equal in magnitude" },
         ],
-        answerKey: "B",
+        answerKey: "D",
       },
       {
         id: 7,
-        q_en: "What is the main purpose of road signs?",
-        q_hi: "",
+        q_en:
+          "PHYSICS 7) The stopping potential in photoelectric effect depends on:",
         options: [
-          { key: "A", en: "To decorate the road", hi: "" },
-          { key: "B", en: "To provide information and regulate traffic", hi: "" },
-          { key: "C", en: "To confuse drivers", hi: "" },
-          { key: "D", en: "To indicate the location of buildings", hi: "" },
+          { key: "A", en: "Intensity" },
+          { key: "B", en: "Frequency" },
+          { key: "C", en: "Work function only" },
+          { key: "D", en: "Number of electrons" },
         ],
         answerKey: "B",
       },
       {
         id: 8,
         q_en:
-          "Which of the following is the safest way to use a mobile phone while driving?",
-        q_hi: "",
+          "PHYSICS 8) Match the Following: List I List II A. Gauss Law 1.opposes change B. Lenz Law 2. Electric flux relation C. Ampere Law 3. Particle nature D. Photoelectric effect 4. Magnetic field due to current Options:",
         options: [
-          { key: "A", en: "Texting with one hand", hi: "" },
-          { key: "B", en: "Using a hands-free device", hi: "" },
-          { key: "C", en: "Holding the phone and talking", hi: "" },
-          { key: "D", en: "Checking notifications quickly", hi: "" },
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-1, D-2" },
+          { key: "D", en: "A-4, B-3, C-2, D-1" },
         ],
         answerKey: "B",
       },
       {
         id: 9,
-        q_en: "What should you do at a yellow traffic light?",
-        q_hi: "",
+        q_en:
+          "PHYSICS 9) A convex lens forms image at same distance as object but inverted. Magnification is:",
         options: [
-          { key: "A", en: "Speed up to cross quickly", hi: "" },
-          { key: "B", en: "Stop if it is safe to do so", hi: "" },
-          { key: "C", en: "Ignore it and proceed", hi: "" },
-          { key: "D", en: "Honk and move forward", hi: "" },
+          { key: "A", en: "+1" },
+          { key: "B", en: "−1" },
+          { key: "C", en: "+2" },
+          { key: "D", en: "−2" },
         ],
         answerKey: "B",
       },
       {
         id: 10,
-        q_en: "What is the most common cause of road accidents?",
-        q_hi: "",
+        q_en:
+          "PHYSICS 10) Match the Following: List I List II A. Binding energy 1. Voltage regulation B. Half life 2. Rectification C. Zener diode 3. Mass defect D. p-n junction 4. Radioactive decay Options:",
         options: [
-          { key: "A", en: "Road conditions", hi: "" },
-          { key: "B", en: "Vehicle defects", hi: "" },
-          { key: "C", en: "Human error", hi: "" },
-          { key: "D", en: "Weather conditions", hi: "" },
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-1, D-2" },
+          { key: "D", en: "A-4, B-3, C-2, D-1" },
         ],
         answerKey: "C",
       },
+
+      // ---------------- CHEMISTRY (11-20) ----------------
       {
         id: 11,
-        q_en: "Why is wearing a seat belt important?",
-        q_hi: "",
+        q_en:
+          "CHEMISTRY 1) Rate law: r = k[A]²[B]. If [A] doubled and [B] halved, rate becomes:",
         options: [
-          { key: "A", en: "It helps you drive faster", hi: "" },
-          { key: "B", en: "It reduces the risk of injury during an accident", hi: "" },
-          { key: "C", en: "It makes driving comfortable", hi: "" },
-          { key: "D", en: "It is only required on highways", hi: "" },
+          { key: "A", en: "Same" },
+          { key: "B", en: "Double" },
+          { key: "C", en: "Half" },
+          { key: "D", en: "Four times" },
         ],
         answerKey: "B",
       },
       {
         id: 12,
-        q_en: "What should you do when you see an ambulance with siren on behind you?",
-        q_hi: "",
+        q_en: "CHEMISTRY 2) For a spontaneous reaction at all temperatures:",
         options: [
-          { key: "A", en: "Speed up", hi: "" },
-          { key: "B", en: "Stop immediately in the middle of the road", hi: "" },
-          { key: "C", en: "Move to the side and give way", hi: "" },
-          { key: "D", en: "Ignore and continue driving", hi: "" },
+          { key: "A", en: "ΔH < 0 and ΔS > 0" },
+          { key: "B", en: "ΔH > 0 and ΔS > 0" },
+          { key: "C", en: "ΔH < 0 and ΔS < 0" },
+          { key: "D", en: "ΔH > 0 and ΔS < 0" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 13,
+        q_en:
+          "CHEMISTRY 3) In electrochemical cell, if reaction quotient Q < K, EMF is:",
+        options: [
+          { key: "A", en: "Zero" },
+          { key: "B", en: "Negative" },
+          { key: "C", en: "Positive" },
+          { key: "D", en: "Infinite" },
         ],
         answerKey: "C",
       },
       {
-        id: 13,
-        q_en: "What is defensive driving?",
-        q_hi: "",
-        options: [
-          { key: "A", en: "Driving aggressively to protect your position", hi: "" },
-          {
-            key: "B",
-            en: "Driving while anticipating potential hazards and avoiding accidents",
-            hi: "",
-          },
-          { key: "C", en: "Driving only at night", hi: "" },
-          { key: "D", en: "Driving only in slow lanes", hi: "" },
-        ],
-        answerKey: "B",
-      },
-      {
         id: 14,
-        q_en: "What does a red traffic light mean?",
-        q_hi: "",
+        q_en: "CHEMISTRY 4) Van’t Hoff factor greater than 1 indicates:",
         options: [
-          { key: "A", en: "Go", hi: "" },
-          { key: "B", en: "Stop", hi: "" },
-          { key: "C", en: "Proceed with caution", hi: "" },
-          { key: "D", en: "Speed up", hi: "" },
+          { key: "A", en: "Association" },
+          { key: "B", en: "Dissociation" },
+          { key: "C", en: "Non-electrolyte" },
+          { key: "D", en: "Weak acid" },
         ],
         answerKey: "B",
       },
       {
         id: 15,
-        q_en: "What should you do before changing lanes?",
-        q_hi: "",
+        q_en: "CHEMISTRY 5) Order of boiling point: H2O, NH3, HF",
         options: [
-          { key: "A", en: "Honk continuously", hi: "" },
-          {
-            key: "B",
-            en: "Check mirrors and blind spots, and use indicators",
-            hi: "",
-          },
-          { key: "C", en: "Accelerate immediately", hi: "" },
-          { key: "D", en: "Brake suddenly", hi: "" },
+          { key: "A", en: "HF > H2O > NH3" },
+          { key: "B", en: "H2O > HF > NH3" },
+          { key: "C", en: "NH3 > HF > H2O" },
+          { key: "D", en: "HF > NH3 > H2O" },
         ],
         answerKey: "B",
       },
       {
         id: 16,
-        q_en: "What is the safest speed while driving near schools?",
-        q_hi: "",
+        q_en: "CHEMISTRY 6) In SN1 reaction, rate determining step involves:",
         options: [
-          { key: "A", en: "High speed", hi: "" },
-          { key: "B", en: "Moderate speed", hi: "" },
-          { key: "C", en: "Low speed and as per signboards", hi: "" },
-          { key: "D", en: "Any speed is fine", hi: "" },
+          { key: "A", en: "Nucleophile attack" },
+          { key: "B", en: "Carbocation formation" },
+          { key: "C", en: "Bond rotation" },
+          { key: "D", en: "Proton transfer" },
         ],
-        answerKey: "C",
+        answerKey: "B",
       },
       {
         id: 17,
-        q_en: "What should you do if you feel sleepy while driving?",
-        q_hi: "",
+        q_en: "CHEMISTRY 7) pH of 0.001 M HCl:",
         options: [
-          { key: "A", en: "Open window and continue", hi: "" },
-          { key: "B", en: "Drink coffee and drive faster", hi: "" },
-          { key: "C", en: "Stop at a safe place and take rest", hi: "" },
-          { key: "D", en: "Turn on loud music", hi: "" },
+          { key: "A", en: "1" },
+          { key: "B", en: "2" },
+          { key: "C", en: "3" },
+          { key: "D", en: "4" },
         ],
         answerKey: "C",
       },
       {
         id: 18,
-        q_en: "Which is a safe following distance on highways?",
-        q_hi: "",
+        q_en: "CHEMISTRY 8) Which has highest crystal field splitting?",
         options: [
-          { key: "A", en: "One-second gap", hi: "" },
-          { key: "B", en: "Two-second gap (minimum)", hi: "" },
-          { key: "C", en: "Half-second gap", hi: "" },
-          { key: "D", en: "No gap needed", hi: "" },
+          { key: "A", en: "d⁰" },
+          { key: "B", en: "d³" },
+          { key: "C", en: "d⁵ high spin" },
+          { key: "D", en: "d¹⁰" },
         ],
         answerKey: "B",
       },
       {
         id: 19,
-        q_en: "What is the first thing you should do in case of an accident?",
-        q_hi: "",
+        q_en:
+          "CHEMISTRY 9) If concentration decreases, half life of first order reaction:",
         options: [
-          { key: "A", en: "Run away", hi: "" },
-          {
-            key: "B",
-            en: "Ensure safety, call emergency services, and provide help if possible",
-            hi: "",
-          },
-          { key: "C", en: "Argue with other driver", hi: "" },
-          { key: "D", en: "Continue driving", hi: "" },
+          { key: "A", en: "Increases" },
+          { key: "B", en: "Decreases" },
+          { key: "C", en: "Same" },
+          { key: "D", en: "Doubles" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 20,
+        q_en:
+          "CHEMISTRY 10) Match the Following: List I List II A. Buffer 1. Surface effect B. Catalyst 2. Liquid in liquid C. Emulsion 3. Resists pH D. Adsorption 4. Lowers Ea Options:",
+        options: [
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-2, D-1" },
+          { key: "D", en: "A-4, B-3, C-1, D-2" },
+        ],
+        answerKey: "C",
+      },
+
+      // ---------------- MATHEMATICS (21-30) ----------------
+      {
+        id: 21,
+        q_en: "MATHEMATICS 1) If |A| = 3 for 2×2 matrix, then |A⁻¹| =",
+        options: [
+          { key: "A", en: "3" },
+          { key: "B", en: "1/3" },
+          { key: "C", en: "−3" },
+          { key: "D", en: "0" },
         ],
         answerKey: "B",
       },
       {
-        id: 20,
-        q_en: "What is the correct way to overtake another vehicle?",
-        q_hi: "",
+        id: 22,
+        q_en:
+          "MATHEMATICS 2) If f(x) = x³ − 3x² + 2, number of local maxima:",
         options: [
-          { key: "A", en: "Overtake from the left without signal", hi: "" },
-          { key: "B", en: "Overtake from the right when safe and use indicator", hi: "" },
-          { key: "C", en: "Overtake at blind turns", hi: "" },
-          { key: "D", en: "Overtake near zebra crossings", hi: "" },
+          { key: "A", en: "0" },
+          { key: "B", en: "1" },
+          { key: "C", en: "2" },
+          { key: "D", en: "3" },
         ],
         answerKey: "B",
+      },
+      {
+        id: 23,
+        q_en:
+          "MATHEMATICS 3) If two events are independent and P(A)=0.5, P(B)=0.4, then P(A∩B)=",
+        options: [
+          { key: "A", en: "0.9" },
+          { key: "B", en: "0.2" },
+          { key: "C", en: "0.1" },
+          { key: "D", en: "0.5" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 24,
+        q_en: "MATHEMATICS 4) Slope of normal to curve y = x² at x = 1:",
+        options: [
+          { key: "A", en: "−1/2" },
+          { key: "B", en: "−1" },
+          { key: "C", en: "−2" },
+          { key: "D", en: "−4" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 25,
+        q_en:
+          "MATHEMATICS 5) If determinant of coefficient matrix is zero, system may have:",
+        options: [
+          { key: "A", en: "Unique solution" },
+          { key: "B", en: "No solution" },
+          { key: "C", en: "Infinite solution" },
+          { key: "D", en: "B or C" },
+        ],
+        answerKey: "D",
+      },
+      {
+        id: 26,
+        q_en: "MATHEMATICS 6) Unit vector in direction of 2i − 2j:",
+        options: [
+          { key: "A", en: "(i − j)" },
+          { key: "B", en: "(i − j)/√2" },
+          { key: "C", en: "(2i −2j)/2" },
+          { key: "D", en: "(2i −2j)/√8" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 27,
+        q_en:
+          "MATHEMATICS 7) Maximize Z = 3x + 2y subject to x + y ≤ 4, x ≥ 0, y ≥ 0. Maximum value is:",
+        options: [
+          { key: "A", en: "8" },
+          { key: "B", en: "10" },
+          { key: "C", en: "12" },
+          { key: "D", en: "6" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 28,
+        q_en: "MATHEMATICS 8) ∫ e^x sin x dx involves:",
+        options: [
+          { key: "A", en: "Substitution" },
+          { key: "B", en: "By parts twice" },
+          { key: "C", en: "Partial fraction" },
+          { key: "D", en: "Direct formula" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 29,
+        q_en: "MATHEMATICS 9) Maximum value of sin x + cos x:",
+        options: [
+          { key: "A", en: "1" },
+          { key: "B", en: "√2" },
+          { key: "C", en: "2" },
+          { key: "D", en: "0" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 30,
+        q_en:
+          "MATHEMATICS 10) Match the Following: List I List II A. Bayes theorem 1. Conditional probability B. Lagrange MVT 2. Mean slope C. Inverse matrix 3. Identity relation D. Linear programming 4. Optimization Options:",
+        options: [
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-2, D-1" },
+          { key: "D", en: "A-4, B-3, C-1, D-2" },
+        ],
+        answerKey: "A",
       },
     ],
     []
   );
 
-  // ✅ Auto display counts
   const TOTAL_QUESTIONS_DISPLAY = questions.length;
   const TOTAL_MARKS_DISPLAY = questions.length;
 
@@ -350,27 +416,11 @@ export default function QuizPage() {
 
   // ---------------- Start Quiz --------------------
   const handleStart = async () => {
-    if (!userData.name || !userData.empId || !userData.department || !userData.designation) {
-      alert("⚠️ Please fill in all details!");
+    if (!userData.name) {
+      alert("⚠️ Please enter your name!");
       return;
     }
-
     setLoading(true);
-
-    const q = query(
-      collection(db, "quizResults"),
-      where("employeeId", "==", userData.empId.trim()),
-      where("quizTitle", "==", quizTitle)
-    );
-
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      alert("⚠️ You have already attempted this quiz!");
-      setLoading(false);
-      return;
-    }
-
     setLoading(false);
     setQuizStarted(true);
     setTimeLeft(QUIZ_DURATION_SEC);
@@ -379,7 +429,6 @@ export default function QuizPage() {
   // ---------------- Submit --------------------
   const handleSubmit = async () => {
     let score = 0;
-
     questions.forEach((q) => {
       if (answers[q.id] === q.answerKey) score++;
     });
@@ -390,13 +439,10 @@ export default function QuizPage() {
 
     await addDoc(collection(db, "quizResults"), {
       name: userData.name,
-      department: userData.department,
-      designation: userData.designation,
-      employeeId: userData.empId,
       quizTitle,
       answers,
       marks: score,
-      questions, // ✅ store questions snapshot
+      questions, // same as your original (snapshot)
       submittedAt: serverTimestamp(),
     });
   };
@@ -411,14 +457,12 @@ export default function QuizPage() {
       fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
       WebkitTextSizeAdjust: "100%",
     },
-
     container: {
       maxWidth: "820px",
       margin: "0 auto",
       padding: isMobile ? "10px" : "18px",
       paddingTop: quizStarted ? (isMobile ? "68px" : "74px") : undefined,
     },
-
     brand: {
       textAlign: "center",
       fontWeight: 900,
@@ -428,7 +472,6 @@ export default function QuizPage() {
       textTransform: "uppercase",
       fontSize: isMobile ? "14px" : "18px",
     },
-
     titleWrap: {
       background: "linear-gradient(135deg, #ffffff, #fff7f7)",
       border: "1px solid rgba(192,57,43,0.15)",
@@ -437,7 +480,6 @@ export default function QuizPage() {
       boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
       marginBottom: "14px",
     },
-
     header: {
       textAlign: "center",
       color: "#2c3e50",
@@ -446,7 +488,6 @@ export default function QuizPage() {
       fontWeight: 900,
       lineHeight: 1.2,
     },
-
     subHeader: {
       textAlign: "center",
       marginTop: "6px",
@@ -454,7 +495,6 @@ export default function QuizPage() {
       fontSize: isMobile ? "12px" : "14px",
       lineHeight: 1.4,
     },
-
     badgeRow: {
       display: "flex",
       gap: "10px",
@@ -462,7 +502,6 @@ export default function QuizPage() {
       flexWrap: "wrap",
       marginTop: "12px",
     },
-
     badge: {
       background: "rgba(231,76,60,0.10)",
       border: "1px solid rgba(231,76,60,0.20)",
@@ -472,7 +511,6 @@ export default function QuizPage() {
       fontSize: isMobile ? "12px" : "13px",
       fontWeight: 700,
     },
-
     badgeBlue: {
       background: "rgba(52,152,219,0.10)",
       border: "1px solid rgba(52,152,219,0.20)",
@@ -482,7 +520,6 @@ export default function QuizPage() {
       fontSize: isMobile ? "12px" : "13px",
       fontWeight: 700,
     },
-
     notice: {
       background: "linear-gradient(135deg, #e8f6ff, #f7fbff)",
       border: "1px solid rgba(52,152,219,0.25)",
@@ -494,10 +531,8 @@ export default function QuizPage() {
       fontWeight: 600,
       lineHeight: 1.45,
     },
-
     noticeTitle: { fontSize: isMobile ? "13px" : "14px", fontWeight: 900, marginBottom: "6px" },
     rules: { margin: 0, paddingLeft: "18px", fontWeight: 600, fontSize: isMobile ? "12px" : "13px" },
-
     card: {
       background: "#fff",
       padding: isMobile ? "14px" : "18px",
@@ -508,13 +543,11 @@ export default function QuizPage() {
       flexDirection: "column",
       gap: "12px",
     },
-
     row2: {
       display: "grid",
-      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      gridTemplateColumns: "1fr",
       gap: "12px",
     },
-
     input: {
       padding: "13px 12px",
       fontSize: isMobile ? "16px" : "15px",
@@ -526,7 +559,6 @@ export default function QuizPage() {
       background: "#fcfcfd",
       boxSizing: "border-box",
     },
-
     helper: {
       fontSize: isMobile ? "12px" : "12px",
       color: "#6c7a89",
@@ -534,7 +566,6 @@ export default function QuizPage() {
       marginBottom: "2px",
       lineHeight: 1.4,
     },
-
     button: {
       padding: isMobile ? "14px 12px" : "12px",
       fontSize: isMobile ? "16px" : "16px",
@@ -548,8 +579,8 @@ export default function QuizPage() {
       transition: "0.2s",
       width: "100%",
       touchAction: "manipulation",
+      opacity: loading ? 0.85 : 1,
     },
-
     timer: {
       position: "fixed",
       top: 0,
@@ -565,7 +596,6 @@ export default function QuizPage() {
       borderBottom: "1px solid rgba(192,57,43,0.18)",
       paddingTop: "calc(10px + env(safe-area-inset-top))",
     },
-
     question: {
       background: "linear-gradient(135deg, #ffffff, #fbfcff)",
       padding: isMobile ? "12px" : "14px",
@@ -574,7 +604,6 @@ export default function QuizPage() {
       marginBottom: "12px",
       boxShadow: "0 6px 16px rgba(0,0,0,0.05)",
     },
-
     qTitle: {
       margin: 0,
       marginBottom: "10px",
@@ -582,7 +611,6 @@ export default function QuizPage() {
       fontSize: isMobile ? "14px" : "15px",
       lineHeight: 1.35,
     },
-
     option: {
       display: "flex",
       alignItems: "flex-start",
@@ -596,12 +624,10 @@ export default function QuizPage() {
       lineHeight: 1.3,
       touchAction: "manipulation",
     },
-
     radio: {
       marginTop: "2px",
       transform: isMobile ? "scale(1.1)" : "scale(1)",
     },
-
     submitBtn: {
       padding: isMobile ? "14px 12px" : "12px",
       fontSize: "16px",
@@ -617,38 +643,20 @@ export default function QuizPage() {
     },
   };
 
-  // ✅ QUIZ OVER SCREEN (blocks attempts)
+  // ✅ QUIZ OVER SCREEN
   if (QUIZ_OVER) {
     return (
       <div style={styles.page}>
         <div style={styles.container}>
           <div style={styles.titleWrap}>
             <div style={styles.brand}>HERO STEELS LIMITED</div>
-
             <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
               📝 {quizTitle}
             </h2>
-
-            <h3
-              style={{
-                color: "#c0392b",
-                textAlign: "center",
-                margin: "12px 0 0",
-                fontWeight: 900,
-              }}
-            >
+            <h3 style={{ color: "#c0392b", textAlign: "center", margin: "12px 0 0", fontWeight: 900 }}>
               ✅ Quiz is Over
             </h3>
-
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                color: "#566573",
-                fontWeight: 700,
-                lineHeight: 1.4,
-              }}
-            >
+            <p style={{ textAlign: "center", marginTop: 10, color: "#566573", fontWeight: 700, lineHeight: 1.4 }}>
               This quiz is currently closed. Please contact HR/Admin.
             </p>
           </div>
@@ -664,24 +672,13 @@ export default function QuizPage() {
         <div style={styles.container}>
           <div style={styles.titleWrap}>
             <div style={styles.brand}>HERO STEELS LIMITED</div>
-
             <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
               📝 {quizTitle}
             </h2>
-
             <h3 style={{ color: "#27ae60", textAlign: "center", margin: "10px 0 0" }}>
               🎉 Quiz Submitted Successfully!
             </h3>
-
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                color: "#2c3e50",
-                fontWeight: 700,
-                lineHeight: 1.4,
-              }}
-            >
+            <p style={{ textAlign: "center", marginTop: 10, color: "#2c3e50", fontWeight: 700, lineHeight: 1.4 }}>
               Your Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
             </p>
           </div>
@@ -700,7 +697,7 @@ export default function QuizPage() {
             <h1 style={styles.header}>📝 {quizTitle}</h1>
 
             <div style={styles.subHeader}>
-              Please enter your details carefully — your submission will be recorded.
+              Please enter your name carefully — your submission will be recorded.
             </div>
 
             <div style={styles.badgeRow}>
@@ -714,16 +711,10 @@ export default function QuizPage() {
             <div style={styles.noticeTitle}>⚠️ Important Instructions</div>
             <ul style={styles.rules}>
               <li>
-                This quiz is <b>{QUIZ_DURATION_MIN} minutes</b> long — the timer starts immediately
-                after you click Start.
+                This quiz is <b>{QUIZ_DURATION_MIN} minutes</b> long — the timer starts immediately after you click Start.
               </li>
               <li>Each question has <b>only one correct answer</b>.</li>
-              <li>
-                When time runs out, the quiz will be <b>auto-submitted</b>.
-              </li>
-              <li>
-                The same Employee ID <b>cannot attempt</b> this quiz again.
-              </li>
+              <li>When time runs out, the quiz will be <b>auto-submitted</b>.</li>
             </ul>
           </div>
 
@@ -731,43 +722,17 @@ export default function QuizPage() {
             <div style={styles.row2}>
               <input
                 style={styles.input}
-                placeholder="Full Name"
+                placeholder="Your Name"
                 onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                 value={userData.name}
                 inputMode="text"
               />
-              <input
-                style={styles.input}
-                placeholder="Employee ID"
-                onChange={(e) => setUserData({ ...userData, empId: e.target.value })}
-                value={userData.empId}
-                inputMode="text"
-              />
             </div>
 
-            <div style={styles.row2}>
-              <input
-                style={styles.input}
-                placeholder="Department"
-                onChange={(e) => setUserData({ ...userData, department: e.target.value })}
-                value={userData.department}
-                inputMode="text"
-              />
-              <input
-                style={styles.input}
-                placeholder="Designation"
-                onChange={(e) => setUserData({ ...userData, designation: e.target.value })}
-                value={userData.designation}
-                inputMode="text"
-              />
-            </div>
+            <div style={styles.helper}>Tip: Please type your full name before starting.</div>
 
-            <div style={styles.helper}>
-              Tip: Double-check your details before starting — your submission is stored.
-            </div>
-
-            <button style={styles.button} onClick={handleStart}>
-              {loading ? "Checking..." : "🚀 Start Quiz"}
+            <button style={styles.button} onClick={handleStart} disabled={loading}>
+              {loading ? "Starting..." : "🚀 Start Quiz"}
             </button>
           </div>
         </div>
@@ -800,12 +765,6 @@ export default function QuizPage() {
               <b>
                 {q.id}. {q.q_en}
               </b>
-              {q.q_hi ? (
-                <>
-                  <br />
-                  <span style={{ color: "#566573", fontWeight: 700 }}>{q.q_hi}</span>
-                </>
-              ) : null}
             </p>
 
             {q.options.map((opt) => (
@@ -820,12 +779,6 @@ export default function QuizPage() {
                 />
                 <span style={{ fontSize: isMobile ? "14px" : "15px" }}>
                   <b>{opt.key}.</b> {opt.en}
-                  {opt.hi ? (
-                    <>
-                      <br />
-                      <span style={{ color: "#566573", fontWeight: 700 }}>{opt.hi}</span>
-                    </>
-                  ) : null}
                 </span>
               </label>
             ))}
