@@ -1,9 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function QuizPage() {
-  const [userData, setUserData] = useState({ name: "" });
+  const [userData, setUserData] = useState({
+    name: "",
+    college: "",
+    branch: "",
+  });
 
   // ✅ Quiz Title
   const quizTitle = "PCM Quiz (Physics + Chemistry + Mathematics)";
@@ -11,18 +15,24 @@ export default function QuizPage() {
   // ✅ QUIZ LIVE
   const QUIZ_OVER = false;
 
-  // ✅ Timing 5 Minutes
-  const QUIZ_DURATION_MIN = 5;
-  const QUIZ_DURATION_SEC = QUIZ_DURATION_MIN * 60;
+  // ✅ Total Timing 1 Hour
+  const TOTAL_DURATION_MIN = 60;
+  const TOTAL_DURATION_SEC = TOTAL_DURATION_MIN * 60;
 
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [marks, setMarks] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(QUIZ_DURATION_SEC);
-  const [loading, setLoading] = useState(false);
 
+  // ✅ Overall + Section timers
+  const [overallTimeLeft, setOverallTimeLeft] = useState(TOTAL_DURATION_SEC);
+  const [sectionTimeLeft, setSectionTimeLeft] = useState(0);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+
+  const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const isSubmittingRef = useRef(false);
 
   // ---------------- Detect Mobile --------------------
   useEffect(() => {
@@ -32,7 +42,7 @@ export default function QuizPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ✅ Questions (Hindi removed)
+  // ✅ Questions
   const questions = useMemo(
     () => [
       // ---------------- PHYSICS (1-10) ----------------
@@ -393,41 +403,97 @@ export default function QuizPage() {
     []
   );
 
+  // ✅ Section-wise config (1 hour total)
+  const sections = useMemo(
+    () => [
+      { key: "PHYSICS", title: "Physics", fromId: 1, toId: 10, durationMin: 20 },
+      { key: "CHEMISTRY", title: "Chemistry", fromId: 11, toId: 20, durationMin: 20 },
+      { key: "MATHS", title: "Mathematics", fromId: 21, toId: 30, durationMin: 20 },
+    ],
+    []
+  );
+
   const TOTAL_QUESTIONS_DISPLAY = questions.length;
   const TOTAL_MARKS_DISPLAY = questions.length;
 
-  // ---------------- Timer --------------------
-  useEffect(() => {
-    if (quizStarted && timeLeft > 0 && !submitted) {
-      const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-      return () => clearInterval(timer);
-    }
-    if (timeLeft === 0 && quizStarted && !submitted) handleSubmit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quizStarted, timeLeft, submitted]);
+  const currentSection = sections[currentSectionIndex];
+  const sectionQuestions = useMemo(() => {
+    if (!currentSection) return [];
+    return questions.filter((q) => q.id >= currentSection.fromId && q.id <= currentSection.toId);
+  }, [questions, currentSection]);
 
   const formatTime = (sec) =>
-    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(
-      2,
-      "0"
-    )}`;
+    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
 
   const handleChange = (id, val) => setAnswers({ ...answers, [id]: val });
 
+  // ---------------- Timers --------------------
+  useEffect(() => {
+    if (!quizStarted || submitted) return;
+
+    const timer = setInterval(() => {
+      setOverallTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setSectionTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [quizStarted, submitted]);
+
+  // ✅ Auto submit on overall time end
+  useEffect(() => {
+    if (!quizStarted || submitted) return;
+    if (overallTimeLeft === 0) {
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overallTimeLeft, quizStarted, submitted]);
+
+  // ✅ Auto move to next section on section time end
+  useEffect(() => {
+    if (!quizStarted || submitted) return;
+    if (sectionTimeLeft === 0 && overallTimeLeft > 0) {
+      // move next section, if available
+      if (currentSectionIndex < sections.length - 1) {
+        const nextIndex = currentSectionIndex + 1;
+        setCurrentSectionIndex(nextIndex);
+        setSectionTimeLeft(sections[nextIndex].durationMin * 60);
+        // scroll to top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        // last section ended -> submit
+        handleSubmit();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionTimeLeft, quizStarted, submitted, currentSectionIndex, overallTimeLeft]);
+
   // ---------------- Start Quiz --------------------
   const handleStart = async () => {
-    if (!userData.name) {
-      alert("⚠️ Please enter your name!");
+    if (!userData.name || !userData.college || !userData.branch) {
+      alert("⚠️ Please fill Name, College Name, and Branch!");
       return;
     }
+
     setLoading(true);
     setLoading(false);
+
     setQuizStarted(true);
-    setTimeLeft(QUIZ_DURATION_SEC);
+    setSubmitted(false);
+    setMarks(null);
+    setAnswers({});
+
+    setOverallTimeLeft(TOTAL_DURATION_SEC);
+    setCurrentSectionIndex(0);
+    setSectionTimeLeft(sections[0].durationMin * 60);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ---------------- Submit --------------------
+  // ---------------- Submit (LOGIC UNCHANGED) --------------------
   const handleSubmit = async () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     let score = 0;
     questions.forEach((q) => {
       if (answers[q.id] === q.answerKey) score++;
@@ -439,6 +505,8 @@ export default function QuizPage() {
 
     await addDoc(collection(db, "quizResults"), {
       name: userData.name,
+      college: userData.college,
+      branch: userData.branch,
       quizTitle,
       answers,
       marks: score,
@@ -461,7 +529,7 @@ export default function QuizPage() {
       maxWidth: "820px",
       margin: "0 auto",
       padding: isMobile ? "10px" : "18px",
-      paddingTop: quizStarted ? (isMobile ? "68px" : "74px") : undefined,
+      paddingTop: quizStarted ? (isMobile ? "94px" : "104px") : undefined,
     },
     brand: {
       textAlign: "center",
@@ -531,8 +599,17 @@ export default function QuizPage() {
       fontWeight: 600,
       lineHeight: 1.45,
     },
-    noticeTitle: { fontSize: isMobile ? "13px" : "14px", fontWeight: 900, marginBottom: "6px" },
-    rules: { margin: 0, paddingLeft: "18px", fontWeight: 600, fontSize: isMobile ? "12px" : "13px" },
+    noticeTitle: {
+      fontSize: isMobile ? "13px" : "14px",
+      fontWeight: 900,
+      marginBottom: "6px",
+    },
+    rules: {
+      margin: 0,
+      paddingLeft: "18px",
+      fontWeight: 600,
+      fontSize: isMobile ? "12px" : "13px",
+    },
     card: {
       background: "#fff",
       padding: isMobile ? "14px" : "18px",
@@ -588,13 +665,16 @@ export default function QuizPage() {
       width: "100%",
       background: "linear-gradient(90deg, #fff0f0, #ffe3e3)",
       color: "#c0392b",
-      padding: "12px 10px",
-      fontSize: isMobile ? "14px" : "16px",
+      padding: "10px 10px",
       textAlign: "center",
       fontWeight: 900,
       zIndex: 1000,
       borderBottom: "1px solid rgba(192,57,43,0.18)",
       paddingTop: "calc(10px + env(safe-area-inset-top))",
+    },
+    timerLine: {
+      fontSize: isMobile ? "13px" : "15px",
+      lineHeight: 1.25,
     },
     question: {
       background: "linear-gradient(135deg, #ffffff, #fbfcff)",
@@ -641,6 +721,31 @@ export default function QuizPage() {
       width: "100%",
       touchAction: "manipulation",
     },
+    nextBtn: {
+      padding: isMobile ? "14px 12px" : "12px",
+      fontSize: "16px",
+      border: "none",
+      borderRadius: "12px",
+      background: "linear-gradient(135deg, #1f6fb2, #3498db)",
+      color: "#fff",
+      cursor: "pointer",
+      fontWeight: 900,
+      boxShadow: "0 10px 18px rgba(52,152,219,0.25)",
+      width: "100%",
+      touchAction: "manipulation",
+      marginTop: "10px",
+    },
+    answerBox: {
+      marginTop: "10px",
+      padding: "10px 12px",
+      borderRadius: "12px",
+      border: "1px solid rgba(0,0,0,0.08)",
+      background: "linear-gradient(135deg, #f7fbff, #ffffff)",
+      color: "#2c3e50",
+      fontWeight: 700,
+      fontSize: isMobile ? "12px" : "13px",
+      lineHeight: 1.45,
+    },
   };
 
   // ✅ QUIZ OVER SCREEN
@@ -653,10 +758,25 @@ export default function QuizPage() {
             <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
               📝 {quizTitle}
             </h2>
-            <h3 style={{ color: "#c0392b", textAlign: "center", margin: "12px 0 0", fontWeight: 900 }}>
+            <h3
+              style={{
+                color: "#c0392b",
+                textAlign: "center",
+                margin: "12px 0 0",
+                fontWeight: 900,
+              }}
+            >
               ✅ Quiz is Over
             </h3>
-            <p style={{ textAlign: "center", marginTop: 10, color: "#566573", fontWeight: 700, lineHeight: 1.4 }}>
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: 10,
+                color: "#566573",
+                fontWeight: 700,
+                lineHeight: 1.4,
+              }}
+            >
               This quiz is currently closed. Please contact HR/Admin.
             </p>
           </div>
@@ -678,10 +798,73 @@ export default function QuizPage() {
             <h3 style={{ color: "#27ae60", textAlign: "center", margin: "10px 0 0" }}>
               🎉 Quiz Submitted Successfully!
             </h3>
-            <p style={{ textAlign: "center", marginTop: 10, color: "#2c3e50", fontWeight: 700, lineHeight: 1.4 }}>
+
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: 10,
+                color: "#2c3e50",
+                fontWeight: 700,
+                lineHeight: 1.4,
+              }}
+            >
+              <b>Student:</b> {userData.name} &nbsp; | &nbsp; <b>College:</b>{" "}
+              {userData.college} &nbsp; | &nbsp; <b>Branch:</b> {userData.branch}
+            </p>
+
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: 10,
+                color: "#2c3e50",
+                fontWeight: 700,
+                lineHeight: 1.4,
+              }}
+            >
               Your Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
             </p>
           </div>
+
+          {/* ✅ Answers (section-wise) */}
+          {sections.map((sec) => (
+            <div key={sec.key} style={styles.titleWrap}>
+              <h3 style={{ margin: 0, color: "#2c3e50" }}>
+                ✅ Answer Key — {sec.title}
+              </h3>
+
+              {questions
+                .filter((q) => q.id >= sec.fromId && q.id <= sec.toId)
+                .map((q) => {
+                  const correctOpt = q.options.find((o) => o.key === q.answerKey);
+                  const userOpt = q.options.find((o) => o.key === answers[q.id]);
+                  const isCorrect = answers[q.id] === q.answerKey;
+
+                  return (
+                    <div key={q.id} style={styles.question}>
+                      <p style={styles.qTitle}>
+                        <b>
+                          {q.id}. {q.q_en}
+                        </b>
+                      </p>
+
+                      <div style={styles.answerBox}>
+                        <div>
+                          <b>Correct:</b> {q.answerKey}
+                          {correctOpt ? ` — ${correctOpt.en}` : ""}
+                        </div>
+                        <div style={{ marginTop: 4 }}>
+                          <b>Your Answer:</b> {answers[q.id] ? answers[q.id] : "Not Attempted"}
+                          {userOpt ? ` — ${userOpt.en}` : ""}
+                        </div>
+                        <div style={{ marginTop: 6, color: isCorrect ? "#27ae60" : "#c0392b" }}>
+                          {isCorrect ? "✔ Correct" : "✘ Wrong"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -697,24 +880,41 @@ export default function QuizPage() {
             <h1 style={styles.header}>📝 {quizTitle}</h1>
 
             <div style={styles.subHeader}>
-              Please enter your name carefully — your submission will be recorded.
+              Quiz start karne se pehle details fill karna mandatory hai — submission record hogi.
             </div>
 
             <div style={styles.badgeRow}>
-              <div style={styles.badge}>⏱ Duration: {QUIZ_DURATION_MIN} Minutes</div>
+              <div style={styles.badge}>⏱ Total Duration: {TOTAL_DURATION_MIN} Minutes</div>
               <div style={styles.badgeBlue}>✅ Questions: {TOTAL_QUESTIONS_DISPLAY}</div>
               <div style={styles.badge}>📌 Total Marks: {TOTAL_MARKS_DISPLAY}</div>
             </div>
           </div>
 
           <div style={styles.notice}>
+            <div style={styles.noticeTitle}>📚 Section & Timing Details</div>
+            <ul style={styles.rules}>
+              {sections.map((s) => (
+                <li key={s.key}>
+                  <b>{s.title}</b> — {s.durationMin} minutes ({s.fromId} to {s.toId})
+                </li>
+              ))}
+              <li>
+                Overall timer <b>{TOTAL_DURATION_MIN} minutes</b> ka hoga (auto submit at end).
+              </li>
+              <li>
+                Section timer khatam hote hi next section start ho jayega (auto move).
+              </li>
+            </ul>
+          </div>
+
+          <div style={styles.notice}>
             <div style={styles.noticeTitle}>⚠️ Important Instructions</div>
             <ul style={styles.rules}>
               <li>
-                This quiz is <b>{QUIZ_DURATION_MIN} minutes</b> long — the timer starts immediately after you click Start.
+                Total quiz <b>{TOTAL_DURATION_MIN} minutes</b> long hai — Start click karte hi timer start.
               </li>
-              <li>Each question has <b>only one correct answer</b>.</li>
-              <li>When time runs out, the quiz will be <b>auto-submitted</b>.</li>
+              <li>Each question ka <b>only one correct answer</b>.</li>
+              <li>Overall time end par quiz <b>auto-submitted</b>.</li>
             </ul>
           </div>
 
@@ -722,14 +922,30 @@ export default function QuizPage() {
             <div style={styles.row2}>
               <input
                 style={styles.input}
-                placeholder="Your Name"
+                placeholder="Student Name"
                 onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                 value={userData.name}
                 inputMode="text"
               />
+              <input
+                style={styles.input}
+                placeholder="College Name"
+                onChange={(e) => setUserData({ ...userData, college: e.target.value })}
+                value={userData.college}
+                inputMode="text"
+              />
+              <input
+                style={styles.input}
+                placeholder="Branch (e.g. CSE / ME / ECE)"
+                onChange={(e) => setUserData({ ...userData, branch: e.target.value })}
+                value={userData.branch}
+                inputMode="text"
+              />
             </div>
 
-            <div style={styles.helper}>Tip: Please type your full name before starting.</div>
+            <div style={styles.helper}>
+              Tip: Full details sahi fill karo — ye Firestore me save hogi.
+            </div>
 
             <button style={styles.button} onClick={handleStart} disabled={loading}>
               {loading ? "Starting..." : "🚀 Start Quiz"}
@@ -740,9 +956,27 @@ export default function QuizPage() {
     );
 
   // ---------------- Quiz Screen --------------------
+  const goNextSection = () => {
+    if (currentSectionIndex < sections.length - 1) {
+      const nextIndex = currentSectionIndex + 1;
+      setCurrentSectionIndex(nextIndex);
+      setSectionTimeLeft(sections[nextIndex].durationMin * 60);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const isLastSection = currentSectionIndex === sections.length - 1;
+
   return (
     <div style={styles.page}>
-      <div style={styles.timer}>⏳ Time Left: {formatTime(timeLeft)}</div>
+      <div style={styles.timer}>
+        <div style={styles.timerLine}>
+          ⏳ Overall Time Left: {formatTime(overallTimeLeft)}
+        </div>
+        <div style={styles.timerLine}>
+          📘 Section ({currentSection?.title}) Time Left: {formatTime(sectionTimeLeft)}
+        </div>
+      </div>
 
       <div style={styles.container}>
         <div style={styles.titleWrap}>
@@ -752,14 +986,21 @@ export default function QuizPage() {
             📝 {quizTitle}
           </h2>
 
+          <div style={styles.subHeader}>
+            <b>Student:</b> {userData.name} &nbsp; | &nbsp; <b>College:</b> {userData.college} &nbsp; | &nbsp;{" "}
+            <b>Branch:</b> {userData.branch}
+          </div>
+
           <div style={styles.badgeRow}>
             <div style={styles.badgeBlue}>📄 Total Marks: {TOTAL_MARKS_DISPLAY}</div>
-            <div style={styles.badge}>⏱ Duration: {QUIZ_DURATION_MIN} Minutes</div>
-            <div style={styles.badgeBlue}>✅ Questions: {TOTAL_QUESTIONS_DISPLAY}</div>
+            <div style={styles.badge}>⏱ Total: {TOTAL_DURATION_MIN} Minutes</div>
+            <div style={styles.badgeBlue}>
+              ✅ Section: {currentSection?.title} ({currentSection?.fromId}–{currentSection?.toId})
+            </div>
           </div>
         </div>
 
-        {questions.map((q) => (
+        {sectionQuestions.map((q) => (
           <div key={q.id} style={styles.question}>
             <p style={styles.qTitle}>
               <b>
@@ -784,6 +1025,12 @@ export default function QuizPage() {
             ))}
           </div>
         ))}
+
+        {!isLastSection ? (
+          <button style={styles.nextBtn} onClick={goNextSection}>
+            ➡️ Next Section
+          </button>
+        ) : null}
 
         <button style={styles.submitBtn} onClick={handleSubmit}>
           ✅ Submit
