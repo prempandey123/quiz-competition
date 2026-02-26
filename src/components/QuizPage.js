@@ -10,12 +10,12 @@ export default function QuizPage() {
   });
 
   // ✅ Quiz Title
-  const quizTitle = "PCM Quiz (Physics + Chemistry + Mathematics)";
+  const quizTitle = "PCM + Aptitude Assessment (Physics, Chemistry, Mathematics, DI, LR, QA, Verbal)";
 
   // ✅ QUIZ LIVE
   const QUIZ_OVER = false;
 
-  // ✅ Total Timing 1 Hour
+  // ✅ Total Timing 60 Minutes
   const TOTAL_DURATION_MIN = 60;
   const TOTAL_DURATION_SEC = TOTAL_DURATION_MIN * 60;
 
@@ -42,7 +42,7 @@ export default function QuizPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ✅ Questions
+  // ✅ Questions (PCM + DI/LR/QA/Verbal)
   const questions = useMemo(
     () => [
       // ---------------- PHYSICS (1-10) ----------------
@@ -85,7 +85,7 @@ export default function QuizPage() {
       {
         id: 4,
         q_en:
-          "PHYSICS 4) An electron enters perpendicular to a uniform magnetic field. If its speed is doubled, radius of circular path becomes:",
+          "PHYSICS 4) An electron enters perpendicular to a uniform magnetic field. If its speed is doubled, the radius of the circular path becomes:",
         options: [
           { key: "A", en: "Same" },
           { key: "B", en: "Half" },
@@ -97,7 +97,7 @@ export default function QuizPage() {
       {
         id: 5,
         q_en:
-          "PHYSICS 5) In Young’s double slit experiment, if wavelength is halved and slit separation doubled, fringe width becomes:",
+          "PHYSICS 5) In Young’s double slit experiment, if wavelength is halved and slit separation is doubled, the fringe width becomes:",
         options: [
           { key: "A", en: "Same" },
           { key: "B", en: "Half" },
@@ -111,17 +111,17 @@ export default function QuizPage() {
         q_en:
           "PHYSICS 6) In a series LCR circuit at resonance, which statement is correct?",
         options: [
-          { key: "A", en: "Current minimum" },
-          { key: "B", en: "Impedance maximum" },
-          { key: "C", en: "Power factor zero" },
-          { key: "D", en: "Voltage across L and C equal in magnitude" },
+          { key: "A", en: "Current is minimum" },
+          { key: "B", en: "Impedance is maximum" },
+          { key: "C", en: "Power factor is zero" },
+          { key: "D", en: "Voltages across L and C are equal in magnitude" },
         ],
         answerKey: "D",
       },
       {
         id: 7,
         q_en:
-          "PHYSICS 7) The stopping potential in photoelectric effect depends on:",
+          "PHYSICS 7) The stopping potential in the photoelectric effect depends on:",
         options: [
           { key: "A", en: "Intensity" },
           { key: "B", en: "Frequency" },
@@ -133,7 +133,7 @@ export default function QuizPage() {
       {
         id: 8,
         q_en:
-          "PHYSICS 8) Match the Following: List I List II A. Gauss Law 1.opposes change B. Lenz Law 2. Electric flux relation C. Ampere Law 3. Particle nature D. Photoelectric effect 4. Magnetic field due to current Options:",
+          "PHYSICS 8) Match the following: List I — A. Gauss Law, B. Lenz Law, C. Ampere Law, D. Photoelectric effect. List II — 1. Opposes change, 2. Electric flux relation, 3. Particle nature, 4. Magnetic field due to current. Options:",
         options: [
           { key: "A", en: "A-1, B-2, C-3, D-4" },
           { key: "B", en: "A-2, B-1, C-4, D-3" },
@@ -145,7 +145,7 @@ export default function QuizPage() {
       {
         id: 9,
         q_en:
-          "PHYSICS 9) A convex lens forms image at same distance as object but inverted. Magnification is:",
+          "PHYSICS 9) A convex lens forms an image at the same distance as the object but inverted. Magnification is:",
         options: [
           { key: "A", en: "+1" },
           { key: "B", en: "−1" },
@@ -157,7 +157,7 @@ export default function QuizPage() {
       {
         id: 10,
         q_en:
-          "PHYSICS 10) Match the Following: List I List II A. Binding energy 1. Voltage regulation B. Half life 2. Rectification C. Zener diode 3. Mass defect D. p-n junction 4. Radioactive decay Options:",
+          "PHYSICS 10) Match the following: List I — A. Binding energy, B. Half life, C. Zener diode, D. p-n junction. List II — 1. Voltage regulation, 2. Rectification, 3. Mass defect, 4. Radioactive decay. Options:",
         options: [
           { key: "A", en: "A-1, B-2, C-3, D-4" },
           { key: "B", en: "A-2, B-1, C-4, D-3" },
@@ -171,7 +171,7 @@ export default function QuizPage() {
       {
         id: 11,
         q_en:
-          "CHEMISTRY 1) Rate law: r = k[A]²[B]. If [A] doubled and [B] halved, rate becomes:",
+          "CHEMISTRY 1) Rate law: r = k[A]²[B]. If [A] is doubled and [B] is halved, the rate becomes:",
         options: [
           { key: "A", en: "Same" },
           { key: "B", en: "Double" },
@@ -182,7 +182,7 @@ export default function QuizPage() {
       },
       {
         id: 12,
-        q_en: "CHEMISTRY 2) For a spontaneous reaction at all temperatures:",
+        q_en: "CHEMISTRY 2) For a reaction to be spontaneous at all temperatures:",
         options: [
           { key: "A", en: "ΔH < 0 and ΔS > 0" },
           { key: "B", en: "ΔH > 0 and ΔS > 0" },
@@ -194,7 +194,7 @@ export default function QuizPage() {
       {
         id: 13,
         q_en:
-          "CHEMISTRY 3) In electrochemical cell, if reaction quotient Q < K, EMF is:",
+          "CHEMISTRY 3) In an electrochemical cell, if reaction quotient Q < K, the EMF is:",
         options: [
           { key: "A", en: "Zero" },
           { key: "B", en: "Negative" },
@@ -205,7 +205,7 @@ export default function QuizPage() {
       },
       {
         id: 14,
-        q_en: "CHEMISTRY 4) Van’t Hoff factor greater than 1 indicates:",
+        q_en: "CHEMISTRY 4) A Van’t Hoff factor greater than 1 indicates:",
         options: [
           { key: "A", en: "Association" },
           { key: "B", en: "Dissociation" },
@@ -216,7 +216,7 @@ export default function QuizPage() {
       },
       {
         id: 15,
-        q_en: "CHEMISTRY 5) Order of boiling point: H2O, NH3, HF",
+        q_en: "CHEMISTRY 5) Correct order of boiling points: H2O, NH3, HF",
         options: [
           { key: "A", en: "HF > H2O > NH3" },
           { key: "B", en: "H2O > HF > NH3" },
@@ -227,7 +227,7 @@ export default function QuizPage() {
       },
       {
         id: 16,
-        q_en: "CHEMISTRY 6) In SN1 reaction, rate determining step involves:",
+        q_en: "CHEMISTRY 6) In an SN1 reaction, the rate-determining step involves:",
         options: [
           { key: "A", en: "Nucleophile attack" },
           { key: "B", en: "Carbocation formation" },
@@ -238,7 +238,7 @@ export default function QuizPage() {
       },
       {
         id: 17,
-        q_en: "CHEMISTRY 7) pH of 0.001 M HCl:",
+        q_en: "CHEMISTRY 7) The pH of 0.001 M HCl is:",
         options: [
           { key: "A", en: "1" },
           { key: "B", en: "2" },
@@ -249,11 +249,11 @@ export default function QuizPage() {
       },
       {
         id: 18,
-        q_en: "CHEMISTRY 8) Which has highest crystal field splitting?",
+        q_en: "CHEMISTRY 8) Which electronic configuration has the highest crystal field stabilization (as per given options)?",
         options: [
           { key: "A", en: "d⁰" },
           { key: "B", en: "d³" },
-          { key: "C", en: "d⁵ high spin" },
+          { key: "C", en: "d⁵ (high spin)" },
           { key: "D", en: "d¹⁰" },
         ],
         answerKey: "B",
@@ -261,11 +261,11 @@ export default function QuizPage() {
       {
         id: 19,
         q_en:
-          "CHEMISTRY 9) If concentration decreases, half life of first order reaction:",
+          "CHEMISTRY 9) If concentration decreases, the half-life of a first-order reaction:",
         options: [
           { key: "A", en: "Increases" },
           { key: "B", en: "Decreases" },
-          { key: "C", en: "Same" },
+          { key: "C", en: "Remains the same" },
           { key: "D", en: "Doubles" },
         ],
         answerKey: "C",
@@ -273,7 +273,7 @@ export default function QuizPage() {
       {
         id: 20,
         q_en:
-          "CHEMISTRY 10) Match the Following: List I List II A. Buffer 1. Surface effect B. Catalyst 2. Liquid in liquid C. Emulsion 3. Resists pH D. Adsorption 4. Lowers Ea Options:",
+          "CHEMISTRY 10) Match the following: List I — A. Buffer, B. Catalyst, C. Emulsion, D. Adsorption. List II — 1. Surface effect, 2. Liquid in liquid, 3. Resists pH change, 4. Lowers activation energy. Options:",
         options: [
           { key: "A", en: "A-1, B-2, C-3, D-4" },
           { key: "B", en: "A-2, B-1, C-4, D-3" },
@@ -286,7 +286,7 @@ export default function QuizPage() {
       // ---------------- MATHEMATICS (21-30) ----------------
       {
         id: 21,
-        q_en: "MATHEMATICS 1) If |A| = 3 for 2×2 matrix, then |A⁻¹| =",
+        q_en: "MATHEMATICS 1) If |A| = 3 for a 2×2 matrix, then |A⁻¹| =",
         options: [
           { key: "A", en: "3" },
           { key: "B", en: "1/3" },
@@ -298,7 +298,7 @@ export default function QuizPage() {
       {
         id: 22,
         q_en:
-          "MATHEMATICS 2) If f(x) = x³ − 3x² + 2, number of local maxima:",
+          "MATHEMATICS 2) If f(x) = x³ − 3x² + 2, the number of local maxima is:",
         options: [
           { key: "A", en: "0" },
           { key: "B", en: "1" },
@@ -321,7 +321,7 @@ export default function QuizPage() {
       },
       {
         id: 24,
-        q_en: "MATHEMATICS 4) Slope of normal to curve y = x² at x = 1:",
+        q_en: "MATHEMATICS 4) Slope of the normal to curve y = x² at x = 1 is:",
         options: [
           { key: "A", en: "−1/2" },
           { key: "B", en: "−1" },
@@ -333,30 +333,30 @@ export default function QuizPage() {
       {
         id: 25,
         q_en:
-          "MATHEMATICS 5) If determinant of coefficient matrix is zero, system may have:",
+          "MATHEMATICS 5) If the determinant of the coefficient matrix is zero, the system may have:",
         options: [
           { key: "A", en: "Unique solution" },
           { key: "B", en: "No solution" },
-          { key: "C", en: "Infinite solution" },
+          { key: "C", en: "Infinite solutions" },
           { key: "D", en: "B or C" },
         ],
         answerKey: "D",
       },
       {
         id: 26,
-        q_en: "MATHEMATICS 6) Unit vector in direction of 2i − 2j:",
+        q_en: "MATHEMATICS 6) Unit vector in the direction of 2i − 2j is:",
         options: [
           { key: "A", en: "(i − j)" },
           { key: "B", en: "(i − j)/√2" },
-          { key: "C", en: "(2i −2j)/2" },
-          { key: "D", en: "(2i −2j)/√8" },
+          { key: "C", en: "(2i − 2j)/2" },
+          { key: "D", en: "(2i − 2j)/√8" },
         ],
         answerKey: "B",
       },
       {
         id: 27,
         q_en:
-          "MATHEMATICS 7) Maximize Z = 3x + 2y subject to x + y ≤ 4, x ≥ 0, y ≥ 0. Maximum value is:",
+          "MATHEMATICS 7) Maximize Z = 3x + 2y subject to x + y ≤ 4, x ≥ 0, y ≥ 0. The maximum value is:",
         options: [
           { key: "A", en: "8" },
           { key: "B", en: "10" },
@@ -367,18 +367,18 @@ export default function QuizPage() {
       },
       {
         id: 28,
-        q_en: "MATHEMATICS 8) ∫ e^x sin x dx involves:",
+        q_en: "MATHEMATICS 8) ∫ e^x sin x dx is typically solved using:",
         options: [
           { key: "A", en: "Substitution" },
-          { key: "B", en: "By parts twice" },
-          { key: "C", en: "Partial fraction" },
-          { key: "D", en: "Direct formula" },
+          { key: "B", en: "Integration by parts (twice)" },
+          { key: "C", en: "Partial fractions" },
+          { key: "D", en: "A direct formula only" },
         ],
         answerKey: "B",
       },
       {
         id: 29,
-        q_en: "MATHEMATICS 9) Maximum value of sin x + cos x:",
+        q_en: "MATHEMATICS 9) The maximum value of sin x + cos x is:",
         options: [
           { key: "A", en: "1" },
           { key: "B", en: "√2" },
@@ -390,7 +390,7 @@ export default function QuizPage() {
       {
         id: 30,
         q_en:
-          "MATHEMATICS 10) Match the Following: List I List II A. Bayes theorem 1. Conditional probability B. Lagrange MVT 2. Mean slope C. Inverse matrix 3. Identity relation D. Linear programming 4. Optimization Options:",
+          "MATHEMATICS 10) Match the following: List I — A. Bayes theorem, B. Lagrange MVT, C. Inverse matrix, D. Linear programming. List II — 1. Conditional probability, 2. Mean slope, 3. Identity relation, 4. Optimization. Options:",
         options: [
           { key: "A", en: "A-1, B-2, C-3, D-4" },
           { key: "B", en: "A-2, B-1, C-4, D-3" },
@@ -399,16 +399,266 @@ export default function QuizPage() {
         ],
         answerKey: "A",
       },
+
+      // ---------------- SECTION D: DATA INTERPRETATION (31-35) ----------------
+      {
+        id: 31,
+        q_en:
+          "DATA INTERPRETATION 1) Pie Chart (Total Employees = 800): Production – 320, Marketing – 200, HR – 80, IT – 120, Finance – 80. What is the percentage of employees in Production?",
+        options: [
+          { key: "A", en: "35%" },
+          { key: "B", en: "40%" },
+          { key: "C", en: "45%" },
+          { key: "D", en: "50%" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 32,
+        q_en:
+          "DATA INTERPRETATION 2) Ratio of Marketing to IT employees is:",
+        options: [
+          { key: "A", en: "5:3" },
+          { key: "B", en: "4:3" },
+          { key: "C", en: "3:2" },
+          { key: "D", en: "2:1" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 33,
+        q_en:
+          "DATA INTERPRETATION 3) Combined percentage of HR and Finance employees is:",
+        options: [
+          { key: "A", en: "20%" },
+          { key: "B", en: "25%" },
+          { key: "C", en: "30%" },
+          { key: "D", en: "35%" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 34,
+        q_en:
+          "DATA INTERPRETATION 4) If 25% of Production employees are promoted, how many employees are promoted?",
+        options: [
+          { key: "A", en: "70" },
+          { key: "B", en: "75" },
+          { key: "C", en: "80" },
+          { key: "D", en: "85" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 35,
+        q_en:
+          "DATA INTERPRETATION 5) Which department has the second-highest number of employees?",
+        options: [
+          { key: "A", en: "IT" },
+          { key: "B", en: "Marketing" },
+          { key: "C", en: "Finance" },
+          { key: "D", en: "HR" },
+        ],
+        answerKey: "B",
+      },
+
+      // ---------------- SECTION E: LOGICAL REASONING (36-45) ----------------
+      {
+        id: 36,
+        q_en: "LOGICAL REASONING 1) Find the missing term: AZ, BY, CX, ?",
+        options: [
+          { key: "A", en: "DW" },
+          { key: "B", en: "DV" },
+          { key: "C", en: "EV" },
+          { key: "D", en: "EW" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 37,
+        q_en:
+          "LOGICAL REASONING 2) Statement: All engineers are graduates. Some graduates are MBA holders. Conclusion:",
+        options: [
+          { key: "A", en: "All engineers are MBA holders" },
+          { key: "B", en: "Some engineers are MBA holders" },
+          { key: "C", en: "Engineers are graduates" },
+          { key: "D", en: "None of the above" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 38,
+        q_en: "LOGICAL REASONING 3) Odd one out: 121, 144, 169, 196, 225",
+        options: [
+          { key: "A", en: "121" },
+          { key: "B", en: "144" },
+          { key: "C", en: "169" },
+          { key: "D", en: "196" },
+          { key: "E", en: "225" },
+        ],
+        answerKey: "E",
+      },
+      {
+        id: 39,
+        q_en:
+          "LOGICAL REASONING 4) If CAT = 3120 (C=3, A=1, T=20), then DOG = ?",
+        options: [
+          { key: "A", en: "4715" },
+          { key: "B", en: "4157" },
+          { key: "C", en: "4716" },
+          { key: "D", en: "4751" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 40,
+        q_en:
+          "LOGICAL REASONING 5) Five people sit in a row. A is left of B, C is right of B, D is left of A. Who is at the extreme left?",
+        options: [
+          { key: "A", en: "A" },
+          { key: "B", en: "B" },
+          { key: "C", en: "C" },
+          { key: "D", en: "D" },
+        ],
+        answerKey: "D",
+      },
+
+      // (You provided 10 LR questions label, but only 5 LR questions are present in your message.
+      // Keeping exactly what you sent.)
+      // If you send the remaining 5 LR questions, I will add them as Q41–Q45.
+
+      // ---------------- SECTION F: QUANTITATIVE APTITUDE (41-45) ----------------
+      {
+        id: 41,
+        q_en: "QUANTITATIVE APTITUDE 1) Average of first 20 natural numbers is:",
+        options: [
+          { key: "A", en: "10" },
+          { key: "B", en: "10.5" },
+          { key: "C", en: "11" },
+          { key: "D", en: "9.5" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 42,
+        q_en:
+          "QUANTITATIVE APTITUDE 2) A sum doubles in 5 years at simple interest. The rate per annum is:",
+        options: [
+          { key: "A", en: "10%" },
+          { key: "B", en: "15%" },
+          { key: "C", en: "20%" },
+          { key: "D", en: "25%" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 43,
+        q_en: "QUANTITATIVE APTITUDE 3) 40% of a number is 240. The number is:",
+        options: [
+          { key: "A", en: "500" },
+          { key: "B", en: "550" },
+          { key: "C", en: "600" },
+          { key: "D", en: "650" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 44,
+        q_en:
+          "QUANTITATIVE APTITUDE 4) Time & Work: A alone can do a job in 12 days, B alone in 18 days. Together they will complete it in:",
+        options: [
+          { key: "A", en: "6 days" },
+          { key: "B", en: "7.2 days" },
+          { key: "C", en: "8 days" },
+          { key: "D", en: "9 days" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 45,
+        q_en: "QUANTITATIVE APTITUDE 5) If x² – 9 = 0, then x =",
+        options: [
+          { key: "A", en: "±3" },
+          { key: "B", en: "3" },
+          { key: "C", en: "-3" },
+          { key: "D", en: "±9" },
+        ],
+        answerKey: "A",
+      },
+
+      // ---------------- SECTION G: VERBAL ABILITY (46-50) ----------------
+      {
+        id: 46,
+        q_en: 'VERBAL ABILITY 1) Synonym of "Meticulous" is:',
+        options: [
+          { key: "A", en: "Careless" },
+          { key: "B", en: "Careful" },
+          { key: "C", en: "Rough" },
+          { key: "D", en: "Fast" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 47,
+        q_en: 'VERBAL ABILITY 2) Antonym of "Scarcity" is:',
+        options: [
+          { key: "A", en: "Shortage" },
+          { key: "B", en: "Plenty" },
+          { key: "C", en: "Lack" },
+          { key: "D", en: "Need" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 48,
+        q_en: "VERBAL ABILITY 3) Fill in the blank: He has been living here _____ five years.",
+        options: [
+          { key: "A", en: "since" },
+          { key: "B", en: "for" },
+          { key: "C", en: "from" },
+          { key: "D", en: "at" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 49,
+        q_en: "VERBAL ABILITY 4) Choose the grammatically correct sentence:",
+        options: [
+          { key: "A", en: "Each of the students have a book." },
+          { key: "B", en: "Each of the students has a book." },
+          { key: "C", en: "Each students have book." },
+          { key: "D", en: "Each student have a book." },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 50,
+        q_en: 'VERBAL ABILITY 5) Idiom: "Hit the nail on the head" means:',
+        options: [
+          { key: "A", en: "Miss the point" },
+          { key: "B", en: "Exactly right" },
+          { key: "C", en: "Angry" },
+          { key: "D", en: "Confused" },
+        ],
+        answerKey: "B",
+      },
     ],
     []
   );
 
-  // ✅ Section-wise config (1 hour total)
+  // ✅ Section-wise config (exactly as requested: 15/15/15/15)
   const sections = useMemo(
     () => [
-      { key: "PHYSICS", title: "Physics", fromId: 1, toId: 10, durationMin: 20 },
-      { key: "CHEMISTRY", title: "Chemistry", fromId: 11, toId: 20, durationMin: 20 },
-      { key: "MATHS", title: "Mathematics", fromId: 21, toId: 30, durationMin: 20 },
+      { key: "PHYSICS", title: "Physics", fromId: 1, toId: 10, durationMin: 15 },
+      { key: "CHEMISTRY", title: "Chemistry", fromId: 11, toId: 20, durationMin: 15 },
+      { key: "MATHEMATICS", title: "Mathematics", fromId: 21, toId: 30, durationMin: 15 },
+      {
+        key: "APTITUDE",
+        title: "Aptitude (DI + Logical Reasoning + Quantitative Aptitude + Verbal Ability)",
+        fromId: 31,
+        toId: 50,
+        durationMin: 15,
+      },
     ],
     []
   );
@@ -442,25 +692,21 @@ export default function QuizPage() {
   // ✅ Auto submit on overall time end
   useEffect(() => {
     if (!quizStarted || submitted) return;
-    if (overallTimeLeft === 0) {
-      handleSubmit();
-    }
+    if (overallTimeLeft === 0) handleSubmit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallTimeLeft, quizStarted, submitted]);
 
   // ✅ Auto move to next section on section time end
   useEffect(() => {
     if (!quizStarted || submitted) return;
+
     if (sectionTimeLeft === 0 && overallTimeLeft > 0) {
-      // move next section, if available
       if (currentSectionIndex < sections.length - 1) {
         const nextIndex = currentSectionIndex + 1;
         setCurrentSectionIndex(nextIndex);
         setSectionTimeLeft(sections[nextIndex].durationMin * 60);
-        // scroll to top
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
-        // last section ended -> submit
         handleSubmit();
       }
     }
@@ -470,9 +716,11 @@ export default function QuizPage() {
   // ---------------- Start Quiz --------------------
   const handleStart = async () => {
     if (!userData.name || !userData.college || !userData.branch) {
-      alert("⚠️ Please fill Name, College Name, and Branch!");
+      alert("Please fill in Name, College Name, and Branch to start the quiz.");
       return;
     }
+
+    isSubmittingRef.current = false;
 
     setLoading(true);
     setLoading(false);
@@ -489,7 +737,7 @@ export default function QuizPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ---------------- Submit (LOGIC UNCHANGED) --------------------
+  // ---------------- Submit (SCORING/FIRESTORE LOGIC UNCHANGED) --------------------
   const handleSubmit = async () => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
@@ -510,7 +758,7 @@ export default function QuizPage() {
       quizTitle,
       answers,
       marks: score,
-      questions, // same as your original (snapshot)
+      questions, // snapshot
       submittedAt: serverTimestamp(),
     });
   };
@@ -758,26 +1006,11 @@ export default function QuizPage() {
             <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
               📝 {quizTitle}
             </h2>
-            <h3
-              style={{
-                color: "#c0392b",
-                textAlign: "center",
-                margin: "12px 0 0",
-                fontWeight: 900,
-              }}
-            >
-              ✅ Quiz is Over
+            <h3 style={{ color: "#c0392b", textAlign: "center", margin: "12px 0 0", fontWeight: 900 }}>
+              Quiz Closed
             </h3>
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                color: "#566573",
-                fontWeight: 700,
-                lineHeight: 1.4,
-              }}
-            >
-              This quiz is currently closed. Please contact HR/Admin.
+            <p style={{ textAlign: "center", marginTop: 10, color: "#566573", fontWeight: 700, lineHeight: 1.4 }}>
+              This quiz is currently unavailable. Please contact the administrator.
             </p>
           </div>
         </div>
@@ -796,41 +1029,23 @@ export default function QuizPage() {
               📝 {quizTitle}
             </h2>
             <h3 style={{ color: "#27ae60", textAlign: "center", margin: "10px 0 0" }}>
-              🎉 Quiz Submitted Successfully!
+              Submission Successful
             </h3>
 
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                color: "#2c3e50",
-                fontWeight: 700,
-                lineHeight: 1.4,
-              }}
-            >
-              <b>Student:</b> {userData.name} &nbsp; | &nbsp; <b>College:</b>{" "}
-              {userData.college} &nbsp; | &nbsp; <b>Branch:</b> {userData.branch}
+            <p style={{ textAlign: "center", marginTop: 10, color: "#2c3e50", fontWeight: 700, lineHeight: 1.4 }}>
+              <b>Student:</b> {userData.name} &nbsp; | &nbsp; <b>College:</b> {userData.college} &nbsp; | &nbsp;{" "}
+              <b>Branch:</b> {userData.branch}
             </p>
 
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                color: "#2c3e50",
-                fontWeight: 700,
-                lineHeight: 1.4,
-              }}
-            >
-              Your Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
+            <p style={{ textAlign: "center", marginTop: 10, color: "#2c3e50", fontWeight: 700, lineHeight: 1.4 }}>
+              Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
             </p>
           </div>
 
-          {/* ✅ Answers (section-wise) */}
+          {/* ✅ Answer Key (all sections) */}
           {sections.map((sec) => (
             <div key={sec.key} style={styles.titleWrap}>
-              <h3 style={{ margin: 0, color: "#2c3e50" }}>
-                ✅ Answer Key — {sec.title}
-              </h3>
+              <h3 style={{ margin: 0, color: "#2c3e50" }}>Answer Key — {sec.title}</h3>
 
               {questions
                 .filter((q) => q.id >= sec.fromId && q.id <= sec.toId)
@@ -849,7 +1064,7 @@ export default function QuizPage() {
 
                       <div style={styles.answerBox}>
                         <div>
-                          <b>Correct:</b> {q.answerKey}
+                          <b>Correct Answer:</b> {q.answerKey}
                           {correctOpt ? ` — ${correctOpt.en}` : ""}
                         </div>
                         <div style={{ marginTop: 4 }}>
@@ -857,7 +1072,7 @@ export default function QuizPage() {
                           {userOpt ? ` — ${userOpt.en}` : ""}
                         </div>
                         <div style={{ marginTop: 6, color: isCorrect ? "#27ae60" : "#c0392b" }}>
-                          {isCorrect ? "✔ Correct" : "✘ Wrong"}
+                          {isCorrect ? "✔ Correct" : "✘ Incorrect"}
                         </div>
                       </div>
                     </div>
@@ -880,7 +1095,7 @@ export default function QuizPage() {
             <h1 style={styles.header}>📝 {quizTitle}</h1>
 
             <div style={styles.subHeader}>
-              Quiz start karne se pehle details fill karna mandatory hai — submission record hogi.
+              Please enter your details accurately — your submission will be recorded.
             </div>
 
             <div style={styles.badgeRow}>
@@ -891,30 +1106,28 @@ export default function QuizPage() {
           </div>
 
           <div style={styles.notice}>
-            <div style={styles.noticeTitle}>📚 Section & Timing Details</div>
+            <div style={styles.noticeTitle}>Section & Timing Details</div>
             <ul style={styles.rules}>
               {sections.map((s) => (
                 <li key={s.key}>
-                  <b>{s.title}</b> — {s.durationMin} minutes ({s.fromId} to {s.toId})
+                  <b>{s.title}</b> — {s.durationMin} minutes (Q{s.fromId} to Q{s.toId})
                 </li>
               ))}
               <li>
-                Overall timer <b>{TOTAL_DURATION_MIN} minutes</b> ka hoga (auto submit at end).
+                The quiz will be automatically submitted when the overall time limit ends.
               </li>
               <li>
-                Section timer khatam hote hi next section start ho jayega (auto move).
+                When a section timer ends, the next section will start automatically.
               </li>
             </ul>
           </div>
 
           <div style={styles.notice}>
-            <div style={styles.noticeTitle}>⚠️ Important Instructions</div>
+            <div style={styles.noticeTitle}>Important Instructions</div>
             <ul style={styles.rules}>
-              <li>
-                Total quiz <b>{TOTAL_DURATION_MIN} minutes</b> long hai — Start click karte hi timer start.
-              </li>
-              <li>Each question ka <b>only one correct answer</b>.</li>
-              <li>Overall time end par quiz <b>auto-submitted</b>.</li>
+              <li>Each question has only <b>one</b> correct answer.</li>
+              <li>Please do not refresh the page during the assessment.</li>
+              <li>Ensure a stable internet connection for saving your submission.</li>
             </ul>
           </div>
 
@@ -936,19 +1149,17 @@ export default function QuizPage() {
               />
               <input
                 style={styles.input}
-                placeholder="Branch (e.g. CSE / ME / ECE)"
+                placeholder="Branch (e.g., CSE / ME / ECE)"
                 onChange={(e) => setUserData({ ...userData, branch: e.target.value })}
                 value={userData.branch}
                 inputMode="text"
               />
             </div>
 
-            <div style={styles.helper}>
-              Tip: Full details sahi fill karo — ye Firestore me save hogi.
-            </div>
+            <div style={styles.helper}>Tip: Please enter your full name and official college details.</div>
 
             <button style={styles.button} onClick={handleStart} disabled={loading}>
-              {loading ? "Starting..." : "🚀 Start Quiz"}
+              {loading ? "Starting..." : "🚀 Start Assessment"}
             </button>
           </div>
         </div>
@@ -970,11 +1181,9 @@ export default function QuizPage() {
   return (
     <div style={styles.page}>
       <div style={styles.timer}>
+        <div style={styles.timerLine}>⏳ Overall Time Remaining: {formatTime(overallTimeLeft)}</div>
         <div style={styles.timerLine}>
-          ⏳ Overall Time Left: {formatTime(overallTimeLeft)}
-        </div>
-        <div style={styles.timerLine}>
-          📘 Section ({currentSection?.title}) Time Left: {formatTime(sectionTimeLeft)}
+          📘 Section Time Remaining ({currentSection?.title}): {formatTime(sectionTimeLeft)}
         </div>
       </div>
 
@@ -982,9 +1191,7 @@ export default function QuizPage() {
         <div style={styles.titleWrap}>
           <div style={styles.brand}>HERO STEELS LIMITED</div>
 
-          <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
-            📝 {quizTitle}
-          </h2>
+          <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>📝 {quizTitle}</h2>
 
           <div style={styles.subHeader}>
             <b>Student:</b> {userData.name} &nbsp; | &nbsp; <b>College:</b> {userData.college} &nbsp; | &nbsp;{" "}
@@ -995,7 +1202,7 @@ export default function QuizPage() {
             <div style={styles.badgeBlue}>📄 Total Marks: {TOTAL_MARKS_DISPLAY}</div>
             <div style={styles.badge}>⏱ Total: {TOTAL_DURATION_MIN} Minutes</div>
             <div style={styles.badgeBlue}>
-              ✅ Section: {currentSection?.title} ({currentSection?.fromId}–{currentSection?.toId})
+              ✅ Current Section: {currentSection?.title} (Q{currentSection?.fromId}–Q{currentSection?.toId})
             </div>
           </div>
         </div>
@@ -1028,12 +1235,12 @@ export default function QuizPage() {
 
         {!isLastSection ? (
           <button style={styles.nextBtn} onClick={goNextSection}>
-            ➡️ Next Section
+            ➡️ Proceed to Next Section
           </button>
         ) : null}
 
         <button style={styles.submitBtn} onClick={handleSubmit}>
-          ✅ Submit
+          ✅ Submit Assessment
         </button>
       </div>
     </div>
