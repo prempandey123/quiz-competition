@@ -10,7 +10,8 @@ export default function QuizPage() {
   });
 
   // ✅ Quiz Title
-  const quizTitle = "PCM + Aptitude Assessment (Physics, Chemistry, Mathematics, DI, LR, QA, Verbal)";
+  const quizTitle =
+    "PCM + Aptitude Assessment (Physics, Chemistry, Mathematics, DI, LR, QA, Verbal)";
 
   // ✅ QUIZ LIVE
   const QUIZ_OVER = false;
@@ -114,7 +115,10 @@ export default function QuizPage() {
           { key: "A", en: "Current is minimum" },
           { key: "B", en: "Impedance is maximum" },
           { key: "C", en: "Power factor is zero" },
-          { key: "D", en: "Voltages across L and C are equal in magnitude" },
+          {
+            key: "D",
+            en: "Voltages across L and C are equal in magnitude",
+          },
         ],
         answerKey: "D",
       },
@@ -249,7 +253,8 @@ export default function QuizPage() {
       },
       {
         id: 18,
-        q_en: "CHEMISTRY 8) Which electronic configuration has the highest crystal field stabilization (as per given options)?",
+        q_en:
+          "CHEMISTRY 8) Which electronic configuration has the highest crystal field stabilization (as per given options)?",
         options: [
           { key: "A", en: "d⁰" },
           { key: "B", en: "d³" },
@@ -415,8 +420,7 @@ export default function QuizPage() {
       },
       {
         id: 32,
-        q_en:
-          "DATA INTERPRETATION 2) Ratio of Marketing to IT employees is:",
+        q_en: "DATA INTERPRETATION 2) Ratio of Marketing to IT employees is:",
         options: [
           { key: "A", en: "5:3" },
           { key: "B", en: "4:3" },
@@ -427,8 +431,7 @@ export default function QuizPage() {
       },
       {
         id: 33,
-        q_en:
-          "DATA INTERPRETATION 3) Combined percentage of HR and Finance employees is:",
+        q_en: "DATA INTERPRETATION 3) Combined percentage of HR and Finance employees is:",
         options: [
           { key: "A", en: "20%" },
           { key: "B", en: "25%" },
@@ -451,8 +454,7 @@ export default function QuizPage() {
       },
       {
         id: 35,
-        q_en:
-          "DATA INTERPRETATION 5) Which department has the second-highest number of employees?",
+        q_en: "DATA INTERPRETATION 5) Which department has the second-highest number of employees?",
         options: [
           { key: "A", en: "IT" },
           { key: "B", en: "Marketing" },
@@ -500,8 +502,7 @@ export default function QuizPage() {
       },
       {
         id: 39,
-        q_en:
-          "LOGICAL REASONING 4) If CAT = 3120 (C=3, A=1, T=20), then DOG = ?",
+        q_en: "LOGICAL REASONING 4) If CAT = 3120 (C=3, A=1, T=20), then DOG = ?",
         options: [
           { key: "A", en: "4715" },
           { key: "B", en: "4157" },
@@ -522,10 +523,6 @@ export default function QuizPage() {
         ],
         answerKey: "D",
       },
-
-      // (You provided 10 LR questions label, but only 5 LR questions are present in your message.
-      // Keeping exactly what you sent.)
-      // If you send the remaining 5 LR questions, I will add them as Q41–Q45.
 
       // ---------------- SECTION F: QUANTITATIVE APTITUDE (41-45) ----------------
       {
@@ -650,11 +647,24 @@ export default function QuizPage() {
   const sections = useMemo(
     () => [
       { key: "PHYSICS", title: "Physics", fromId: 1, toId: 10, durationMin: 15 },
-      { key: "CHEMISTRY", title: "Chemistry", fromId: 11, toId: 20, durationMin: 15 },
-      { key: "MATHEMATICS", title: "Mathematics", fromId: 21, toId: 30, durationMin: 15 },
+      {
+        key: "CHEMISTRY",
+        title: "Chemistry",
+        fromId: 11,
+        toId: 20,
+        durationMin: 15,
+      },
+      {
+        key: "MATHEMATICS",
+        title: "Mathematics",
+        fromId: 21,
+        toId: 30,
+        durationMin: 15,
+      },
       {
         key: "APTITUDE",
-        title: "Aptitude (DI + Logical Reasoning + Quantitative Aptitude + Verbal Ability)",
+        title:
+          "Aptitude (DI + Logical Reasoning + Quantitative Aptitude + Verbal Ability)",
         fromId: 31,
         toId: 50,
         durationMin: 15,
@@ -669,11 +679,15 @@ export default function QuizPage() {
   const currentSection = sections[currentSectionIndex];
   const sectionQuestions = useMemo(() => {
     if (!currentSection) return [];
-    return questions.filter((q) => q.id >= currentSection.fromId && q.id <= currentSection.toId);
+    return questions.filter(
+      (q) => q.id >= currentSection.fromId && q.id <= currentSection.toId
+    );
   }, [questions, currentSection]);
 
   const formatTime = (sec) =>
-    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
+    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(
+      sec % 60
+    ).padStart(2, "0")}`;
 
   const handleChange = (id, val) => setAnswers({ ...answers, [id]: val });
 
@@ -711,7 +725,13 @@ export default function QuizPage() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionTimeLeft, quizStarted, submitted, currentSectionIndex, overallTimeLeft]);
+  }, [
+    sectionTimeLeft,
+    quizStarted,
+    submitted,
+    currentSectionIndex,
+    overallTimeLeft,
+  ]);
 
   // ---------------- Start Quiz --------------------
   const handleStart = async () => {
@@ -1041,45 +1061,6 @@ export default function QuizPage() {
               Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
             </p>
           </div>
-
-          {/* ✅ Answer Key (all sections) */}
-          {sections.map((sec) => (
-            <div key={sec.key} style={styles.titleWrap}>
-              <h3 style={{ margin: 0, color: "#2c3e50" }}>Answer Key — {sec.title}</h3>
-
-              {questions
-                .filter((q) => q.id >= sec.fromId && q.id <= sec.toId)
-                .map((q) => {
-                  const correctOpt = q.options.find((o) => o.key === q.answerKey);
-                  const userOpt = q.options.find((o) => o.key === answers[q.id]);
-                  const isCorrect = answers[q.id] === q.answerKey;
-
-                  return (
-                    <div key={q.id} style={styles.question}>
-                      <p style={styles.qTitle}>
-                        <b>
-                          {q.id}. {q.q_en}
-                        </b>
-                      </p>
-
-                      <div style={styles.answerBox}>
-                        <div>
-                          <b>Correct Answer:</b> {q.answerKey}
-                          {correctOpt ? ` — ${correctOpt.en}` : ""}
-                        </div>
-                        <div style={{ marginTop: 4 }}>
-                          <b>Your Answer:</b> {answers[q.id] ? answers[q.id] : "Not Attempted"}
-                          {userOpt ? ` — ${userOpt.en}` : ""}
-                        </div>
-                        <div style={{ marginTop: 6, color: isCorrect ? "#27ae60" : "#c0392b" }}>
-                          {isCorrect ? "✔ Correct" : "✘ Incorrect"}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          ))}
         </div>
       </div>
     );
@@ -1113,19 +1094,17 @@ export default function QuizPage() {
                   <b>{s.title}</b> — {s.durationMin} minutes (Q{s.fromId} to Q{s.toId})
                 </li>
               ))}
-              <li>
-                The quiz will be automatically submitted when the overall time limit ends.
-              </li>
-              <li>
-                When a section timer ends, the next section will start automatically.
-              </li>
+              <li>The quiz will be automatically submitted when the overall time limit ends.</li>
+              <li>When a section timer ends, the next section will start automatically.</li>
             </ul>
           </div>
 
           <div style={styles.notice}>
             <div style={styles.noticeTitle}>Important Instructions</div>
             <ul style={styles.rules}>
-              <li>Each question has only <b>one</b> correct answer.</li>
+              <li>
+                Each question has only <b>one</b> correct answer.
+              </li>
               <li>Please do not refresh the page during the assessment.</li>
               <li>Ensure a stable internet connection for saving your submission.</li>
             </ul>
