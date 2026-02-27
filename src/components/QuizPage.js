@@ -48,17 +48,17 @@ export default function QuizPage() {
     () => [
       // ---------------- PHYSICS (1-10) ----------------
       {
-  id: 1,
-  q_en:
-    "PHYSICS 1) Two identical metallic spheres carry charges +q and +9q. They are connected by a thin wire and then separated again. The ratio of initial to final electrostatic potential energy is:",
-  options: [
-    { key: "A", en: "25:41" },
-    { key: "B", en: "41:25" },
-    { key: "C", en: "82:50" },
-    { key: "D", en: "50:82" },
-  ],
-  answerKey: "B",
-},
+        id: 1,
+        q_en:
+          "PHYSICS 1) Two identical metallic spheres carry charges +q and +9q. They are connected by a thin wire and then separated again. The ratio of initial to final electrostatic potential energy is:",
+        options: [
+          { key: "A", en: "25:41" },
+          { key: "B", en: "41:25" }, // ✅ Correct
+          { key: "C", en: "9:25" },
+          { key: "D", en: "5:9" },
+        ],
+        answerKey: "B",
+      },
       {
         id: 2,
         q_en:
@@ -115,10 +115,7 @@ export default function QuizPage() {
           { key: "A", en: "Current is minimum" },
           { key: "B", en: "Impedance is maximum" },
           { key: "C", en: "Power factor is zero" },
-          {
-            key: "D",
-            en: "Voltages across L and C are equal in magnitude",
-          },
+          { key: "D", en: "Voltages across L and C are equal in magnitude" },
         ],
         answerKey: "D",
       },
@@ -420,7 +417,8 @@ export default function QuizPage() {
       },
       {
         id: 32,
-        q_en: "DATA INTERPRETATION 2) Ratio of Marketing to IT employees is:",
+        q_en:
+          "DATA INTERPRETATION 2) Ratio of Marketing to IT employees is:",
         options: [
           { key: "A", en: "5:3" },
           { key: "B", en: "4:3" },
@@ -431,7 +429,8 @@ export default function QuizPage() {
       },
       {
         id: 33,
-        q_en: "DATA INTERPRETATION 3) Combined percentage of HR and Finance employees is:",
+        q_en:
+          "DATA INTERPRETATION 3) Combined percentage of HR and Finance employees is:",
         options: [
           { key: "A", en: "20%" },
           { key: "B", en: "25%" },
@@ -454,7 +453,8 @@ export default function QuizPage() {
       },
       {
         id: 35,
-        q_en: "DATA INTERPRETATION 5) Which department has the second-highest number of employees?",
+        q_en:
+          "DATA INTERPRETATION 5) Which department has the second-highest number of employees?",
         options: [
           { key: "A", en: "IT" },
           { key: "B", en: "Marketing" },
@@ -489,20 +489,21 @@ export default function QuizPage() {
         answerKey: "C",
       },
       {
-  id: 38,
-  q_en: "LOGICAL REASONING 3) Odd one out: 121, 144, 169, 196, 216",
-  options: [
-    { key: "A", en: "121" },
-    { key: "B", en: "144" },
-    { key: "C", en: "169" },
-    { key: "D", en: "196" },
-    { key: "E", en: "216" },
-  ],
-  answerKey: "E",
-},
+        id: 38,
+        q_en: "LOGICAL REASONING 3) Odd one out: 121, 144, 169, 196, 216",
+        options: [
+          { key: "A", en: "121" },
+          { key: "B", en: "144" },
+          { key: "C", en: "169" },
+          { key: "D", en: "196" },
+          { key: "E", en: "216" },
+        ],
+        answerKey: "E",
+      },
       {
         id: 39,
-        q_en: "LOGICAL REASONING 4) If CAT = 3120 (C=3, A=1, T=20), then DOG = ?",
+        q_en:
+          "LOGICAL REASONING 4) If CAT = 3120 (C=3, A=1, T=20), then DOG = ?",
         options: [
           { key: "A", en: "4715" },
           { key: "B", en: "4157" },
@@ -527,7 +528,8 @@ export default function QuizPage() {
       // ---------------- SECTION F: QUANTITATIVE APTITUDE (41-45) ----------------
       {
         id: 41,
-        q_en: "QUANTITATIVE APTITUDE 1) Average of first 20 natural numbers is:",
+        q_en:
+          "QUANTITATIVE APTITUDE 1) Average of first 20 natural numbers is:",
         options: [
           { key: "A", en: "10" },
           { key: "B", en: "10.5" },
@@ -550,7 +552,8 @@ export default function QuizPage() {
       },
       {
         id: 43,
-        q_en: "QUANTITATIVE APTITUDE 3) 40% of a number is 240. The number is:",
+        q_en:
+          "QUANTITATIVE APTITUDE 3) 40% of a number is 240. The number is:",
         options: [
           { key: "A", en: "500" },
           { key: "B", en: "550" },
@@ -608,7 +611,8 @@ export default function QuizPage() {
       },
       {
         id: 48,
-        q_en: "VERBAL ABILITY 3) Fill in the blank: He has been living here _____ five years.",
+        q_en:
+          "VERBAL ABILITY 3) Fill in the blank: He has been living here _____ five years.",
         options: [
           { key: "A", en: "since" },
           { key: "B", en: "for" },
@@ -725,13 +729,7 @@ export default function QuizPage() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    sectionTimeLeft,
-    quizStarted,
-    submitted,
-    currentSectionIndex,
-    overallTimeLeft,
-  ]);
+  }, [sectionTimeLeft, quizStarted, submitted, currentSectionIndex, overallTimeLeft]);
 
   // ---------------- Start Quiz --------------------
   const handleStart = async () => {
@@ -771,16 +769,21 @@ export default function QuizPage() {
     setSubmitted(true);
     setQuizStarted(false);
 
-    await addDoc(collection(db, "quizResults"), {
-      name: userData.name,
-      college: userData.college,
-      branch: userData.branch,
-      quizTitle,
-      answers,
-      marks: score,
-      questions, // snapshot
-      submittedAt: serverTimestamp(),
-    });
+    try {
+      await addDoc(collection(db, "quizResults"), {
+        name: userData.name,
+        college: userData.college,
+        branch: userData.branch,
+        quizTitle,
+        answers,
+        marks: score,
+        questions, // snapshot
+        submittedAt: serverTimestamp(),
+      });
+    } catch (e) {
+      // If Firestore fails, still keep UI submitted; optionally log
+      console.error("Error saving quiz result:", e);
+    }
   };
 
   // ---------------- Styles --------------------
