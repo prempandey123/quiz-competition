@@ -48,17 +48,17 @@ export default function QuizPage() {
     () => [
       // ---------------- PHYSICS (1-10) ----------------
       {
-        id: 1,
-        q_en:
-          "PHYSICS 1) Two identical metallic spheres carry charges +q and +9q. They are connected by a thin wire and then separated again. The ratio of initial to final electrostatic potential energy is:",
-        options: [
-          { key: "A", en: "1:1" },
-          { key: "B", en: "5:9" },
-          { key: "C", en: "9:5" },
-          { key: "D", en: "9:25" },
-        ],
-        answerKey: "D",
-      },
+  id: 1,
+  q_en:
+    "PHYSICS 1) Two identical metallic spheres carry charges +q and +9q. They are connected by a thin wire and then separated again. The ratio of initial to final electrostatic potential energy is:",
+  options: [
+    { key: "A", en: "25:41" },
+    { key: "B", en: "41:25" },
+    { key: "C", en: "82:50" },
+    { key: "D", en: "50:82" },
+  ],
+  answerKey: "B",
+},
       {
         id: 2,
         q_en:
@@ -489,17 +489,17 @@ export default function QuizPage() {
         answerKey: "C",
       },
       {
-        id: 38,
-        q_en: "LOGICAL REASONING 3) Odd one out: 121, 144, 169, 196, 225",
-        options: [
-          { key: "A", en: "121" },
-          { key: "B", en: "144" },
-          { key: "C", en: "169" },
-          { key: "D", en: "196" },
-          { key: "E", en: "225" },
-        ],
-        answerKey: "E",
-      },
+  id: 38,
+  q_en: "LOGICAL REASONING 3) Odd one out: 121, 144, 169, 196, 216",
+  options: [
+    { key: "A", en: "121" },
+    { key: "B", en: "144" },
+    { key: "C", en: "169" },
+    { key: "D", en: "196" },
+    { key: "E", en: "216" },
+  ],
+  answerKey: "E",
+},
       {
         id: 39,
         q_en: "LOGICAL REASONING 4) If CAT = 3120 (C=3, A=1, T=20), then DOG = ?",
