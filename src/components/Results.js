@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { db } from "../firebase";
 import {
   collection,
@@ -12,7 +12,7 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-export default function Results() {
+export default function ResultsPCM_Aptitude() {
   const [results, setResults] = useState([]);
   const [quizTitles, setQuizTitles] = useState([]);
   const [selectedQuizTitle, setSelectedQuizTitle] = useState("");
@@ -20,14 +20,12 @@ export default function Results() {
   const [loading, setLoading] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState(null);
 
-  // ✅ toggle for questions view (inside modal)
   const [showQuestions, setShowQuestions] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // delete loaders
   const [deletingId, setDeletingId] = useState(null);
   const [deletingQuiz, setDeletingQuiz] = useState(false);
 
@@ -35,11 +33,20 @@ export default function Results() {
 
   const cleanText = (t) => (t || "").replace(/\s+/g, " ").trim();
 
+  const getTotalQuestions = (u) => {
+    if (Array.isArray(u.questions) && u.questions.length > 0) return u.questions.length;
+    // fallback: max question id from answers (not perfect but OK for very old records)
+    const keys = Object.keys(u.answers || {});
+    return keys.length ? keys.length : 0;
+  };
+
+  const getAttempted = (u) => Object.keys(u.answers || {}).length;
+
   // ---------------- LOGIN ----------------
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (allowedPasswords.includes(passwordInput.trim())) {
       setIsAuthenticated(true);
-      fetchQuizTitles();
+      await fetchQuizTitles();
     } else {
       setPasswordError("Invalid password!");
     }
@@ -69,15 +76,14 @@ export default function Results() {
     if (!selectedQuizTitle) return alert("Please select a quiz title.");
 
     setLoading(true);
-
     try {
       const cleanedTitle = cleanText(selectedQuizTitle);
 
-      const q = query(
+      const qRef = query(
         collection(db, "quizResults"),
         where("quizTitle", "==", cleanedTitle)
       );
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(qRef);
 
       const list = snapshot.docs.map((d) => ({
         id: d.id,
@@ -92,8 +98,8 @@ export default function Results() {
       setResults(list);
     } catch (err) {
       console.error("Error:", err);
+      alert("Failed to fetch results. Check console.");
     }
-
     setLoading(false);
   };
 
@@ -102,15 +108,16 @@ export default function Results() {
     if (!results.length) return alert("No data to export!");
 
     const rows = results.map((u) => {
-      const attempted = Object.keys(u.answers || {}).length;
+      const attempted = getAttempted(u);
+      const total = getTotalQuestions(u);
 
       return {
         QuizTitle: cleanText(u.quizTitle),
         Name: u.name,
-        Department: u.department,
-        Designation: u.designation,
-        EmployeeID: u.employeeId,
-        Marks: `${u.marks} / ${attempted} / 20`,
+        College: u.college || "",
+        Branch: u.branch || "",
+        Marks: `${u.marks} / ${attempted} / ${total || ""}`,
+        SubmittedAt: u.submittedAt?.toDate ? u.submittedAt.toDate().toLocaleString() : "N/A",
       };
     });
 
@@ -129,15 +136,12 @@ export default function Results() {
   const handlePrintSingle = (user) => {
     const win = window.open("", "_blank");
 
-    const date = user.submittedAt?.toDate
-      ? user.submittedAt.toDate().toLocaleString()
-      : "N/A";
-
-    const attempted = Object.keys(user.answers || {}).length;
+    const date = user.submittedAt?.toDate ? user.submittedAt.toDate().toLocaleString() : "N/A";
+    const attempted = getAttempted(user);
+    const total = getTotalQuestions(user);
 
     const hasQuestions = Array.isArray(user.questions) && user.questions.length > 0;
 
-    // ✅ supports both old (q.answer + string options) and new (q.answerKey + object options)
     const questionsHtml = hasQuestions
       ? user.questions
           .map((q) => {
@@ -150,7 +154,7 @@ export default function Results() {
 
             const renderOptText = (opt) => {
               if (typeof opt === "string") return opt; // old
-              return `${opt.key}. ${opt.en} / ${opt.hi}`; // new
+              return `${opt.key}. ${opt.en || ""}`; // new (english only)
             };
 
             const optKey = (opt) => {
@@ -161,7 +165,6 @@ export default function Results() {
             const opts = (q.options || [])
               .map((opt) => {
                 const key = optKey(opt);
-
                 const isCorrect = isNewFormat ? correctKey === key : q.answer === opt;
                 const isChosen = chosen === key;
 
@@ -174,11 +177,10 @@ export default function Results() {
               .join("");
 
             const questionText = q.q || q.q_en || "";
-            const hindiText = q.q_hi ? `<div style="opacity:.8; margin-top:4px;">${q.q_hi}</div>` : "";
 
             return `
               <div style="border:1px solid #ddd; padding:12px; border-radius:10px; margin:10px 0;">
-                <p style="margin:0 0 8px 0;"><b>Q${q.id}:</b> ${questionText}${hindiText}</p>
+                <p style="margin:0 0 8px 0;"><b>Q${q.id}:</b> ${questionText}</p>
                 <ol style="margin:0 0 8px 18px; padding:0;">
                   ${opts}
                 </ol>
@@ -199,7 +201,7 @@ export default function Results() {
     win.document.write(`
       <html>
       <head>
-        <title>Print Quiz Answers</title>
+        <title>Print Quiz Submission</title>
         <style>
           body { font-family: Arial; padding: 20px; line-height: 1.6; }
           h2 { margin-bottom: 10px; }
@@ -210,11 +212,10 @@ export default function Results() {
         <h2>Quiz Submission Details</h2>
         <div class="box">
           <p><b>Quiz Title:</b> ${cleanText(user.quizTitle)}</p>
-          <p><b>Name:</b> ${user.name}</p>
-          <p><b>Department:</b> ${user.department}</p>
-          <p><b>Designation:</b> ${user.designation}</p>
-          <p><b>Employee ID:</b> ${user.employeeId}</p>
-          <p><b>Marks:</b> ${user.marks} / ${attempted} / 20</p>
+          <p><b>Name:</b> ${user.name || ""}</p>
+          <p><b>College:</b> ${user.college || ""}</p>
+          <p><b>Branch:</b> ${user.branch || ""}</p>
+          <p><b>Marks:</b> ${user.marks} / ${attempted} / ${total || ""}</p>
           <p><b>Submitted At:</b> ${date}</p>
         </div>
 
@@ -231,18 +232,13 @@ export default function Results() {
   // ---------------- DELETE SINGLE ----------------
   const handleDeleteSingle = async (user) => {
     const ok = window.confirm(
-      `Delete this result?\n\nName: ${user.name}\nEmployee ID: ${user.employeeId}\nQuiz: ${cleanText(
-        user.quizTitle
-      )}`
+      `Delete this result?\n\nName: ${user.name}\nQuiz: ${cleanText(user.quizTitle)}`
     );
     if (!ok) return;
 
     try {
       setDeletingId(user.id);
-
       await deleteDoc(doc(db, "quizResults", user.id));
-
-      // UI update
       setResults((prev) => prev.filter((r) => r.id !== user.id));
       if (selectedAnswers?.id === user.id) setSelectedAnswers(null);
     } catch (err) {
@@ -268,12 +264,12 @@ export default function Results() {
 
     try {
       const cleanedTitle = cleanText(selectedQuizTitle);
-      const q = query(
+      const qRef = query(
         collection(db, "quizResults"),
         where("quizTitle", "==", cleanedTitle)
       );
 
-      const snap = await getDocs(q);
+      const snap = await getDocs(qRef);
 
       if (snap.empty) {
         alert("No results found to delete for this quiz.");
@@ -281,7 +277,6 @@ export default function Results() {
         return;
       }
 
-      // Firestore batch supports up to 500 ops per batch
       let batch = writeBatch(db);
       let opCount = 0;
       let totalDeleted = 0;
@@ -298,15 +293,10 @@ export default function Results() {
         }
       }
 
-      if (opCount > 0) {
-        await batch.commit();
-      }
+      if (opCount > 0) await batch.commit();
 
-      // UI reset
       setResults([]);
       setSelectedAnswers(null);
-
-      // refresh titles
       await fetchQuizTitles();
 
       alert(`Deleted ${totalDeleted} results for "${cleanedTitle}".`);
@@ -327,13 +317,13 @@ export default function Results() {
             <div style={styles.brandLogo}>QZ</div>
             <div>
               <h2 style={{ margin: 0 }}>Admin Login</h2>
-              <p style={styles.subText}>Secure access for results dashboard</p>
+              <p style={styles.subText}>Secure access for the results dashboard</p>
             </div>
           </div>
 
           <input
             type="password"
-            placeholder="Enter Password"
+            placeholder="Enter password"
             value={passwordInput}
             onChange={(e) => {
               setPasswordInput(e.target.value);
@@ -356,7 +346,7 @@ export default function Results() {
       <div style={styles.topBar}>
         <div>
           <div style={styles.titleRow}>
-            <h1 style={styles.pageTitle}>📊 Quiz Results</h1>
+            <h1 style={styles.pageTitle}>📊 Results Dashboard (New Quiz)</h1>
             <span style={styles.badge}>
               {selectedQuizTitle ? cleanText(selectedQuizTitle) : "No Quiz Selected"}
             </span>
@@ -377,7 +367,7 @@ export default function Results() {
             disabled={deletingQuiz || loading}
             title="Delete all results for selected quiz"
           >
-            {deletingQuiz ? "Deleting Quiz..." : "🗑 Delete Quiz Results"}
+            {deletingQuiz ? "Deleting..." : "🗑 Delete Quiz Results"}
           </button>
         </div>
       </div>
@@ -443,9 +433,8 @@ export default function Results() {
               <thead>
                 <tr>
                   <th style={styles.th}>Name</th>
-                  <th style={styles.th}>Department</th>
-                  <th style={styles.th}>Designation</th>
-                  <th style={styles.th}>Employee ID</th>
+                  <th style={styles.th}>College</th>
+                  <th style={styles.th}>Branch</th>
                   <th style={styles.th}>Marks</th>
                   <th style={styles.th}>Submitted At</th>
                   <th style={styles.th}>Actions</th>
@@ -454,7 +443,8 @@ export default function Results() {
 
               <tbody>
                 {results.map((r) => {
-                  const attempted = Object.keys(r.answers || {}).length;
+                  const attempted = getAttempted(r);
+                  const total = getTotalQuestions(r);
 
                   return (
                     <tr key={r.id} style={styles.tr}>
@@ -465,25 +455,22 @@ export default function Results() {
                           </div>
                           <div>
                             <div style={styles.nameText}>{r.name}</div>
-                            <div style={styles.smallText}>{r.employeeId}</div>
+                            <div style={styles.smallText}>{cleanText(r.quizTitle)}</div>
                           </div>
                         </div>
                       </td>
 
-                      <td style={styles.td}>{r.department}</td>
-                      <td style={styles.td}>{r.designation}</td>
-                      <td style={styles.td}>{r.employeeId}</td>
+                      <td style={styles.td}>{r.college || "—"}</td>
+                      <td style={styles.td}>{r.branch || "—"}</td>
 
                       <td style={styles.td}>
                         <span style={styles.marksPill}>
-                          {r.marks} / {attempted} / 20
+                          {r.marks} / {attempted} / {total || "—"}
                         </span>
                       </td>
 
                       <td style={styles.td}>
-                        {r.submittedAt?.toDate
-                          ? r.submittedAt.toDate().toLocaleString()
-                          : "N/A"}
+                        {r.submittedAt?.toDate ? r.submittedAt.toDate().toLocaleString() : "N/A"}
                       </td>
 
                       <td style={styles.td}>
@@ -498,7 +485,6 @@ export default function Results() {
                             View
                           </button>
 
-                          {/* ✅ NEW: Questions button (only opens modal questions) */}
                           <button
                             style={styles.questionsBtn}
                             onClick={() => {
@@ -509,10 +495,7 @@ export default function Results() {
                             ❓ Questions
                           </button>
 
-                          <button
-                            style={styles.printBtn}
-                            onClick={() => handlePrintSingle(r)}
-                          >
+                          <button style={styles.printBtn} onClick={() => handlePrintSingle(r)}>
                             🖨 Print
                           </button>
 
@@ -520,12 +503,10 @@ export default function Results() {
                             style={{
                               ...styles.deleteBtn,
                               opacity: deletingId === r.id ? 0.6 : 1,
-                              cursor:
-                                deletingId === r.id ? "not-allowed" : "pointer",
+                              cursor: deletingId === r.id ? "not-allowed" : "pointer",
                             }}
                             onClick={() => handleDeleteSingle(r)}
                             disabled={deletingId === r.id}
-                            title="Delete this result"
                           >
                             {deletingId === r.id ? "Deleting..." : "🗑 Delete"}
                           </button>
@@ -549,7 +530,8 @@ export default function Results() {
                     {showQuestions ? "Questions & Answers" : "User Answers"}
                   </h2>
                   <p style={styles.muted}>
-                    {selectedAnswers.name} • {selectedAnswers.employeeId}
+                    {selectedAnswers.name} • {selectedAnswers.college || "—"} •{" "}
+                    {selectedAnswers.branch || "—"}
                   </p>
                 </div>
 
@@ -561,23 +543,22 @@ export default function Results() {
               <div style={styles.modalBody}>
                 <div style={styles.metaGrid}>
                   <div style={styles.metaCard}>
-                    <div style={styles.metaLabel}>Department</div>
-                    <div style={styles.metaValue}>{selectedAnswers.department}</div>
+                    <div style={styles.metaLabel}>College</div>
+                    <div style={styles.metaValue}>{selectedAnswers.college || "—"}</div>
                   </div>
                   <div style={styles.metaCard}>
-                    <div style={styles.metaLabel}>Designation</div>
-                    <div style={styles.metaValue}>{selectedAnswers.designation}</div>
+                    <div style={styles.metaLabel}>Branch</div>
+                    <div style={styles.metaValue}>{selectedAnswers.branch || "—"}</div>
                   </div>
                   <div style={styles.metaCard}>
                     <div style={styles.metaLabel}>Marks</div>
                     <div style={styles.metaValue}>
-                      {selectedAnswers.marks} /{" "}
-                      {Object.keys(selectedAnswers.answers || {}).length} / 20
+                      {selectedAnswers.marks} / {getAttempted(selectedAnswers)} /{" "}
+                      {getTotalQuestions(selectedAnswers) || "—"}
                     </div>
                   </div>
                 </div>
 
-                {/* Answers list */}
                 {!showQuestions && (
                   <div style={styles.answersBox}>
                     <h3 style={{ marginTop: 0 }}>Answers</h3>
@@ -592,7 +573,6 @@ export default function Results() {
                   </div>
                 )}
 
-                {/* ✅ Questions view */}
                 {showQuestions && (
                   <div style={{ ...styles.answersBox, marginTop: "0px" }}>
                     <h3 style={{ marginTop: 0 }}>Questions & Answers</h3>
@@ -601,7 +581,6 @@ export default function Results() {
                       selectedAnswers.questions.map((q) => {
                         const chosen = selectedAnswers.answers?.[q.id];
 
-                        // supports old format and new format
                         const isNewFormat =
                           Array.isArray(q.options) && typeof q.options?.[0] === "object";
 
@@ -609,7 +588,7 @@ export default function Results() {
 
                         const renderOptText = (opt) => {
                           if (typeof opt === "string") return opt;
-                          return `${opt.key}. ${opt.en} / ${opt.hi}`;
+                          return `${opt.key}. ${opt.en || ""}`;
                         };
 
                         const optKey = (opt) => {
@@ -618,20 +597,12 @@ export default function Results() {
                         };
 
                         const questionText = q.q || q.q_en || "";
-                        const hindiText = q.q_hi || "";
 
                         return (
                           <div key={q.id} style={styles.qBlock}>
                             <div style={styles.qLine}>
                               <span style={styles.qBadge}>Q{q.id}</span>
-                              <span style={{ fontWeight: 800 }}>
-                                {questionText}
-                                {hindiText ? (
-                                  <div style={{ marginTop: 4, color: "rgba(229,231,235,0.7)" }}>
-                                    {hindiText}
-                                  </div>
-                                ) : null}
-                              </span>
+                              <span style={{ fontWeight: 800 }}>{questionText}</span>
                             </div>
 
                             <div style={{ marginTop: 8 }}>
@@ -654,8 +625,7 @@ export default function Results() {
                                   >
                                     {renderOptText(opt)}
                                     {isCorrect ? " ✅" : ""}
-                                    {isChosen && !isCorrect ? " (Your answer)" : ""}
-                                    {isChosen && isCorrect ? " (Your answer)" : ""}
+                                    {isChosen ? " (Your answer)" : ""}
                                   </div>
                                 );
                               })}
@@ -668,25 +638,17 @@ export default function Results() {
                         );
                       })
                     ) : (
-                      <p style={styles.muted}>
-                        Questions not found for this attempt (old records).
-                      </p>
+                      <p style={styles.muted}>Questions are not available for this attempt.</p>
                     )}
                   </div>
                 )}
 
                 <div style={styles.modalFooter}>
-                  <button
-                    style={styles.secondaryBtn}
-                    onClick={() => setShowQuestions((s) => !s)}
-                  >
+                  <button style={styles.secondaryBtn} onClick={() => setShowQuestions((s) => !s)}>
                     {showQuestions ? "Hide Questions" : "Show Questions"}
                   </button>
 
-                  <button
-                    style={styles.printBtn}
-                    onClick={() => handlePrintSingle(selectedAnswers)}
-                  >
+                  <button style={styles.printBtn} onClick={() => handlePrintSingle(selectedAnswers)}>
                     🖨 Print
                   </button>
 
@@ -694,10 +656,7 @@ export default function Results() {
                     style={{
                       ...styles.deleteBtn,
                       opacity: deletingId === selectedAnswers.id ? 0.6 : 1,
-                      cursor:
-                        deletingId === selectedAnswers.id
-                          ? "not-allowed"
-                          : "pointer",
+                      cursor: deletingId === selectedAnswers.id ? "not-allowed" : "pointer",
                     }}
                     onClick={() => handleDeleteSingle(selectedAnswers)}
                     disabled={deletingId === selectedAnswers.id}
@@ -705,10 +664,7 @@ export default function Results() {
                     {deletingId === selectedAnswers.id ? "Deleting..." : "🗑 Delete Result"}
                   </button>
 
-                  <button
-                    style={styles.secondaryBtn}
-                    onClick={() => setSelectedAnswers(null)}
-                  >
+                  <button style={styles.secondaryBtn} onClick={() => setSelectedAnswers(null)}>
                     Close
                   </button>
                 </div>
@@ -719,15 +675,14 @@ export default function Results() {
       </div>
 
       <div style={styles.footerNote}>
-        Tip: Quiz-wise delete is powerful — use it only when needed. ✅
+        Tip: Quiz-wise delete is powerful — use it only when necessary.
       </div>
     </div>
   );
 }
 
-// -------------------- STYLES ------------------------
+// -------------------- STYLES (same look & feel) ------------------------
 const styles = {
-  // Login
   loginContainer: {
     minHeight: "100vh",
     background:
@@ -773,7 +728,6 @@ const styles = {
   },
   errorText: { color: "#fecaca", marginTop: "10px", fontWeight: 800 },
 
-  // Page
   page: {
     minHeight: "100vh",
     background:
@@ -799,10 +753,8 @@ const styles = {
     fontSize: "12px",
   },
   subText2: { margin: "6px 0 0 0", color: "rgba(229,231,235,0.75)", fontSize: "13px" },
-
   actionsRight: { display: "flex", gap: "10px", alignItems: "center" },
 
-  // Card
   card: {
     maxWidth: "1250px",
     margin: "0 auto",
@@ -814,7 +766,6 @@ const styles = {
     backdropFilter: "blur(10px)",
   },
 
-  // Filters row
   filters: {
     display: "flex",
     gap: "12px",
@@ -836,7 +787,6 @@ const styles = {
     color: "#e5e7eb",
   },
 
-  // Buttons
   primaryBtn: {
     padding: "12px 14px",
     borderRadius: "12px",
@@ -865,7 +815,6 @@ const styles = {
     fontWeight: 800,
   },
 
-  // Table
   tableWrap: { width: "100%", overflowX: "auto" },
   table: {
     width: "100%",
@@ -967,7 +916,6 @@ const styles = {
     fontWeight: 900,
   },
 
-  // Empty
   emptyState: { padding: "34px 10px", textAlign: "center" },
   emptyIcon: {
     fontSize: "34px",
@@ -981,10 +929,8 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.10)",
   },
   muted: { color: "rgba(229,231,235,0.65)", margin: 0 },
-
   infoText: { color: "rgba(229,231,235,0.75)" },
 
-  // Modal
   modalOverlay: {
     position: "fixed",
     top: 0,
@@ -1077,7 +1023,6 @@ const styles = {
     marginTop: "14px",
   },
 
-  // Questions rendering
   qBlock: {
     padding: "12px",
     borderRadius: "14px",
