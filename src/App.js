@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import QuizPage from "./pages/admin";
 import AdminLogin from "./pages";
 import Results from "./pages/results";
-import ResultsPCM_Aptitude from "./pages/pcm";
+import ResultsPCM_Aptitude from "./pages/reults2";
 
 function App() {
   return (
