@@ -10,13 +10,13 @@ export default function QuizPage() {
     designation: "",
   });
 
-  const quizTitle = "SMED Pre-Test / Post-Test";
+  const quizTitle = "Inventory Management Post Test";
 
   // ✅ QUIZ LIVE / CLOSE
   const QUIZ_OVER = false;
 
   // ✅ Total Timing 20 Minutes
-  const TOTAL_DURATION_MIN = 20;
+  const TOTAL_DURATION_MIN = 25;
   const TOTAL_DURATION_SEC = TOTAL_DURATION_MIN * 60;
 
   const [quizStarted, setQuizStarted] = useState(false);
@@ -44,275 +44,252 @@ const questions = useMemo(
     {
       id: 1,
       q_en:
-        "Who developed the SMED (Single Minute Exchange of Die) system in the 1950s and 1960s?",
+        "Which of the following is NOT one of the five common inventory types discussed in this program?",
       options: [
-        { key: "A", en: "Henry Ford" },
-        { key: "B", en: "Taiichi Ohno" },
-        { key: "C", en: "Shigeo Shingo" },
-        { key: "D", en: "Eiji Toyoda" },
+        { key: "A", en: "Raw Material" },
+        { key: "B", en: "Work-in-Progress (WIP)" },
+        { key: "C", en: "Marketing Collateral" },
+        { key: "D", en: "MRO / Spares" },
       ],
       answerKey: "C",
     },
     {
       id: 2,
-      q_en: 'According to the SMED concept, what does "Single Minute" mean?',
+      q_en:
+        "The cost incurred each time a purchase order is placed (paperwork, transport, inspection, follow-up) is called:",
       options: [
-        { key: "A", en: "The setup takes exactly 60 seconds" },
-        { key: "B", en: "The setup requires only one operator" },
-        {
-          key: "C",
-          en: "All setups should take less than 10 minutes (a single-digit number of minutes)",
-        },
-        { key: "D", en: "It takes one minute to remove a bolt" },
-      ],
-      answerKey: "C",
-    },
-    {
-      id: 3,
-      q_en: 'What is the definition of an "Internal Setup" element?',
-      options: [
-        { key: "A", en: "Operations that must be performed by internal company staff" },
-        {
-          key: "B",
-          en: "Operations that must be performed while the machine or process is stopped",
-        },
-        { key: "C", en: "Operations done inside the machine's control panel" },
-        {
-          key: "D",
-          en: "Operations that can be performed while the machine is running",
-        },
+        { key: "A", en: "Carrying Cost" },
+        { key: "B", en: "Ordering Cost" },
+        { key: "C", en: "Stock-out Cost" },
+        { key: "D", en: "Obsolescence Cost" },
       ],
       answerKey: "B",
     },
     {
-      id: 4,
-      q_en: 'What is the definition of an "External Setup" element?',
+      id: 3,
+      q_en:
+        "Carrying / holding cost typically runs at approximately what percentage of inventory value per year?",
       options: [
-        { key: "A", en: "Operations that are performed by outside contractors" },
-        { key: "B", en: "Operations that are performed outside the factory building" },
-        {
-          key: "C",
-          en: "Operations that can be performed while the machine or process is running",
-        },
-        {
-          key: "D",
-          en: "Operations that must be performed while the machine is stopped",
-        },
+        { key: "A", en: "2-5%" },
+        { key: "B", en: "8-12%" },
+        { key: "C", en: "20-30%" },
+        { key: "D", en: "45-50%" },
       ],
       answerKey: "C",
     },
     {
-      id: 5,
-      q_en: "How many formal stages are there in the SMED implementation process?",
+      id: 4,
+      q_en: "Which of these is a common CAUSE of stock-outs?",
       options: [
-        { key: "A", en: "Two Stages" },
-        { key: "B", en: "Three Stages" },
-        { key: "C", en: "Four Stages" },
-        { key: "D", en: "Five Stages" },
+        { key: "A", en: "Bulk-discount over-ordering" },
+        { key: "B", en: "No reorder trigger / ROL not set" },
+        { key: "C", en: "Safety stock set too high" },
+        { key: "D", en: "Excess safety buffer" },
+      ],
+      answerKey: "B",
+    },
+    {
+      id: 5,
+      q_en:
+        "In the inventory lifecycle, which stage comes immediately after 'Receiving & Inspection'?",
+      options: [
+        { key: "A", en: "Dispatch to Customer" },
+        { key: "B", en: "Storage" },
+        { key: "C", en: "Consumption / Production" },
+        { key: "D", en: "Procurement" },
       ],
       answerKey: "B",
     },
     {
       id: 6,
-      q_en: "What is Stage 1 of the SMED implementation process?",
+      q_en:
+        "ABC Analysis classifies inventory items primarily on the basis of:",
       options: [
-        { key: "A", en: "Convert internal setup to external setup" },
-        { key: "B", en: "Streamline all aspects of the setup" },
-        { key: "C", en: "Separate internal and external setup" },
-        { key: "D", en: "Mechanize all setup functions" },
+        { key: "A", en: "Criticality to operations" },
+        { key: "B", en: "Annual usage value" },
+        { key: "C", en: "Physical size" },
+        { key: "D", en: "Shelf life" },
       ],
-      answerKey: "C",
+      answerKey: "B",
     },
     {
       id: 7,
-      q_en:
-        "Which of the following is a practical technique used in Stage 1 to separate internal and external setups?",
+      q_en: "VED analysis classifies spare parts into which three categories?",
       options: [
-        { key: "A", en: "Using Checklists and Function Checks" },
-        { key: "B", en: "Using Parallel Operations" },
-        { key: "C", en: "Using One-turn functional clamps" },
-        { key: "D", en: "Using Mechanization" },
+        { key: "A", en: "Vital / Essential / Desirable" },
+        { key: "B", en: "Value / Expiry / Demand" },
+        { key: "C", en: "Variable / Even / Direct" },
+        { key: "D", en: "Volume / Economic / Discrete" },
       ],
       answerKey: "A",
     },
     {
       id: 8,
-      q_en: 'What is the purpose of performing a "Function Check" during external setup?',
+      q_en: "FEFO (First Expired, First Out) is most appropriate for:",
       options: [
-        { key: "A", en: "To test if the machine is running at full speed" },
+        { key: "A", en: "Steel billets and coils" },
         {
           key: "B",
-          en: "To check if parts, dies, and tools are in perfect working order before the machine is stopped",
+          en: "Chemicals, paints and welding consumables with shelf life",
         },
-        { key: "C", en: "To see if the operators understand their job" },
-        { key: "D", en: "To test the quality of the final product" },
+        { key: "C", en: "Office stationery" },
+        { key: "D", en: "Finished goods with no expiry" },
       ],
       answerKey: "B",
     },
     {
       id: 9,
-      q_en: "What is Stage 2 of the SMED implementation process?",
+      q_en: "Which formula correctly represents Reorder Level (ROL)?",
       options: [
-        { key: "A", en: "Streamline all setup operations" },
-        { key: "B", en: "Separate internal and external setup" },
-        { key: "C", en: "Mechanize manual functions" },
-        { key: "D", en: "Convert internal setup to external setup" },
+        {
+          key: "A",
+          en: "(Avg Daily Usage × Lead Time) + Safety Stock",
+        },
+        {
+          key: "B",
+          en: "(Max Daily Usage × Max Lead Time) − Safety Stock",
+        },
+        { key: "C", en: "Annual Demand ÷ Ordering Cost" },
+        { key: "D", en: "COGS ÷ Average Inventory Value" },
       ],
-      answerKey: "D",
+      answerKey: "A",
     },
     {
       id: 10,
       q_en:
-        "Which of the following is a technique for converting internal setup to external setup (Stage 2)?",
+        "The Economic Order Quantity (EOQ) formula minimises the total of which two costs?",
       options: [
-        { key: "A", en: "Moving heavy parts by remote control" },
-        {
-          key: "B",
-          en: "Advance preparation of operating conditions (like pre-heating tools)",
-        },
-        { key: "C", en: "Eliminating adjustments with fixed stops" },
-        { key: "D", en: "Doing a trial run" },
+        { key: "A", en: "Ordering cost and Carrying cost" },
+        { key: "B", en: "Stock-out cost and Obsolescence cost" },
+        { key: "C", en: "Insurance cost and Tax cost" },
+        { key: "D", en: "Labour cost and Transport cost" },
       ],
-      answerKey: "B",
+      answerKey: "A",
     },
     {
       id: 11,
-      q_en: 'How do "Intermediary Jigs" help in Stage 2 of SMED?',
+      q_en:
+        "Given: Average daily usage = 40 units, Average lead time = 5 days, Maximum daily usage = 60 units, Maximum lead time = 8 days. Calculate the Safety Stock.",
       options: [
-        { key: "A", en: "They automatically clean the machine" },
-        {
-          key: "B",
-          en: "They allow a new workpiece or die to be centered and attached to a jig plate externally, while the machine is running",
-        },
-        { key: "C", en: "They replace the need for an operator" },
-        { key: "D", en: "They act as a safety barrier" },
+        { key: "A", en: "200 units" },
+        { key: "B", en: "280 units" },
+        { key: "C", en: "480 units" },
       ],
       answerKey: "B",
     },
     {
       id: 12,
-      q_en: "What is Stage 3 of the SMED implementation process?",
+      q_en:
+        "Given: Annual Demand (D) = 4,500 units, Ordering Cost (S) = ₹ 400/order, Holding Cost (H) = ₹ 18/unit/year. Calculate the EOQ (round to the nearest whole unit).",
       options: [
-        { key: "A", en: "Separate internal and external setup" },
-        {
-          key: "B",
-          en: "Streamline all aspects of the setup operation (both internal and external)",
-        },
-        { key: "C", en: "Convert internal setup to external setup" },
-        { key: "D", en: "Perform trial runs and adjustments" },
+        { key: "A", en: "400 units" },
+        { key: "B", en: "447 units" },
+        { key: "C", en: "500 units" },
       ],
       answerKey: "B",
     },
     {
       id: 13,
       q_en:
-        'When implementing "Parallel Operations" (dividing setup tasks between two people), what is the most important issue to consider?',
+        "In a well-designed warehouse layout, A-class (fast-moving) items should ideally be stored:",
       options: [
-        { key: "A", en: "Making sure both people get paid the same" },
-        {
-          key: "B",
-          en: "Maintaining reliable and safe operations, often using safety signals",
-        },
-        { key: "C", en: "Ensuring both people use the exact same tools" },
-        { key: "D", en: "Working in complete silence" },
+        { key: "A", en: "Farthest from the issue point" },
+        { key: "B", en: "Nearest to the issue/dispatch point" },
+        { key: "C", en: "Only in the receiving dock" },
+        { key: "D", en: "Randomly, location doesn't matter" },
       ],
       answerKey: "B",
     },
     {
       id: 14,
-      q_en: 'In traditional setups, why are standard bolts considered "the enemy"?',
+      q_en: "A bin location code such as 'A-03-02-C' typically identifies:",
       options: [
-        { key: "A", en: "They are too expensive to replace" },
-        { key: "B", en: "They rust easily" },
-        {
-          key: "C",
-          en: "Only the last turn actually tightens the bolt; the rest of the turns are a waste of time and energy",
-        },
-        { key: "D", en: "They cannot hold heavy weights" },
+        { key: "A", en: "Item cost category" },
+        { key: "B", en: "Aisle, Rack, Level and Bin position" },
+        { key: "C", en: "Supplier code" },
+        { key: "D", en: "Batch expiry date" },
       ],
-      answerKey: "C",
+      answerKey: "B",
     },
     {
       id: 15,
-      q_en: 'What is a "Functional Clamp" in the SMED system?',
+      q_en:
+        "Under a typical ABC-based cycle-counting schedule, how often should A-class items be counted?",
       options: [
-        {
-          key: "A",
-          en: "An attachment device that holds objects in place with minimal effort and can be tightened quickly",
-        },
-        { key: "B", en: "A traditional nut and bolt with 15 threads" },
-        { key: "C", en: "A clamp used exclusively by maintenance teams" },
-        { key: "D", en: "A heavy hydraulic press" },
+        { key: "A", en: "Monthly" },
+        { key: "B", en: "Quarterly" },
+        { key: "C", en: "Half-yearly" },
+        { key: "D", en: "Once every 2 years" },
       ],
       answerKey: "A",
     },
     {
       id: 16,
-      q_en:
-        'Which of the following is an example of a "One-Turn" functional clamping method?',
+      q_en: "The Inventory Accuracy % formula is:",
       options: [
-        { key: "A", en: "Using a 3-inch threaded bolt" },
-        { key: "B", en: "Welding the part permanently" },
-        { key: "C", en: "The Pear-Shaped Hole method or U-Slot method" },
-        { key: "D", en: "Using an electric screwdriver on standard nuts" },
+        { key: "A", en: "(System Qty ÷ Physical Qty) × 100" },
+        {
+          key: "B",
+          en: "(1 − |System Qty − Physical Qty| ÷ System Qty) × 100",
+        },
+        { key: "C", en: "(Physical Qty − System Qty) × 100" },
+        { key: "D", en: "System Qty − Physical Qty" },
       ],
-      answerKey: "C",
+      answerKey: "B",
     },
     {
       id: 17,
-      q_en:
-        'According to the documents, "Trial runs and adjustments" typically account for what percentage of traditional setup time?',
+      q_en: "In the 5S methodology, 'Seiton' (Set in Order) means:",
       options: [
-        { key: "A", en: "5%" },
-        { key: "B", en: "10%" },
-        { key: "C", en: "Up to 50%" },
-        { key: "D", en: "100%" },
+        { key: "A", en: "Removing unneeded items" },
+        {
+          key: "B",
+          en: "A designated place for everything, everything in its place",
+        },
+        { key: "C", en: "Daily cleaning of the workplace" },
+        { key: "D", en: "Building audit habits to sustain standards" },
       ],
-      answerKey: "C",
+      answerKey: "B",
     },
     {
       id: 18,
-      q_en: 'How does SMED recommend we handle "Adjustments" during a changeover?',
+      q_en: "Inventory Turnover Ratio is calculated as:",
       options: [
-        { key: "A", en: "Assign a dedicated adjustment team" },
-        {
-          key: "B",
-          en: "Eliminate the need for adjustments entirely by using fixed stops, positioning pins, and visual marks",
-        },
-        { key: "C", en: "Schedule an extra 30 minutes for trial runs" },
-        { key: "D", en: "Only adjust the machine while it is running" },
+        { key: "A", en: "Average Inventory Value ÷ COGS" },
+        { key: "B", en: "COGS ÷ Average Inventory Value" },
+        { key: "C", en: "Annual Demand ÷ EOQ" },
+        { key: "D", en: "Total Carrying Cost ÷ COGS" },
       ],
       answerKey: "B",
     },
     {
       id: 19,
       q_en:
-        'When should "Mechanization" (using motors, electric drives, etc.) be considered in the SMED process?',
+        "An item with zero consumption for 12 or more months is best classified as:",
       options: [
-        { key: "A", en: "It should be the very first step" },
-        { key: "B", en: "It should be used to replace checklists" },
-        {
-          key: "C",
-          en: "Only for fine-tuning, after every attempt has been made to streamline setups using low-cost/no-cost techniques",
-        },
-        { key: "D", en: "It should never be used" },
+        { key: "A", en: "Fast-moving" },
+        { key: "B", en: "Slow-moving" },
+        { key: "C", en: "Non-moving" },
+        { key: "D", en: "Vital" },
       ],
       answerKey: "C",
     },
     {
       id: 20,
-      q_en:
-        "To sustain the improvements made through SMED, what must be done after creating the new changeover process?",
+      q_en: "In Root Cause Analysis, the '5-Why' technique is used to:",
       options: [
-        { key: "A", en: "Stop measuring setup times" },
-        { key: "B", en: "Keep the old tools just in case" },
         {
-          key: "C",
-          en: "Document the new standard operating procedures (SOP) and maintain detailed checklists",
+          key: "A",
+          en: "Justify why more stock should always be purchased",
         },
-        { key: "D", en: "Rely on the operators' memory" },
+        {
+          key: "B",
+          en: "Repeatedly ask 'why' until the true underlying cause of a problem is found",
+        },
+        { key: "C", en: "Calculate the EOQ five times for accuracy" },
+        { key: "D", en: "Rank suppliers by delivery performance" },
       ],
-      answerKey: "C",
+      answerKey: "B",
     },
   ],
   []
@@ -328,6 +305,17 @@ const questions = useMemo(
 
   const handleChange = (id, val) => {
     setAnswers((prev) => ({ ...prev, [id]: val }));
+  };
+
+  const isAnswerCorrect = (question, value) => {
+    if (question.type === "numeric") {
+      const numericValue = Number.parseFloat(
+        String(value ?? "").replace(/,/g, "").trim()
+      );
+      return Number.isFinite(numericValue) && numericValue === question.answerValue;
+    }
+
+    return value === question.answerKey;
   };
 
   // ✅ Timer
@@ -379,7 +367,7 @@ const questions = useMemo(
 
     let score = 0;
     questions.forEach((q) => {
-      if (answers[q.id] === q.answerKey) score++;
+      if (isAnswerCorrect(q, answers[q.id])) score++;
     });
 
     setMarks(score);
@@ -523,6 +511,17 @@ const questions = useMemo(
       outline: "none",
       width: "100%",
       background: "#fcfcfd",
+      boxSizing: "border-box",
+    },
+    numericAnswer: {
+      padding: "12px",
+      fontSize: isMobile ? "16px" : "15px",
+      borderRadius: "10px",
+      border: "1px solid rgba(0,0,0,0.18)",
+      outline: "none",
+      width: isMobile ? "100%" : "320px",
+      maxWidth: "100%",
+      background: "#ffffff",
       boxSizing: "border-box",
     },
     helper: {
@@ -836,21 +835,32 @@ const questions = useMemo(
               </b>
             </p>
 
-            {q.options.map((opt) => (
-              <label key={opt.key} style={styles.option}>
-                <input
-                  type="radio"
-                  name={String(q.id)}
-                  value={opt.key}
-                  checked={answers[q.id] === opt.key}
-                  onChange={() => handleChange(q.id, opt.key)}
-                  style={styles.radio}
-                />
-                <span style={{ fontSize: isMobile ? "14px" : "15px" }}>
-                  <b>{opt.key}.</b> {opt.en}
-                </span>
-              </label>
-            ))}
+            {q.type === "numeric" ? (
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="Enter your answer"
+                value={answers[q.id] || ""}
+                onChange={(e) => handleChange(q.id, e.target.value)}
+                style={styles.numericAnswer}
+              />
+            ) : (
+              q.options.map((opt) => (
+                <label key={opt.key} style={styles.option}>
+                  <input
+                    type="radio"
+                    name={String(q.id)}
+                    value={opt.key}
+                    checked={answers[q.id] === opt.key}
+                    onChange={() => handleChange(q.id, opt.key)}
+                    style={styles.radio}
+                  />
+                  <span style={{ fontSize: isMobile ? "14px" : "15px" }}>
+                    <b>{opt.key}.</b> {opt.en}
+                  </span>
+                </label>
+              ))
+            )}
           </div>
         ))}
 
