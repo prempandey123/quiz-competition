@@ -5,31 +5,37 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 export default function QuizPage() {
   const [userData, setUserData] = useState({
     name: "",
-    employeeId: "",
-    department: "",
-    designation: "",
+    college: "",
+    branch: "",
   });
 
-  const quizTitle = "Inventory Management Post Test";
+  // ✅ Quiz Title
+  const quizTitle =
+    "PCM + Aptitude Assessment (Physics, Chemistry, Mathematics, DI, LR, QA, Verbal)";
 
-  // ✅ QUIZ LIVE / CLOSE
+  // ✅ QUIZ LIVE
   const QUIZ_OVER = false;
 
-  // ✅ Total Timing 20 Minutes
-  const TOTAL_DURATION_MIN = 25;
+  // ✅ Total Timing 60 Minutes
+  const TOTAL_DURATION_MIN = 60;
   const TOTAL_DURATION_SEC = TOTAL_DURATION_MIN * 60;
 
   const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [marks, setMarks] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(TOTAL_DURATION_SEC);
+
+  // ✅ Overall + Section timers
+  const [overallTimeLeft, setOverallTimeLeft] = useState(TOTAL_DURATION_SEC);
+  const [sectionTimeLeft, setSectionTimeLeft] = useState(0);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   const isSubmittingRef = useRef(false);
 
+  // ---------------- Detect Mobile --------------------
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
     check();
@@ -37,315 +43,698 @@ export default function QuizPage() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // ✅ Questions placeholder - aap questions doge to yaha replace kar denge
+  // ✅ Questions (PCM + DI/LR/QA/Verbal)
+  const questions = useMemo(
+    () => [
+      // ---------------- PHYSICS (1-10) ----------------
+      {
+        id: 1,
+        q_en:
+          "PHYSICS 1) Two identical metallic spheres carry charges +q and +9q. They are connected by a thin wire and then separated again. The ratio of initial to final electrostatic potential energy is:",
+        options: [
+          { key: "A", en: "25:41" },
+          { key: "B", en: "41:25" }, // ✅ Correct
+          { key: "C", en: "9:25" },
+          { key: "D", en: "5:9" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 2,
+        q_en:
+          "PHYSICS 2) A capacitor is connected to a battery and fully charged. The battery is removed and a dielectric slab completely fills the space. Which quantity remains constant?",
+        options: [
+          { key: "A", en: "Potential difference" },
+          { key: "B", en: "Capacitance" },
+          { key: "C", en: "Electric field" },
+          { key: "D", en: "Charge" },
+        ],
+        answerKey: "D",
+      },
+      {
+        id: 3,
+        q_en:
+          "PHYSICS 3) A long straight wire carries current I. Magnetic field at distance r is B. If current becomes 3I and distance becomes 3r, new magnetic field is:",
+        options: [
+          { key: "A", en: "B" },
+          { key: "B", en: "3B" },
+          { key: "C", en: "B/3" },
+          { key: "D", en: "9B" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 4,
+        q_en:
+          "PHYSICS 4) An electron enters perpendicular to a uniform magnetic field. If its speed is doubled, the radius of the circular path becomes:",
+        options: [
+          { key: "A", en: "Same" },
+          { key: "B", en: "Half" },
+          { key: "C", en: "Double" },
+          { key: "D", en: "Four times" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 5,
+        q_en:
+          "PHYSICS 5) In Young’s double slit experiment, if wavelength is halved and slit separation is doubled, the fringe width becomes:",
+        options: [
+          { key: "A", en: "Same" },
+          { key: "B", en: "Half" },
+          { key: "C", en: "One-fourth" },
+          { key: "D", en: "Double" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 6,
+        q_en:
+          "PHYSICS 6) In a series LCR circuit at resonance, which statement is correct?",
+        options: [
+          { key: "A", en: "Current is minimum" },
+          { key: "B", en: "Impedance is maximum" },
+          { key: "C", en: "Power factor is zero" },
+          { key: "D", en: "Voltages across L and C are equal in magnitude" },
+        ],
+        answerKey: "D",
+      },
+      {
+        id: 7,
+        q_en:
+          "PHYSICS 7) The stopping potential in the photoelectric effect depends on:",
+        options: [
+          { key: "A", en: "Intensity" },
+          { key: "B", en: "Frequency" },
+          { key: "C", en: "Work function only" },
+          { key: "D", en: "Number of electrons" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 8,
+        q_en:
+          "PHYSICS 8) Match the following: List I — A. Gauss Law, B. Lenz Law, C. Ampere Law, D. Photoelectric effect. List II — 1. Opposes change, 2. Electric flux relation, 3. Particle nature, 4. Magnetic field due to current. Options:",
+        options: [
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-1, D-2" },
+          { key: "D", en: "A-4, B-3, C-2, D-1" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 9,
+        q_en:
+          "PHYSICS 9) A convex lens forms an image at the same distance as the object but inverted. Magnification is:",
+        options: [
+          { key: "A", en: "+1" },
+          { key: "B", en: "−1" },
+          { key: "C", en: "+2" },
+          { key: "D", en: "−2" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 10,
+        q_en:
+          "PHYSICS 10) Match the following: List I — A. Binding energy, B. Half life, C. Zener diode, D. p-n junction. List II — 1. Voltage regulation, 2. Rectification, 3. Mass defect, 4. Radioactive decay. Options:",
+        options: [
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-1, D-2" },
+          { key: "D", en: "A-4, B-3, C-2, D-1" },
+        ],
+        answerKey: "C",
+      },
 
-const questions = useMemo(
-  () => [
-    {
-      id: 1,
-      q_en:
-        "Which of the following is NOT one of the five common inventory types discussed in this program?",
-      options: [
-        { key: "A", en: "Raw Material" },
-        { key: "B", en: "Work-in-Progress (WIP)" },
-        { key: "C", en: "Marketing Collateral" },
-        { key: "D", en: "MRO / Spares" },
-      ],
-      answerKey: "C",
-    },
-    {
-      id: 2,
-      q_en:
-        "The cost incurred each time a purchase order is placed (paperwork, transport, inspection, follow-up) is called:",
-      options: [
-        { key: "A", en: "Carrying Cost" },
-        { key: "B", en: "Ordering Cost" },
-        { key: "C", en: "Stock-out Cost" },
-        { key: "D", en: "Obsolescence Cost" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 3,
-      q_en:
-        "Carrying / holding cost typically runs at approximately what percentage of inventory value per year?",
-      options: [
-        { key: "A", en: "2-5%" },
-        { key: "B", en: "8-12%" },
-        { key: "C", en: "20-30%" },
-        { key: "D", en: "45-50%" },
-      ],
-      answerKey: "C",
-    },
-    {
-      id: 4,
-      q_en: "Which of these is a common CAUSE of stock-outs?",
-      options: [
-        { key: "A", en: "Bulk-discount over-ordering" },
-        { key: "B", en: "No reorder trigger / ROL not set" },
-        { key: "C", en: "Safety stock set too high" },
-        { key: "D", en: "Excess safety buffer" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 5,
-      q_en:
-        "In the inventory lifecycle, which stage comes immediately after 'Receiving & Inspection'?",
-      options: [
-        { key: "A", en: "Dispatch to Customer" },
-        { key: "B", en: "Storage" },
-        { key: "C", en: "Consumption / Production" },
-        { key: "D", en: "Procurement" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 6,
-      q_en:
-        "ABC Analysis classifies inventory items primarily on the basis of:",
-      options: [
-        { key: "A", en: "Criticality to operations" },
-        { key: "B", en: "Annual usage value" },
-        { key: "C", en: "Physical size" },
-        { key: "D", en: "Shelf life" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 7,
-      q_en: "VED analysis classifies spare parts into which three categories?",
-      options: [
-        { key: "A", en: "Vital / Essential / Desirable" },
-        { key: "B", en: "Value / Expiry / Demand" },
-        { key: "C", en: "Variable / Even / Direct" },
-        { key: "D", en: "Volume / Economic / Discrete" },
-      ],
-      answerKey: "A",
-    },
-    {
-      id: 8,
-      q_en: "FEFO (First Expired, First Out) is most appropriate for:",
-      options: [
-        { key: "A", en: "Steel billets and coils" },
-        {
-          key: "B",
-          en: "Chemicals, paints and welding consumables with shelf life",
-        },
-        { key: "C", en: "Office stationery" },
-        { key: "D", en: "Finished goods with no expiry" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 9,
-      q_en: "Which formula correctly represents Reorder Level (ROL)?",
-      options: [
-        {
-          key: "A",
-          en: "(Avg Daily Usage × Lead Time) + Safety Stock",
-        },
-        {
-          key: "B",
-          en: "(Max Daily Usage × Max Lead Time) − Safety Stock",
-        },
-        { key: "C", en: "Annual Demand ÷ Ordering Cost" },
-        { key: "D", en: "COGS ÷ Average Inventory Value" },
-      ],
-      answerKey: "A",
-    },
-    {
-      id: 10,
-      q_en:
-        "The Economic Order Quantity (EOQ) formula minimises the total of which two costs?",
-      options: [
-        { key: "A", en: "Ordering cost and Carrying cost" },
-        { key: "B", en: "Stock-out cost and Obsolescence cost" },
-        { key: "C", en: "Insurance cost and Tax cost" },
-        { key: "D", en: "Labour cost and Transport cost" },
-      ],
-      answerKey: "A",
-    },
-    {
-      id: 11,
-      q_en:
-        "Given: Average daily usage = 40 units, Average lead time = 5 days, Maximum daily usage = 60 units, Maximum lead time = 8 days. Calculate the Safety Stock.",
-      options: [
-        { key: "A", en: "200 units" },
-        { key: "B", en: "280 units" },
-        { key: "C", en: "480 units" },
-        { key: "D", en: "600 units" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 12,
-      q_en:
-        "Given: Annual Demand (D) = 4,500 units, Ordering Cost (S) = ₹ 400/order, Holding Cost (H) = ₹ 18/unit/year. Calculate the EOQ (round to the nearest whole unit).",
-      options: [
-        { key: "A", en: "400 units" },
-        { key: "B", en: "447 units" },
-        { key: "C", en: "500 units" },
-        { key: "C", en: "800 units" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 13,
-      q_en:
-        "In a well-designed warehouse layout, A-class (fast-moving) items should ideally be stored:",
-      options: [
-        { key: "A", en: "Farthest from the issue point" },
-        { key: "B", en: "Nearest to the issue/dispatch point" },
-        { key: "C", en: "Only in the receiving dock" },
-        { key: "D", en: "Randomly, location doesn't matter" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 14,
-      q_en: "A bin location code such as 'A-03-02-C' typically identifies:",
-      options: [
-        { key: "A", en: "Item cost category" },
-        { key: "B", en: "Aisle, Rack, Level and Bin position" },
-        { key: "C", en: "Supplier code" },
-        { key: "D", en: "Batch expiry date" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 15,
-      q_en:
-        "Under a typical ABC-based cycle-counting schedule, how often should A-class items be counted?",
-      options: [
-        { key: "A", en: "Monthly" },
-        { key: "B", en: "Quarterly" },
-        { key: "C", en: "Half-yearly" },
-        { key: "D", en: "Once every 2 years" },
-      ],
-      answerKey: "A",
-    },
-    {
-      id: 16,
-      q_en: "The Inventory Accuracy % formula is:",
-      options: [
-        { key: "A", en: "(System Qty ÷ Physical Qty) × 100" },
-        {
-          key: "B",
-          en: "(1 − |System Qty − Physical Qty| ÷ System Qty) × 100",
-        },
-        { key: "C", en: "(Physical Qty − System Qty) × 100" },
-        { key: "D", en: "System Qty − Physical Qty" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 17,
-      q_en: "In the 5S methodology, 'Seiton' (Set in Order) means:",
-      options: [
-        { key: "A", en: "Removing unneeded items" },
-        {
-          key: "B",
-          en: "A designated place for everything, everything in its place",
-        },
-        { key: "C", en: "Daily cleaning of the workplace" },
-        { key: "D", en: "Building audit habits to sustain standards" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 18,
-      q_en: "Inventory Turnover Ratio is calculated as:",
-      options: [
-        { key: "A", en: "Average Inventory Value ÷ COGS" },
-        { key: "B", en: "COGS ÷ Average Inventory Value" },
-        { key: "C", en: "Annual Demand ÷ EOQ" },
-        { key: "D", en: "Total Carrying Cost ÷ COGS" },
-      ],
-      answerKey: "B",
-    },
-    {
-      id: 19,
-      q_en:
-        "An item with zero consumption for 12 or more months is best classified as:",
-      options: [
-        { key: "A", en: "Fast-moving" },
-        { key: "B", en: "Slow-moving" },
-        { key: "C", en: "Non-moving" },
-        { key: "D", en: "Vital" },
-      ],
-      answerKey: "C",
-    },
-    {
-      id: 20,
-      q_en: "In Root Cause Analysis, the '5-Why' technique is used to:",
-      options: [
-        {
-          key: "A",
-          en: "Justify why more stock should always be purchased",
-        },
-        {
-          key: "B",
-          en: "Repeatedly ask 'why' until the true underlying cause of a problem is found",
-        },
-        { key: "C", en: "Calculate the EOQ five times for accuracy" },
-        { key: "D", en: "Rank suppliers by delivery performance" },
-      ],
-      answerKey: "B",
-    },
-  ],
-  []
-);
+      // ---------------- CHEMISTRY (11-20) ----------------
+      {
+        id: 11,
+        q_en:
+          "CHEMISTRY 1) Rate law: r = k[A]²[B]. If [A] is doubled and [B] is halved, the rate becomes:",
+        options: [
+          { key: "A", en: "Same" },
+          { key: "B", en: "Double" },
+          { key: "C", en: "Half" },
+          { key: "D", en: "Four times" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 12,
+        q_en: "CHEMISTRY 2) For a reaction to be spontaneous at all temperatures:",
+        options: [
+          { key: "A", en: "ΔH < 0 and ΔS > 0" },
+          { key: "B", en: "ΔH > 0 and ΔS > 0" },
+          { key: "C", en: "ΔH < 0 and ΔS < 0" },
+          { key: "D", en: "ΔH > 0 and ΔS < 0" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 13,
+        q_en:
+          "CHEMISTRY 3) In an electrochemical cell, if reaction quotient Q < K, the EMF is:",
+        options: [
+          { key: "A", en: "Zero" },
+          { key: "B", en: "Negative" },
+          { key: "C", en: "Positive" },
+          { key: "D", en: "Infinite" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 14,
+        q_en: "CHEMISTRY 4) A Van’t Hoff factor greater than 1 indicates:",
+        options: [
+          { key: "A", en: "Association" },
+          { key: "B", en: "Dissociation" },
+          { key: "C", en: "Non-electrolyte" },
+          { key: "D", en: "Weak acid" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 15,
+        q_en: "CHEMISTRY 5) Correct order of boiling points: H2O, NH3, HF",
+        options: [
+          { key: "A", en: "HF > H2O > NH3" },
+          { key: "B", en: "H2O > HF > NH3" },
+          { key: "C", en: "NH3 > HF > H2O" },
+          { key: "D", en: "HF > NH3 > H2O" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 16,
+        q_en: "CHEMISTRY 6) In an SN1 reaction, the rate-determining step involves:",
+        options: [
+          { key: "A", en: "Nucleophile attack" },
+          { key: "B", en: "Carbocation formation" },
+          { key: "C", en: "Bond rotation" },
+          { key: "D", en: "Proton transfer" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 17,
+        q_en: "CHEMISTRY 7) The pH of 0.001 M HCl is:",
+        options: [
+          { key: "A", en: "1" },
+          { key: "B", en: "2" },
+          { key: "C", en: "3" },
+          { key: "D", en: "4" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 18,
+        q_en:
+          "CHEMISTRY 8) Which electronic configuration has the highest crystal field stabilization (as per given options)?",
+        options: [
+          { key: "A", en: "d⁰" },
+          { key: "B", en: "d³" },
+          { key: "C", en: "d⁵ (high spin)" },
+          { key: "D", en: "d¹⁰" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 19,
+        q_en:
+          "CHEMISTRY 9) If concentration decreases, the half-life of a first-order reaction:",
+        options: [
+          { key: "A", en: "Increases" },
+          { key: "B", en: "Decreases" },
+          { key: "C", en: "Remains the same" },
+          { key: "D", en: "Doubles" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 20,
+        q_en:
+          "CHEMISTRY 10) Match the following: List I — A. Buffer, B. Catalyst, C. Emulsion, D. Adsorption. List II — 1. Surface effect, 2. Liquid in liquid, 3. Resists pH change, 4. Lowers activation energy. Options:",
+        options: [
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-2, D-1" },
+          { key: "D", en: "A-4, B-3, C-1, D-2" },
+        ],
+        answerKey: "C",
+      },
+
+      // ---------------- MATHEMATICS (21-30) ----------------
+      {
+        id: 21,
+        q_en: "MATHEMATICS 1) If |A| = 3 for a 2×2 matrix, then |A⁻¹| =",
+        options: [
+          { key: "A", en: "3" },
+          { key: "B", en: "1/3" },
+          { key: "C", en: "−3" },
+          { key: "D", en: "0" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 22,
+        q_en:
+          "MATHEMATICS 2) If f(x) = x³ − 3x² + 2, the number of local maxima is:",
+        options: [
+          { key: "A", en: "0" },
+          { key: "B", en: "1" },
+          { key: "C", en: "2" },
+          { key: "D", en: "3" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 23,
+        q_en:
+          "MATHEMATICS 3) If two events are independent and P(A)=0.5, P(B)=0.4, then P(A∩B)=",
+        options: [
+          { key: "A", en: "0.9" },
+          { key: "B", en: "0.2" },
+          { key: "C", en: "0.1" },
+          { key: "D", en: "0.5" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 24,
+        q_en: "MATHEMATICS 4) Slope of the normal to curve y = x² at x = 1 is:",
+        options: [
+          { key: "A", en: "−1/2" },
+          { key: "B", en: "−1" },
+          { key: "C", en: "−2" },
+          { key: "D", en: "−4" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 25,
+        q_en:
+          "MATHEMATICS 5) If the determinant of the coefficient matrix is zero, the system may have:",
+        options: [
+          { key: "A", en: "Unique solution" },
+          { key: "B", en: "No solution" },
+          { key: "C", en: "Infinite solutions" },
+          { key: "D", en: "B or C" },
+        ],
+        answerKey: "D",
+      },
+      {
+        id: 26,
+        q_en: "MATHEMATICS 6) Unit vector in the direction of 2i − 2j is:",
+        options: [
+          { key: "A", en: "(i − j)" },
+          { key: "B", en: "(i − j)/√2" },
+          { key: "C", en: "(2i − 2j)/2" },
+          { key: "D", en: "(i + j)/√2" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 27,
+        q_en:
+          "MATHEMATICS 7) Maximize Z = 3x + 2y subject to x + y ≤ 4, x ≥ 0, y ≥ 0. The maximum value is:",
+        options: [
+          { key: "A", en: "8" },
+          { key: "B", en: "10" },
+          { key: "C", en: "12" },
+          { key: "D", en: "6" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 28,
+        q_en: "MATHEMATICS 8) ∫ e^x sin x dx is typically solved using:",
+        options: [
+          { key: "A", en: "Substitution" },
+          { key: "B", en: "Integration by parts (twice)" },
+          { key: "C", en: "Partial fractions" },
+          { key: "D", en: "A direct formula only" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 29,
+        q_en: "MATHEMATICS 9) The maximum value of sin x + cos x is:",
+        options: [
+          { key: "A", en: "1" },
+          { key: "B", en: "√2" },
+          { key: "C", en: "2" },
+          { key: "D", en: "0" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 30,
+        q_en:
+          "MATHEMATICS 10) Match the following: List I — A. Bayes theorem, B. Lagrange MVT, C. Inverse matrix, D. Linear programming. List II — 1. Conditional probability, 2. Mean slope, 3. Identity relation, 4. Optimization. Options:",
+        options: [
+          { key: "A", en: "A-1, B-2, C-3, D-4" },
+          { key: "B", en: "A-2, B-1, C-4, D-3" },
+          { key: "C", en: "A-3, B-4, C-2, D-1" },
+          { key: "D", en: "A-4, B-3, C-1, D-2" },
+        ],
+        answerKey: "A",
+      },
+
+      // ---------------- SECTION D: DATA INTERPRETATION (31-35) ----------------
+      {
+        id: 31,
+        q_en:
+          "DATA INTERPRETATION 1) Pie Chart (Total Employees = 800): Production – 320, Marketing – 200, HR – 80, IT – 120, Finance – 80. What is the percentage of employees in Production?",
+        options: [
+          { key: "A", en: "35%" },
+          { key: "B", en: "40%" },
+          { key: "C", en: "45%" },
+          { key: "D", en: "50%" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 32,
+        q_en:
+          "DATA INTERPRETATION 2) Ratio of Marketing to IT employees is:",
+        options: [
+          { key: "A", en: "5:3" },
+          { key: "B", en: "4:3" },
+          { key: "C", en: "3:2" },
+          { key: "D", en: "2:1" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 33,
+        q_en:
+          "DATA INTERPRETATION 3) Combined percentage of HR and Finance employees is:",
+        options: [
+          { key: "A", en: "20%" },
+          { key: "B", en: "25%" },
+          { key: "C", en: "30%" },
+          { key: "D", en: "35%" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 34,
+        q_en:
+          "DATA INTERPRETATION 4) If 25% of Production employees are promoted, how many employees are promoted?",
+        options: [
+          { key: "A", en: "70" },
+          { key: "B", en: "75" },
+          { key: "C", en: "80" },
+          { key: "D", en: "85" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 35,
+        q_en:
+          "DATA INTERPRETATION 5) Which department has the second-highest number of employees?",
+        options: [
+          { key: "A", en: "IT" },
+          { key: "B", en: "Marketing" },
+          { key: "C", en: "Finance" },
+          { key: "D", en: "HR" },
+        ],
+        answerKey: "B",
+      },
+
+      // ---------------- SECTION E: LOGICAL REASONING (36-45) ----------------
+      {
+        id: 36,
+        q_en: "LOGICAL REASONING 1) Find the missing term: AZ, BY, CX, ?",
+        options: [
+          { key: "A", en: "DW" },
+          { key: "B", en: "DV" },
+          { key: "C", en: "EV" },
+          { key: "D", en: "EW" },
+        ],
+        answerKey: "A",
+      },
+      {
+        id: 37,
+        q_en:
+          "LOGICAL REASONING 2) Statement: All engineers are graduates. Some graduates are MBA holders. Conclusion:",
+        options: [
+          { key: "A", en: "All engineers are MBA holders" },
+          { key: "B", en: "Some engineers are MBA holders" },
+          { key: "C", en: "Engineers are graduates" },
+          { key: "D", en: "None of the above" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 38,
+        q_en: "LOGICAL REASONING 3) Odd one out: 121, 144, 169, 196, 216",
+        options: [
+          { key: "A", en: "121" },
+          { key: "B", en: "144" },
+          { key: "C", en: "169" },
+          { key: "D", en: "196" },
+          { key: "E", en: "216" },
+        ],
+        answerKey: "E",
+      },
+      {
+        id: 39,
+        q_en:
+          "LOGICAL REASONING 4) If CAT = 3120 (C=3, A=1, T=20), then DOG = ?",
+        options: [
+          { key: "A", en: "4715" },
+          { key: "B", en: "4157" },
+          { key: "C", en: "4716" },
+          { key: "D", en: "4751" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 40,
+        q_en:
+          "LOGICAL REASONING 5) Among A, B, C and D seated in a row, A is left of B, C is right of B, and D is left of A. Who is farthest left among these four?",
+        options: [
+          { key: "A", en: "A" },
+          { key: "B", en: "B" },
+          { key: "C", en: "C" },
+          { key: "D", en: "D" },
+        ],
+        answerKey: "D",
+      },
+
+      // ---------------- SECTION F: QUANTITATIVE APTITUDE (41-45) ----------------
+      {
+        id: 41,
+        q_en:
+          "QUANTITATIVE APTITUDE 1) Average of first 20 natural numbers is:",
+        options: [
+          { key: "A", en: "10" },
+          { key: "B", en: "10.5" },
+          { key: "C", en: "11" },
+          { key: "D", en: "9.5" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 42,
+        q_en:
+          "QUANTITATIVE APTITUDE 2) A sum doubles in 5 years at simple interest. The rate per annum is:",
+        options: [
+          { key: "A", en: "10%" },
+          { key: "B", en: "15%" },
+          { key: "C", en: "20%" },
+          { key: "D", en: "25%" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 43,
+        q_en:
+          "QUANTITATIVE APTITUDE 3) 40% of a number is 240. The number is:",
+        options: [
+          { key: "A", en: "500" },
+          { key: "B", en: "550" },
+          { key: "C", en: "600" },
+          { key: "D", en: "650" },
+        ],
+        answerKey: "C",
+      },
+      {
+        id: 44,
+        q_en:
+          "QUANTITATIVE APTITUDE 4) Time & Work: A alone can do a job in 12 days, B alone in 18 days. Together they will complete it in:",
+        options: [
+          { key: "A", en: "6 days" },
+          { key: "B", en: "7.2 days" },
+          { key: "C", en: "8 days" },
+          { key: "D", en: "9 days" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 45,
+        q_en: "QUANTITATIVE APTITUDE 5) If x² – 9 = 0, then x =",
+        options: [
+          { key: "A", en: "±3" },
+          { key: "B", en: "3" },
+          { key: "C", en: "-3" },
+          { key: "D", en: "±9" },
+        ],
+        answerKey: "A",
+      },
+
+      // ---------------- SECTION G: VERBAL ABILITY (46-50) ----------------
+      {
+        id: 46,
+        q_en: 'VERBAL ABILITY 1) Synonym of "Meticulous" is:',
+        options: [
+          { key: "A", en: "Careless" },
+          { key: "B", en: "Careful" },
+          { key: "C", en: "Rough" },
+          { key: "D", en: "Fast" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 47,
+        q_en: 'VERBAL ABILITY 2) Antonym of "Scarcity" is:',
+        options: [
+          { key: "A", en: "Shortage" },
+          { key: "B", en: "Plenty" },
+          { key: "C", en: "Lack" },
+          { key: "D", en: "Need" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 48,
+        q_en:
+          "VERBAL ABILITY 3) Fill in the blank: He has been living here _____ five years.",
+        options: [
+          { key: "A", en: "since" },
+          { key: "B", en: "for" },
+          { key: "C", en: "from" },
+          { key: "D", en: "at" },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 49,
+        q_en: "VERBAL ABILITY 4) Choose the grammatically correct sentence:",
+        options: [
+          { key: "A", en: "Each of the students have a book." },
+          { key: "B", en: "Each of the students has a book." },
+          { key: "C", en: "Each students have book." },
+          { key: "D", en: "Each student have a book." },
+        ],
+        answerKey: "B",
+      },
+      {
+        id: 50,
+        q_en: 'VERBAL ABILITY 5) Idiom: "Hit the nail on the head" means:',
+        options: [
+          { key: "A", en: "Miss the point" },
+          { key: "B", en: "Exactly right" },
+          { key: "C", en: "Angry" },
+          { key: "D", en: "Confused" },
+        ],
+        answerKey: "B",
+      },
+    ],
+    []
+  );
+
+  // ✅ Section-wise config (exactly as requested: 15/15/15/15)
+  const sections = useMemo(
+    () => [
+      { key: "PHYSICS", title: "Physics", fromId: 1, toId: 10, durationMin: 15 },
+      {
+        key: "CHEMISTRY",
+        title: "Chemistry",
+        fromId: 11,
+        toId: 20,
+        durationMin: 15,
+      },
+      {
+        key: "MATHEMATICS",
+        title: "Mathematics",
+        fromId: 21,
+        toId: 30,
+        durationMin: 15,
+      },
+      {
+        key: "APTITUDE",
+        title:
+          "Aptitude (DI + Logical Reasoning + Quantitative Aptitude + Verbal Ability)",
+        fromId: 31,
+        toId: 50,
+        durationMin: 15,
+      },
+    ],
+    []
+  );
 
   const TOTAL_QUESTIONS_DISPLAY = questions.length;
   const TOTAL_MARKS_DISPLAY = questions.length;
+
+  const currentSection = sections[currentSectionIndex];
+  const sectionQuestions = useMemo(() => {
+    if (!currentSection) return [];
+    return questions.filter(
+      (q) => q.id >= currentSection.fromId && q.id <= currentSection.toId
+    );
+  }, [questions, currentSection]);
 
   const formatTime = (sec) =>
     `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(
       sec % 60
     ).padStart(2, "0")}`;
 
-  const handleChange = (id, val) => {
-    setAnswers((prev) => ({ ...prev, [id]: val }));
-  };
+  const handleChange = (id, val) => setAnswers({ ...answers, [id]: val });
 
-  const isAnswerCorrect = (question, value) => {
-    if (question.type === "numeric") {
-      const numericValue = Number.parseFloat(
-        String(value ?? "").replace(/,/g, "").trim()
-      );
-      return Number.isFinite(numericValue) && numericValue === question.answerValue;
-    }
-
-    return value === question.answerKey;
-  };
-
-  // ✅ Timer
+  // ---------------- Timers --------------------
   useEffect(() => {
     if (!quizStarted || submitted) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setOverallTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setSectionTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(timer);
   }, [quizStarted, submitted]);
 
-  // ✅ Auto submit on time end
+  // ✅ Auto submit on overall time end
   useEffect(() => {
     if (!quizStarted || submitted) return;
-    if (timeLeft === 0) handleSubmit();
+    if (overallTimeLeft === 0) handleSubmit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft, quizStarted, submitted]);
+  }, [overallTimeLeft, quizStarted, submitted]);
 
+  // ✅ Auto move to next section on section time end
+  useEffect(() => {
+    if (!quizStarted || submitted) return;
+
+    if (sectionTimeLeft === 0 && overallTimeLeft > 0) {
+      if (currentSectionIndex < sections.length - 1) {
+        const nextIndex = currentSectionIndex + 1;
+        setCurrentSectionIndex(nextIndex);
+        setSectionTimeLeft(sections[nextIndex].durationMin * 60);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        handleSubmit();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionTimeLeft, quizStarted, submitted, currentSectionIndex, overallTimeLeft]);
+
+  // ---------------- Start Quiz --------------------
   const handleStart = async () => {
-    if (
-      !userData.name.trim() ||
-      !userData.employeeId.trim() ||
-      !userData.department.trim() ||
-      !userData.designation.trim()
-    ) {
-      alert("Please fill Name, Employee ID, Department, and Designation.");
+    if (!userData.name || !userData.college || !userData.branch) {
+      alert("Please fill in Name, College Name, and Branch to start the quiz.");
       return;
     }
 
@@ -358,18 +747,22 @@ const questions = useMemo(
     setSubmitted(false);
     setMarks(null);
     setAnswers({});
-    setTimeLeft(TOTAL_DURATION_SEC);
+
+    setOverallTimeLeft(TOTAL_DURATION_SEC);
+    setCurrentSectionIndex(0);
+    setSectionTimeLeft(sections[0].durationMin * 60);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // ---------------- Submit (SCORING/FIRESTORE LOGIC UNCHANGED) --------------------
   const handleSubmit = async () => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
 
     let score = 0;
     questions.forEach((q) => {
-      if (isAnswerCorrect(q, answers[q.id])) score++;
+      if (answers[q.id] === q.answerKey) score++;
     });
 
     setMarks(score);
@@ -379,23 +772,21 @@ const questions = useMemo(
     try {
       await addDoc(collection(db, "quizResults"), {
         name: userData.name,
-        employeeId: userData.employeeId,
-        department: userData.department,
-        designation: userData.designation,
+        college: userData.college,
+        branch: userData.branch,
         quizTitle,
         answers,
         marks: score,
-        totalMarks: TOTAL_MARKS_DISPLAY,
-        totalQuestions: TOTAL_QUESTIONS_DISPLAY,
-        durationMinutes: TOTAL_DURATION_MIN,
-        questions,
+        questions, // snapshot
         submittedAt: serverTimestamp(),
       });
     } catch (e) {
+      // If Firestore fails, still keep UI submitted; optionally log
       console.error("Error saving quiz result:", e);
     }
   };
 
+  // ---------------- Styles --------------------
   const styles = {
     page: {
       minHeight: "100vh",
@@ -409,7 +800,7 @@ const questions = useMemo(
       maxWidth: "820px",
       margin: "0 auto",
       padding: isMobile ? "10px" : "18px",
-      paddingTop: quizStarted ? (isMobile ? "72px" : "78px") : undefined,
+      paddingTop: quizStarted ? (isMobile ? "94px" : "104px") : undefined,
     },
     brand: {
       textAlign: "center",
@@ -512,22 +903,12 @@ const questions = useMemo(
       border: "1px solid rgba(0,0,0,0.12)",
       outline: "none",
       width: "100%",
+      transition: "0.2s",
       background: "#fcfcfd",
       boxSizing: "border-box",
     },
-    numericAnswer: {
-      padding: "12px",
-      fontSize: isMobile ? "16px" : "15px",
-      borderRadius: "10px",
-      border: "1px solid rgba(0,0,0,0.18)",
-      outline: "none",
-      width: isMobile ? "100%" : "320px",
-      maxWidth: "100%",
-      background: "#ffffff",
-      boxSizing: "border-box",
-    },
     helper: {
-      fontSize: "12px",
+      fontSize: isMobile ? "12px" : "12px",
       color: "#6c7a89",
       marginTop: "-6px",
       marginBottom: "2px",
@@ -535,7 +916,7 @@ const questions = useMemo(
     },
     button: {
       padding: isMobile ? "14px 12px" : "12px",
-      fontSize: "16px",
+      fontSize: isMobile ? "16px" : "16px",
       border: "none",
       borderRadius: "12px",
       background: "linear-gradient(135deg, #c0392b, #e74c3c)",
@@ -543,6 +924,7 @@ const questions = useMemo(
       cursor: "pointer",
       fontWeight: 900,
       boxShadow: "0 10px 18px rgba(231,76,60,0.25)",
+      transition: "0.2s",
       width: "100%",
       touchAction: "manipulation",
       opacity: loading ? 0.85 : 1,
@@ -554,7 +936,7 @@ const questions = useMemo(
       width: "100%",
       background: "linear-gradient(90deg, #fff0f0, #ffe3e3)",
       color: "#c0392b",
-      padding: "10px",
+      padding: "10px 10px",
       textAlign: "center",
       fontWeight: 900,
       zIndex: 1000,
@@ -610,8 +992,34 @@ const questions = useMemo(
       width: "100%",
       touchAction: "manipulation",
     },
+    nextBtn: {
+      padding: isMobile ? "14px 12px" : "12px",
+      fontSize: "16px",
+      border: "none",
+      borderRadius: "12px",
+      background: "linear-gradient(135deg, #1f6fb2, #3498db)",
+      color: "#fff",
+      cursor: "pointer",
+      fontWeight: 900,
+      boxShadow: "0 10px 18px rgba(52,152,219,0.25)",
+      width: "100%",
+      touchAction: "manipulation",
+      marginTop: "10px",
+    },
+    answerBox: {
+      marginTop: "10px",
+      padding: "10px 12px",
+      borderRadius: "12px",
+      border: "1px solid rgba(0,0,0,0.08)",
+      background: "linear-gradient(135deg, #f7fbff, #ffffff)",
+      color: "#2c3e50",
+      fontWeight: 700,
+      fontSize: isMobile ? "12px" : "13px",
+      lineHeight: 1.45,
+    },
   };
 
+  // ✅ QUIZ OVER SCREEN
   if (QUIZ_OVER) {
     return (
       <div style={styles.page}>
@@ -621,25 +1029,10 @@ const questions = useMemo(
             <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
               📝 {quizTitle}
             </h2>
-            <h3
-              style={{
-                color: "#c0392b",
-                textAlign: "center",
-                margin: "12px 0 0",
-                fontWeight: 900,
-              }}
-            >
+            <h3 style={{ color: "#c0392b", textAlign: "center", margin: "12px 0 0", fontWeight: 900 }}>
               Quiz Closed
             </h3>
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 10,
-                color: "#566573",
-                fontWeight: 700,
-                lineHeight: 1.4,
-              }}
-            >
+            <p style={{ textAlign: "center", marginTop: 10, color: "#566573", fontWeight: 700, lineHeight: 1.4 }}>
               This quiz is currently unavailable. Please contact the administrator.
             </p>
           </div>
@@ -648,62 +1041,27 @@ const questions = useMemo(
     );
   }
 
+  // ---------------- Submitted Screen --------------------
   if (submitted) {
     return (
       <div style={styles.page}>
         <div style={styles.container}>
           <div style={styles.titleWrap}>
             <div style={styles.brand}>HERO STEELS LIMITED</div>
-
             <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
               📝 {quizTitle}
             </h2>
-
-            <h3
-              style={{
-                color: "#27ae60",
-                textAlign: "center",
-                margin: "10px 0 0",
-              }}
-            >
+            <h3 style={{ color: "#27ae60", textAlign: "center", margin: "10px 0 0" }}>
               Submission Successful
             </h3>
 
-            <div
-              style={{
-                marginTop: 16,
-                padding: isMobile ? "12px" : "16px",
-                borderRadius: "14px",
-                background: "#ffffff",
-                border: "1px solid rgba(0,0,0,0.08)",
-                boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-              }}
-            >
-              <p style={{ margin: "8px 0", color: "#2c3e50", fontWeight: 700 }}>
-                <b>Name:</b> {userData.name}
-              </p>
-              <p style={{ margin: "8px 0", color: "#2c3e50", fontWeight: 700 }}>
-                <b>Employee ID:</b> {userData.employeeId}
-              </p>
-              <p style={{ margin: "8px 0", color: "#2c3e50", fontWeight: 700 }}>
-                <b>Department:</b> {userData.department}
-              </p>
-              <p style={{ margin: "8px 0", color: "#2c3e50", fontWeight: 700 }}>
-                <b>Designation:</b> {userData.designation}
-              </p>
-            </div>
+            <p style={{ textAlign: "center", marginTop: 10, color: "#2c3e50", fontWeight: 700, lineHeight: 1.4 }}>
+              <b>Student:</b> {userData.name} &nbsp; | &nbsp; <b>College:</b> {userData.college} &nbsp; | &nbsp;{" "}
+              <b>Branch:</b> {userData.branch}
+            </p>
 
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: 16,
-                color: "#2c3e50",
-                fontWeight: 900,
-                lineHeight: 1.4,
-              }}
-            >
-              Score: <span style={{ fontSize: 24, color: "#27ae60" }}>{marks}</span> /{" "}
-              {TOTAL_MARKS_DISPLAY}
+            <p style={{ textAlign: "center", marginTop: 10, color: "#2c3e50", fontWeight: 700, lineHeight: 1.4 }}>
+              Score: <span style={{ fontSize: 22 }}>{marks}</span> / {TOTAL_MARKS_DISPLAY}
             </p>
           </div>
         </div>
@@ -711,17 +1069,17 @@ const questions = useMemo(
     );
   }
 
-  if (!quizStarted) {
+  // ---------------- Landing Screen --------------------
+  if (!quizStarted)
     return (
       <div style={styles.page}>
         <div style={styles.container}>
           <div style={styles.titleWrap}>
             <div style={styles.brand}>HERO STEELS LIMITED</div>
-
             <h1 style={styles.header}>📝 {quizTitle}</h1>
 
             <div style={styles.subHeader}>
-              Please enter your employee details accurately — your submission will be recorded.
+              Please enter your details accurately — your submission will be recorded.
             </div>
 
             <div style={styles.badgeRow}>
@@ -732,12 +1090,24 @@ const questions = useMemo(
           </div>
 
           <div style={styles.notice}>
+            <div style={styles.noticeTitle}>Section & Timing Details</div>
+            <ul style={styles.rules}>
+              {sections.map((s) => (
+                <li key={s.key}>
+                  <b>{s.title}</b> — {s.durationMin} minutes (Q{s.fromId} to Q{s.toId})
+                </li>
+              ))}
+              <li>The quiz will be automatically submitted when the overall time limit ends.</li>
+              <li>When a section timer ends, the next section will start automatically.</li>
+            </ul>
+          </div>
+
+          <div style={styles.notice}>
             <div style={styles.noticeTitle}>Important Instructions</div>
             <ul style={styles.rules}>
               <li>
                 Each question has only <b>one</b> correct answer.
               </li>
-              <li>The quiz will be automatically submitted when time ends.</li>
               <li>Please do not refresh the page during the assessment.</li>
               <li>Ensure a stable internet connection for saving your submission.</li>
             </ul>
@@ -747,48 +1117,28 @@ const questions = useMemo(
             <div style={styles.row2}>
               <input
                 style={styles.input}
-                placeholder="Name"
-                onChange={(e) =>
-                  setUserData({ ...userData, name: e.target.value })
-                }
+                placeholder="Student Name"
+                onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                 value={userData.name}
                 inputMode="text"
               />
-
               <input
                 style={styles.input}
-                placeholder="Employee ID"
-                onChange={(e) =>
-                  setUserData({ ...userData, employeeId: e.target.value })
-                }
-                value={userData.employeeId}
+                placeholder="College Name"
+                onChange={(e) => setUserData({ ...userData, college: e.target.value })}
+                value={userData.college}
                 inputMode="text"
               />
-
               <input
                 style={styles.input}
-                placeholder="Department"
-                onChange={(e) =>
-                  setUserData({ ...userData, department: e.target.value })
-                }
-                value={userData.department}
-                inputMode="text"
-              />
-
-              <input
-                style={styles.input}
-                placeholder="Designation"
-                onChange={(e) =>
-                  setUserData({ ...userData, designation: e.target.value })
-                }
-                value={userData.designation}
+                placeholder="Branch (e.g., CSE / ME / ECE)"
+                onChange={(e) => setUserData({ ...userData, branch: e.target.value })}
+                value={userData.branch}
                 inputMode="text"
               />
             </div>
 
-            <div style={styles.helper}>
-              Tip: Please enter correct employee details before starting the assessment.
-            </div>
+            <div style={styles.helper}>Tip: Please enter your full name and official college details.</div>
 
             <button style={styles.button} onClick={handleStart} disabled={loading}>
               {loading ? "Starting..." : "🚀 Start Assessment"}
@@ -797,13 +1147,25 @@ const questions = useMemo(
         </div>
       </div>
     );
-  }
+
+  // ---------------- Quiz Screen --------------------
+  const goNextSection = () => {
+    if (currentSectionIndex < sections.length - 1) {
+      const nextIndex = currentSectionIndex + 1;
+      setCurrentSectionIndex(nextIndex);
+      setSectionTimeLeft(sections[nextIndex].durationMin * 60);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const isLastSection = currentSectionIndex === sections.length - 1;
 
   return (
     <div style={styles.page}>
       <div style={styles.timer}>
+        <div style={styles.timerLine}>⏳ Overall Time Remaining: {formatTime(overallTimeLeft)}</div>
         <div style={styles.timerLine}>
-          ⏳ Time Remaining: {formatTime(timeLeft)}
+          📘 Section Time Remaining ({currentSection?.title}): {formatTime(sectionTimeLeft)}
         </div>
       </div>
 
@@ -811,25 +1173,23 @@ const questions = useMemo(
         <div style={styles.titleWrap}>
           <div style={styles.brand}>HERO STEELS LIMITED</div>
 
-          <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>
-            📝 {quizTitle}
-          </h2>
+          <h2 style={{ ...styles.header, fontSize: isMobile ? "18px" : "22px" }}>📝 {quizTitle}</h2>
 
           <div style={styles.subHeader}>
-            <b>Name:</b> {userData.name} &nbsp; | &nbsp;
-            <b>Employee ID:</b> {userData.employeeId} &nbsp; | &nbsp;
-            <b>Department:</b> {userData.department} &nbsp; | &nbsp;
-            <b>Designation:</b> {userData.designation}
+            <b>Student:</b> {userData.name} &nbsp; | &nbsp; <b>College:</b> {userData.college} &nbsp; | &nbsp;{" "}
+            <b>Branch:</b> {userData.branch}
           </div>
 
           <div style={styles.badgeRow}>
             <div style={styles.badgeBlue}>📄 Total Marks: {TOTAL_MARKS_DISPLAY}</div>
             <div style={styles.badge}>⏱ Total: {TOTAL_DURATION_MIN} Minutes</div>
-            <div style={styles.badgeBlue}>✅ Questions: {TOTAL_QUESTIONS_DISPLAY}</div>
+            <div style={styles.badgeBlue}>
+              ✅ Current Section: {currentSection?.title} (Q{currentSection?.fromId}–Q{currentSection?.toId})
+            </div>
           </div>
         </div>
 
-        {questions.map((q) => (
+        {sectionQuestions.map((q) => (
           <div key={q.id} style={styles.question}>
             <p style={styles.qTitle}>
               <b>
@@ -837,34 +1197,29 @@ const questions = useMemo(
               </b>
             </p>
 
-            {q.type === "numeric" ? (
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="Enter your answer"
-                value={answers[q.id] || ""}
-                onChange={(e) => handleChange(q.id, e.target.value)}
-                style={styles.numericAnswer}
-              />
-            ) : (
-              q.options.map((opt) => (
-                <label key={opt.key} style={styles.option}>
-                  <input
-                    type="radio"
-                    name={String(q.id)}
-                    value={opt.key}
-                    checked={answers[q.id] === opt.key}
-                    onChange={() => handleChange(q.id, opt.key)}
-                    style={styles.radio}
-                  />
-                  <span style={{ fontSize: isMobile ? "14px" : "15px" }}>
-                    <b>{opt.key}.</b> {opt.en}
-                  </span>
-                </label>
-              ))
-            )}
+            {q.options.map((opt) => (
+              <label key={opt.key} style={styles.option}>
+                <input
+                  type="radio"
+                  name={String(q.id)}
+                  value={opt.key}
+                  checked={answers[q.id] === opt.key}
+                  onChange={() => handleChange(q.id, opt.key)}
+                  style={styles.radio}
+                />
+                <span style={{ fontSize: isMobile ? "14px" : "15px" }}>
+                  <b>{opt.key}.</b> {opt.en}
+                </span>
+              </label>
+            ))}
           </div>
         ))}
+
+        {!isLastSection ? (
+          <button style={styles.nextBtn} onClick={goNextSection}>
+            ➡️ Proceed to Next Section
+          </button>
+        ) : null}
 
         <button style={styles.submitBtn} onClick={handleSubmit}>
           ✅ Submit Assessment
