@@ -186,12 +186,9 @@ export default function ResultsPCM_Aptitude() {
 
         Name: u.name,
 
-        EmployeeID: u.employeeId || "",
-        Department: u.department || "",
-        Designation: u.designation || "",
         College: u.college || "",
-
         Branch: u.branch || "",
+        RollNumber: u.rollNumber || "",
 
         Marks: `${u.marks} / ${attempted} / ${total || ""}`,
 
@@ -357,9 +354,10 @@ export default function ResultsPCM_Aptitude() {
 
           <p><b>Name:</b> ${user.name || ""}</p>
 
-          <p><b>Employee ID / College:</b> ${user.employeeId || user.college || ""}</p>
+          <p><b>College / University:</b> ${user.college || ""}</p>
+          <p><b>Roll Number:</b> ${user.rollNumber || ""}</p>
 
-          <p><b>Department / Branch:</b> ${user.department || user.branch || ""}</p>
+          <p><b>Branch / Stream:</b> ${user.branch || ""}</p>
 
           <p><b>Marks:</b> ${user.marks} / ${attempted} / ${total || ""}</p>
 
@@ -743,9 +741,10 @@ export default function ResultsPCM_Aptitude() {
 
                   <th style={styles.th}>Name</th>
 
-                  <th style={styles.th}>Employee ID / College</th>
+                  <th style={styles.th}>College / University</th>
 
-                  <th style={styles.th}>Department / Branch</th>
+                  <th style={styles.th}>Branch / Stream</th>
+                  <th style={styles.th}>Roll Number</th>
 
                   <th style={styles.th}>Marks</th>
 
@@ -791,9 +790,10 @@ export default function ResultsPCM_Aptitude() {
 
                       </td>
 
-                      <td style={styles.td}>{r.employeeId || r.college || "—"}</td>
+                      <td style={styles.td}>{r.college || "—"}</td>
 
-                      <td style={styles.td}>{r.department || r.branch || "—"}</td>
+                      <td style={styles.td}>{r.branch || "—"}</td>
+                      <td style={styles.td}>{r.rollNumber || "—"}</td>
 
                       <td style={styles.td}>
 
@@ -917,9 +917,9 @@ export default function ResultsPCM_Aptitude() {
 
                   <p style={styles.muted}>
 
-                    {selectedAnswers.name} • {selectedAnswers.employeeId || selectedAnswers.college || "—"} •{" "}
+                    {selectedAnswers.name} • {selectedAnswers.college || "—"} •{" "}
 
-                    {selectedAnswers.department || selectedAnswers.branch || "—"}
+                    {selectedAnswers.branch || "—"}
 
                   </p>
 
@@ -939,22 +939,26 @@ export default function ResultsPCM_Aptitude() {
 
                   <div style={styles.metaCard}>
 
-                    <div style={styles.metaLabel}>Employee ID / College</div>
+                    <div style={styles.metaLabel}>College / University</div>
 
-                    <div style={styles.metaValue}>{selectedAnswers.employeeId || selectedAnswers.college || "—"}</div>
-
-                  </div>
-
-                  <div style={styles.metaCard}>
-
-                    <div style={styles.metaLabel}>Department / Branch</div>
-
-                    <div style={styles.metaValue}>{selectedAnswers.department || selectedAnswers.branch || "—"}</div>
+                    <div style={styles.metaValue}>{selectedAnswers.college || "—"}</div>
 
                   </div>
 
                   <div style={styles.metaCard}>
 
+                    <div style={styles.metaLabel}>Branch / Stream</div>
+
+                    <div style={styles.metaValue}>{selectedAnswers.branch || "—"}</div>
+
+                  </div>
+
+                  <div style={styles.metaCard}>
+
+                    <div style={styles.metaLabel}>Roll Number</div>
+                    <div style={styles.metaValue}>{selectedAnswers.rollNumber || "—"}</div>
+                  </div>
+                  <div style={styles.metaCard}>
                     <div style={styles.metaLabel}>Marks</div>
 
                     <div style={styles.metaValue}>

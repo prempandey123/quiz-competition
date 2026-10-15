@@ -10,11 +10,11 @@ export default function QuizPage() {
 
     name: "",
 
-    employeeId: "",
+    rollNumber: "",
 
-    department: "",
+    college: "",
 
-    designation: "",
+    branch: "",
 
   });
 
@@ -2436,15 +2436,15 @@ const questions = useMemo(
 
       !userData.name.trim() ||
 
-      !userData.employeeId.trim() ||
+      !userData.rollNumber.trim() ||
 
-      !userData.department.trim() ||
+      !userData.college.trim() ||
 
-      !userData.designation.trim()
+      !userData.branch.trim()
 
     ) {
 
-      alert("Please fill Name, Employee ID, Department, and Designation.");
+      alert("Please fill Student Name, Roll Number, College / University, and Branch / Stream.");
 
       return;
 
@@ -2496,11 +2496,11 @@ const questions = useMemo(
 
         name: userData.name,
 
-        employeeId: userData.employeeId,
+        rollNumber: userData.rollNumber,
 
-        department: userData.department,
+        college: userData.college,
 
-        designation: userData.designation,
+        branch: userData.branch,
 
         quizTitle,
 
@@ -3092,19 +3092,19 @@ const questions = useMemo(
 
               <p style={{ margin: "8px 0", color: "#2c3e50", fontWeight: 700 }}>
 
-                <b>Employee ID:</b> {userData.employeeId}
+                <b>Roll Number:</b> {userData.rollNumber}
 
               </p>
 
               <p style={{ margin: "8px 0", color: "#2c3e50", fontWeight: 700 }}>
 
-                <b>Department:</b> {userData.department}
+                <b>College / University:</b> {userData.college}
 
               </p>
 
               <p style={{ margin: "8px 0", color: "#2c3e50", fontWeight: 700 }}>
 
-                <b>Designation:</b> {userData.designation}
+                <b>Branch / Stream:</b> {userData.branch}
 
               </p>
 
@@ -3160,7 +3160,7 @@ const questions = useMemo(
 
             <div style={styles.subHeader}>
 
-              Please enter your employee details accurately — your submission will be recorded.
+              Please enter your student details accurately — your submission will be recorded.
 
             </div>
 
@@ -3206,7 +3206,7 @@ const questions = useMemo(
 
                 style={styles.input}
 
-                placeholder="Name"
+                placeholder="Student Name"
 
                 onChange={(e) =>
 
@@ -3224,15 +3224,15 @@ const questions = useMemo(
 
                 style={styles.input}
 
-                placeholder="Employee ID"
+                placeholder="Roll Number"
 
                 onChange={(e) =>
 
-                  setUserData({ ...userData, employeeId: e.target.value })
+                  setUserData({ ...userData, rollNumber: e.target.value })
 
                 }
 
-                value={userData.employeeId}
+                value={userData.rollNumber}
 
                 inputMode="text"
 
@@ -3242,15 +3242,15 @@ const questions = useMemo(
 
                 style={styles.input}
 
-                placeholder="Department"
+                placeholder="College / University"
 
                 onChange={(e) =>
 
-                  setUserData({ ...userData, department: e.target.value })
+                  setUserData({ ...userData, college: e.target.value })
 
                 }
 
-                value={userData.department}
+                value={userData.college}
 
                 inputMode="text"
 
@@ -3260,15 +3260,15 @@ const questions = useMemo(
 
                 style={styles.input}
 
-                placeholder="Designation"
+                placeholder="Branch / Stream"
 
                 onChange={(e) =>
 
-                  setUserData({ ...userData, designation: e.target.value })
+                  setUserData({ ...userData, branch: e.target.value })
 
                 }
 
-                value={userData.designation}
+                value={userData.branch}
 
                 inputMode="text"
 
@@ -3278,7 +3278,7 @@ const questions = useMemo(
 
             <div style={styles.helper}>
 
-              Tip: Please enter correct employee details before starting the assessment.
+              Tip: Please enter correct student details before starting the assessment.
 
             </div>
 
@@ -3328,11 +3328,11 @@ const questions = useMemo(
 
             <b>Name:</b> {userData.name} &nbsp; | &nbsp;
 
-            <b>Employee ID:</b> {userData.employeeId} &nbsp; | &nbsp;
+            <b>Roll Number:</b> {userData.rollNumber} &nbsp; | &nbsp;
 
-            <b>Department:</b> {userData.department} &nbsp; | &nbsp;
+            <b>College / University:</b> {userData.college} &nbsp; | &nbsp;
 
-            <b>Designation:</b> {userData.designation}
+            <b>Branch / Stream:</b> {userData.branch}
 
           </div>
 
