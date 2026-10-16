@@ -26,7 +26,7 @@ export default function QuizPage() {
 
   // Total duration: 120 minutes
 
-  const TOTAL_DURATION_MIN = 120;
+  const TOTAL_DURATION_MIN = 90;
 
   const TOTAL_DURATION_SEC = TOTAL_DURATION_MIN * 60;
 
