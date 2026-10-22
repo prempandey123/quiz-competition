@@ -46,6 +46,9 @@ export default function QuizPage() {
 
   const isSubmittingRef = useRef(false);
 
+  const [submissionReason, setSubmissionReason] = useState("manual");
+  const latestSubmitRef = useRef(null);
+
   useEffect(() => {
 
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -2462,6 +2465,8 @@ const questions = useMemo(
 
     setMarks(null);
 
+    setSubmissionReason("manual");
+
     setAnswers({});
 
     setTimeLeft(TOTAL_DURATION_SEC);
@@ -2470,11 +2475,16 @@ const questions = useMemo(
 
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (reason = "manual") => {
+
+    // React click events may be passed to this handler; only accept a string reason.
+    const finalReason = typeof reason === "string" ? reason : "manual";
 
     if (isSubmittingRef.current) return;
 
     isSubmittingRef.current = true;
+
+    setSubmissionReason(finalReason);
 
     let score = 0;
 
@@ -2516,6 +2526,8 @@ const questions = useMemo(
 
         questions,
 
+        submissionReason: finalReason,
+
         submittedAt: serverTimestamp(),
 
       });
@@ -2527,6 +2539,52 @@ const questions = useMemo(
     }
 
   };
+
+  // Keep the event handler current without reinstalling monitoring on every answer change.
+  latestSubmitRef.current = handleSubmit;
+
+  useEffect(() => {
+    if (!quizStarted || submitted) return;
+
+    const autoSubmit = () => {
+      if (!isSubmittingRef.current) latestSubmitRef.current("screen_switch");
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") autoSubmit();
+    };
+    const onWindowBlur = () => autoSubmit();
+
+    // Stop copying/selecting assessment content. Answer fields remain editable.
+    const blockCopy = (event) => event.preventDefault();
+    const blockContextMenu = (event) => event.preventDefault();
+    const blockSelection = (event) => {
+      if (!event.target.closest("input, textarea")) event.preventDefault();
+    };
+    const blockShortcuts = (event) => {
+      if ((event.ctrlKey || event.metaKey) && ["c", "x", "a", "p", "s", "u"].includes(event.key.toLowerCase())) {
+        // Keep input editing shortcuts available except copying assessment content.
+        if (event.key.toLowerCase() === "c" || !event.target.closest("input, textarea")) event.preventDefault();
+      }
+      if (event.key === "PrintScreen") event.preventDefault();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("blur", onWindowBlur);
+    document.addEventListener("copy", blockCopy);
+    document.addEventListener("cut", blockCopy);
+    document.addEventListener("contextmenu", blockContextMenu);
+    document.addEventListener("selectstart", blockSelection);
+    document.addEventListener("keydown", blockShortcuts);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("blur", onWindowBlur);
+      document.removeEventListener("copy", blockCopy);
+      document.removeEventListener("cut", blockCopy);
+      document.removeEventListener("contextmenu", blockContextMenu);
+      document.removeEventListener("selectstart", blockSelection);
+      document.removeEventListener("keydown", blockShortcuts);
+    };
+  }, [quizStarted, submitted]);
 
   const styles = {
 
@@ -3060,7 +3118,7 @@ const questions = useMemo(
 
             >
 
-              Submission Successful
+              {submissionReason === "screen_switch" ? "Assessment Auto-Submitted (Screen Switch Detected)" : "Submission Successful"}
 
             </h3>
 
@@ -3190,6 +3248,10 @@ const questions = useMemo(
 
               <li>The quiz will be automatically submitted when time ends.</li>
 
+              <li>Switching tabs, minimizing the browser, or moving to another window will automatically submit the assessment.</li>
+
+              <li>Copying or selecting assessment questions is disabled.</li>
+
               <li>Please do not refresh the page during the assessment.</li>
 
               <li>Ensure a stable internet connection for saving your submission.</li>
@@ -3300,7 +3362,7 @@ const questions = useMemo(
 
   return (
 
-    <div style={styles.page}>
+    <div style={{ ...styles.page, userSelect: "none", WebkitUserSelect: "none" }}>
 
       <div style={styles.timer}>
 
