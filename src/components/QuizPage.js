@@ -48,6 +48,8 @@ export default function QuizPage() {
 
   const [submissionReason, setSubmissionReason] = useState("manual");
   const latestSubmitRef = useRef(null);
+  const fullscreenEnforcedRef = useRef(false);
+  const [fullscreenNotice, setFullscreenNotice] = useState("");
 
   useEffect(() => {
 
@@ -2455,10 +2457,26 @@ const questions = useMemo(
 
     isSubmittingRef.current = false;
 
+    // Fullscreen requires a direct user gesture; request it from Start Assessment.
+    // iOS Safari and some in-app browsers do not support element fullscreen.
     setLoading(true);
-
+    fullscreenEnforcedRef.current = false;
+    setFullscreenNotice("");
+    const requestFullscreen = document.documentElement.requestFullscreen ||
+      document.documentElement.webkitRequestFullscreen;
+    if (requestFullscreen) {
+      try {
+        // Call before any awaited work, preserving the browser's user activation.
+        await requestFullscreen.call(document.documentElement);
+        fullscreenEnforcedRef.current = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      } catch (error) {
+        console.warn("Fullscreen entry was declined:", error);
+        setFullscreenNotice("Fullscreen was not enabled by this browser. Switching tabs or minimizing will still auto-submit the assessment.");
+      }
+    } else {
+      setFullscreenNotice("This mobile browser does not support automatic fullscreen. Leaving the quiz or switching apps will still auto-submit when detected.");
+    }
     setLoading(false);
-
     setQuizStarted(true);
 
     setSubmitted(false);
@@ -2499,6 +2517,15 @@ const questions = useMemo(
     setSubmitted(true);
 
     setQuizStarted(false);
+
+    // The test is finished: leave fullscreen so the results page is usable.
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exitFullscreen) {
+        try { Promise.resolve(exitFullscreen.call(document)).catch(() => {}); } catch (_) { /* ignore */ }
+      }
+    }
+    fullscreenEnforcedRef.current = false;
 
     try {
 
@@ -2553,6 +2580,14 @@ const questions = useMemo(
       if (document.visibilityState === "hidden") autoSubmit();
     };
     const onWindowBlur = () => autoSubmit();
+    const onFullscreenChange = () => {
+      // Only enforce exit when this browser successfully entered fullscreen at Start.
+      if (fullscreenEnforcedRef.current &&
+          !document.fullscreenElement && !document.webkitFullscreenElement &&
+          !isSubmittingRef.current) {
+        latestSubmitRef.current("fullscreen_exit");
+      }
+    };
 
     // Stop copying/selecting assessment content. Answer fields remain editable.
     const blockCopy = (event) => event.preventDefault();
@@ -2570,6 +2605,8 @@ const questions = useMemo(
 
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("blur", onWindowBlur);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
     document.addEventListener("copy", blockCopy);
     document.addEventListener("cut", blockCopy);
     document.addEventListener("contextmenu", blockContextMenu);
@@ -2578,6 +2615,8 @@ const questions = useMemo(
     return () => {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("blur", onWindowBlur);
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
       document.removeEventListener("copy", blockCopy);
       document.removeEventListener("cut", blockCopy);
       document.removeEventListener("contextmenu", blockContextMenu);
@@ -3118,7 +3157,7 @@ const questions = useMemo(
 
             >
 
-              {submissionReason === "screen_switch" ? "Assessment Auto-Submitted (Screen Switch Detected)" : "Submission Successful"}
+              {submissionReason === "screen_switch" ? "Assessment Auto-Submitted (Screen Switch Detected)" : submissionReason === "fullscreen_exit" ? "Assessment Auto-Submitted (Fullscreen Exited)" : "Submission Successful"}
 
             </h3>
 
@@ -3248,7 +3287,8 @@ const questions = useMemo(
 
               <li>The quiz will be automatically submitted when time ends.</li>
 
-              <li>Switching tabs, minimizing the browser, or moving to another window will automatically submit the assessment.</li>
+              <li>On supported browsers, Start Assessment opens fullscreen. Exiting fullscreen, switching tabs, minimizing, or moving to another window will automatically submit the assessment.</li>
+              <li>Browsers and operating systems do not permit websites to disable Home, minimize, or app switching. Some mobile browsers cannot enter true fullscreen.</li>
 
               <li>Copying or selecting assessment questions is disabled.</li>
 
@@ -3363,6 +3403,12 @@ const questions = useMemo(
   return (
 
     <div style={{ ...styles.page, userSelect: "none", WebkitUserSelect: "none" }}>
+
+      {fullscreenNotice && (
+        <div role="alert" style={{ margin: "12px auto", padding: 12, maxWidth: 900, background: "#fff5df", color: "#704800", borderRadius: 8 }}>
+          {fullscreenNotice}
+        </div>
+      )}
 
       <div style={styles.timer}>
 
