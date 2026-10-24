@@ -26,7 +26,7 @@ export default function QuizPage() {
 
   // Total duration: 120 minutes
 
-  const TOTAL_DURATION_MIN = 90;
+  const TOTAL_DURATION_MIN = 60;
 
   const TOTAL_DURATION_SEC = TOTAL_DURATION_MIN * 60;
 
@@ -50,6 +50,7 @@ export default function QuizPage() {
   const latestSubmitRef = useRef(null);
   const fullscreenEnforcedRef = useRef(false);
   const [fullscreenNotice, setFullscreenNotice] = useState("");
+  const pendingViolationNoticeRef = useRef(false);
 
   useEffect(() => {
 
@@ -2456,6 +2457,7 @@ const questions = useMemo(
     }
 
     isSubmittingRef.current = false;
+    pendingViolationNoticeRef.current = false;
 
     // Fullscreen requires a direct user gesture; request it from Start Assessment.
     // iOS Safari and some in-app browsers do not support element fullscreen.
@@ -2501,6 +2503,11 @@ const questions = useMemo(
     if (isSubmittingRef.current) return;
 
     isSubmittingRef.current = true;
+    // Closing the assessment immediately is important: do not wait for the
+    // result write before removing questions from the student's screen.
+    if (finalReason === "screen_switch" || finalReason === "fullscreen_exit") {
+      pendingViolationNoticeRef.current = true;
+    }
 
     setSubmissionReason(finalReason);
 
@@ -2567,6 +2574,25 @@ const questions = useMemo(
 
   };
 
+  // When Windows shows the desktop (Win+D), our page is not visible, so an
+  // in-page warning can only be shown when the student returns to the browser.
+  useEffect(() => {
+    const notifyOnReturn = () => {
+      if (!pendingViolationNoticeRef.current) return;
+      pendingViolationNoticeRef.current = false;
+      window.alert("Assessment terminated: screen switching, minimizing, or exiting fullscreen is not allowed. Your answers have been automatically submitted. The quiz is now closed.");
+    };
+    window.addEventListener("focus", notifyOnReturn);
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && document.hasFocus()) notifyOnReturn();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", notifyOnReturn);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
+
   // Keep the event handler current without reinstalling monitoring on every answer change.
   latestSubmitRef.current = handleSubmit;
 
@@ -2579,6 +2605,8 @@ const questions = useMemo(
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") autoSubmit();
     };
+    // Windows Win+D / app switching normally blurs the browser. Browsers cannot
+    // block OS shortcuts; terminate the attempt as soon as blur is observed.
     const onWindowBlur = () => autoSubmit();
     const onFullscreenChange = () => {
       // Only enforce exit when this browser successfully entered fullscreen at Start.
@@ -3147,7 +3175,7 @@ const questions = useMemo(
 
               style={{
 
-                color: "#27ae60",
+                color: submissionReason === "manual" ? "#27ae60" : "#c62828",
 
                 textAlign: "center",
 
@@ -3157,7 +3185,7 @@ const questions = useMemo(
 
             >
 
-              {submissionReason === "screen_switch" ? "Assessment Auto-Submitted (Screen Switch Detected)" : submissionReason === "fullscreen_exit" ? "Assessment Auto-Submitted (Fullscreen Exited)" : "Submission Successful"}
+              {submissionReason === "screen_switch" ? "Assessment Terminated – Screen Switch / Minimize Detected" : submissionReason === "fullscreen_exit" ? "Assessment Terminated – Fullscreen Exited" : "Submission Successful"}
 
             </h3>
 
