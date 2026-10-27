@@ -26,7 +26,7 @@ export default function QuizPage() {
 
   // Total duration: 120 minutes
 
-  const TOTAL_DURATION_MIN = 60;
+  const TOTAL_DURATION_MIN = 90;
 
   const TOTAL_DURATION_SEC = TOTAL_DURATION_MIN * 60;
 
@@ -2580,7 +2580,7 @@ const questions = useMemo(
     const notifyOnReturn = () => {
       if (!pendingViolationNoticeRef.current) return;
       pendingViolationNoticeRef.current = false;
-      window.alert("Assessment terminated: screen switching, minimizing, or exiting fullscreen is not allowed. Your answers have been automatically submitted. The quiz is now closed.");
+      window.alert("Quiz submitted: Win + D, minimizing, or switching away from the exam window is not allowed. Your assessment has been closed.");
     };
     window.addEventListener("focus", notifyOnReturn);
     const onVisible = () => {
@@ -3185,7 +3185,7 @@ const questions = useMemo(
 
             >
 
-              {submissionReason === "screen_switch" ? "Assessment Terminated – Screen Switch / Minimize Detected" : submissionReason === "fullscreen_exit" ? "Assessment Terminated – Fullscreen Exited" : "Submission Successful"}
+              {submissionReason === "screen_switch" ? "Quiz Submitted – Win + D / Window Switch / Minimize Detected" : submissionReason === "fullscreen_exit" ? "Quiz Submitted – Fullscreen Exit Detected" : "Submission Successful"}
 
             </h3>
 
@@ -3438,6 +3438,21 @@ const questions = useMemo(
         </div>
       )}
 
+      {/* Always-visible manual submit button on both desktop and mobile. */}
+      <div style={{
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1000,
+        padding: isMobile ? "10px 12px calc(10px + env(safe-area-inset-bottom, 0px))" : "12px 20px",
+        background: "rgba(255,255,255,0.98)", borderTop: "1px solid #dce2e9",
+        boxShadow: "0 -5px 20px rgba(0,0,0,0.12)", display: "flex", justifyContent: "center",
+      }}>
+        <button type="button" onClick={() => handleSubmit("manual")}
+          disabled={isSubmittingRef.current}
+          style={{ ...styles.submitBtn, margin: 0, width: isMobile ? "100%" : "min(100%, 360px)",
+            minHeight: 46, cursor: "pointer" }}>
+          ✅ Submit Quiz
+        </button>
+      </div>
+
       <div style={styles.timer}>
 
         <div style={styles.timerLine}>
@@ -3554,11 +3569,7 @@ const questions = useMemo(
 
         ))}
 
-        <button style={styles.submitBtn} onClick={handleSubmit}>
-
-          ✅ Submit Assessment
-
-        </button>
+        <div style={{ height: isMobile ? 105 : 90 }} aria-hidden="true" />
 
       </div>
 
