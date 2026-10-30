@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 
 import { db } from "../firebase";
 
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, runTransaction, updateDoc, serverTimestamp } from "firebase/firestore";
 
 // Fixed test windows for Saturday, 31 October 2026 (Indian Standard Time, UTC+05:30).
 // The end instant is EXCLUSIVE: 11:00 AM and 4:00 PM are already closed.
@@ -18,6 +18,12 @@ const EXAM_SLOTS = [
     label: "Afternoon: 3:00 PM – 4:00 PM",
   },
 ];
+
+// Ignore case and accidental spaces so e.g. "abc 123" and "ABC123" cannot be used twice.
+const normalizeRollNumber = (value) => String(value).normalize("NFKC").replace(/\s+/g, "").toUpperCase();
+
+const getAttemptDocRef = (rollNumber) =>
+  doc(db, "quizResults", `campus_20261031_${encodeURIComponent(normalizeRollNumber(rollNumber))}`);
 
 const getActiveExamSlot = (time = Date.now()) =>
   EXAM_SLOTS.find((slot) => time >= slot.start && time < slot.end) || null;
@@ -86,6 +92,13 @@ export default function QuizPage() {
   const fullscreenEnforcedRef = useRef(false);
   const [fullscreenNotice, setFullscreenNotice] = useState("");
   const pendingViolationNoticeRef = useRef(false);
+  // Keep the reserved Firestore record for this attempt; a new browser cannot reuse it.
+  const attemptDocRef = useRef(null);
+  const startInProgressRef = useRef(false);
+  const submissionPayloadRef = useRef(null);
+  const saveInProgressRef = useRef(false);
+  const [saveError, setSaveError] = useState("");
+  const [resultSaving, setResultSaving] = useState(false);
 
   useEffect(() => {
 
@@ -2487,7 +2500,8 @@ const questions = useMemo(
   }, [quizStarted, submitted]);
 
   const handleStart = async () => {
-    // Recheck on click; a disabled UI alone cannot enforce scheduling.
+    // Check the allowed session and the student fields first.
+    if (startInProgressRef.current) return;
     const slotAtClick = getActiveExamSlot();
     if (!slotAtClick || QUIZ_OVER) {
       setNowMs(Date.now());
@@ -2495,109 +2509,158 @@ const questions = useMemo(
       return;
     }
 
-    if (
-
-      !userData.name.trim() ||
-
-      !userData.rollNumber.trim() ||
-
-      !userData.college.trim() ||
-
-      !userData.branch.trim()
-
-    ) {
-
-      alert("Please fill Student Name, Roll Number, College / University, and Branch / Stream.");
-
+    if (!userData.name.trim() || !userData.rollNumber.trim() ||
+        !userData.college.trim() || !userData.branch.trim()) {
+      window.alert("Please fill Student Name, Roll Number, College / University, and Branch / Stream.");
       return;
-
     }
 
+    const normalizedRollNumber = normalizeRollNumber(userData.rollNumber);
+    if (!normalizedRollNumber || normalizedRollNumber.length > 100) {
+      window.alert("Please enter a valid Roll Number (up to 100 characters).");
+      return;
+    }
+
+    startInProgressRef.current = true;
+    setLoading(true);
+    setSaveError("");
     isSubmittingRef.current = false;
     pendingViolationNoticeRef.current = false;
-
-    // Fullscreen requires a direct user gesture; request it from Start Assessment.
-    // iOS Safari and some in-app browsers do not support element fullscreen.
-    setLoading(true);
     fullscreenEnforcedRef.current = false;
     setFullscreenNotice("");
+
+    // Fullscreen must be requested directly from this button click, before
+    // awaiting Firebase; browsers otherwise reject fullscreen requests.
     const requestFullscreen = document.documentElement.requestFullscreen ||
       document.documentElement.webkitRequestFullscreen;
-    if (requestFullscreen) {
-      try {
-        // Call before any awaited work, preserving the browser's user activation.
-        await requestFullscreen.call(document.documentElement);
-        fullscreenEnforcedRef.current = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-      } catch (error) {
-        console.warn("Fullscreen entry was declined:", error);
-        setFullscreenNotice("Fullscreen was not enabled by this browser. Switching tabs or minimizing will still auto-submit the assessment.");
+    try {
+      if (requestFullscreen) {
+        try {
+          await requestFullscreen.call(document.documentElement);
+          fullscreenEnforcedRef.current = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+        } catch (error) {
+          console.warn("Fullscreen entry was declined:", error);
+          setFullscreenNotice("Fullscreen was not enabled by this browser. Switching tabs or minimizing will still auto-submit the assessment.");
+        }
+      } else {
+        setFullscreenNotice("This mobile browser does not support automatic fullscreen. Leaving the quiz or switching apps will still auto-submit when detected.");
       }
-    } else {
-      setFullscreenNotice("This mobile browser does not support automatic fullscreen. Leaving the quiz or switching apps will still auto-submit when detected.");
-    }
-    setLoading(false);
 
-    // A slot might close while the fullscreen request is pending.
-    const actualStartTime = Date.now();
-    const slotAtStart = getActiveExamSlot(actualStartTime);
-    if (!slotAtStart) {
-      setNowMs(actualStartTime);
-      if (document.fullscreenElement || document.webkitFullscreenElement) {
-        try { await (document.exitFullscreen?.() || document.webkitExitFullscreen?.()); } catch (_) { /* ignore */ }
+      const actualStartTime = Date.now();
+      const slotAtStart = getActiveExamSlot(actualStartTime);
+      if (!slotAtStart || QUIZ_OVER) {
+        setNowMs(actualStartTime);
+        window.alert(getScheduleNotice(actualStartTime));
+        return;
       }
-      window.alert(getScheduleNotice(actualStartTime));
+
+      // Atomic reservation: two concurrent browsers using the same normalized
+      // Roll Number cannot BOTH start. Once reserved, both test slots count as
+      // the same single attempt, even if the student refreshes/exits early.
+      // Firebase must be online, and Firestore rules must permit a read/create
+      // on quizResults and an update to save the finished result.
+      const resultRef = getAttemptDocRef(userData.rollNumber);
+      try {
+        await runTransaction(db, async (transaction) => {
+          const existing = await transaction.get(resultRef);
+          if (existing.exists()) {
+            const duplicate = new Error("This Roll Number has already started or completed the assessment. Only ONE attempt is allowed across both sessions.");
+            duplicate.code = "roll-number-already-used";
+            throw duplicate;
+          }
+          if (!getActiveExamSlot() || QUIZ_OVER) {
+            const closed = new Error(getScheduleNotice());
+            closed.code = "slot-closed";
+            throw closed;
+          }
+          transaction.set(resultRef, {
+            name: userData.name.trim(),
+            rollNumber: userData.rollNumber.trim(),
+            normalizedRollNumber,
+            college: userData.college.trim(),
+            branch: userData.branch.trim(),
+            quizTitle,
+            attemptDate: "2026-10-31",
+            attemptStatus: "started",
+            startedAt: serverTimestamp(),
+          });
+        });
+      } catch (error) {
+        if (error?.code === "roll-number-already-used") {
+          window.alert("Attempt Not Allowed!\n\nThis Roll Number has already attempted the assessment. A second attempt is NOT allowed, including the other time slot.");
+        } else if (error?.code === "slot-closed") {
+          setNowMs(Date.now());
+          window.alert(getScheduleNotice());
+        } else {
+          console.error("Could not verify/reserve Roll Number in Firestore:", error);
+          window.alert("Unable to verify your Roll Number with the server. Please check your internet connection and Firebase permissions, then try again. The test has NOT started.");
+        }
+        return;
+      }
+
+      attemptDocRef.current = resultRef;
+      const committedStartTime = Date.now();
+      examDeadlineRef.current = Math.min(
+        committedStartTime + TOTAL_DURATION_SEC * 1000,
+        slotAtStart.end
+      );
+      setTimeLeft(Math.max(0, Math.ceil((examDeadlineRef.current - committedStartTime) / 1000)));
+      setQuizStarted(true);
+      setSubmitted(false);
+      setMarks(null);
+      setSubmissionReason("manual");
+      setAnswers({});
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      // Leave fullscreen if login/claim failed, rather than trapping a student
+      // on a blocked login screen.
+      if (!attemptDocRef.current && (document.fullscreenElement || document.webkitFullscreenElement)) {
+        try { await (document.exitFullscreen?.() || document.webkitExitFullscreen?.()); } catch (_) { /* ignore */ }
+        fullscreenEnforcedRef.current = false;
+      }
+      startInProgressRef.current = false;
+      setLoading(false);
+    }
+  };
+
+  const saveSubmittedResult = async () => {
+    // Preserve the same one-and-only document created at Start Assessment.
+    if (saveInProgressRef.current) return;
+    if (!attemptDocRef.current || !submissionPayloadRef.current) {
+      setSaveError("Submission could not be linked to the original Roll Number attempt. Please contact the administrator.");
       return;
     }
-    examDeadlineRef.current = Math.min(
-      actualStartTime + TOTAL_DURATION_SEC * 1000,
-      slotAtStart.end
-    );
-    setTimeLeft(Math.max(0, Math.ceil((examDeadlineRef.current - actualStartTime) / 1000)));
-    setQuizStarted(true);
-
-    setSubmitted(false);
-
-    setMarks(null);
-
-    setSubmissionReason("manual");
-
-    setAnswers({});
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
+    saveInProgressRef.current = true;
+    setResultSaving(true);
+    setSaveError("");
+    try {
+      await updateDoc(attemptDocRef.current, submissionPayloadRef.current);
+    } catch (error) {
+      console.error("Error saving quiz result:", error);
+      setSaveError("Your quiz has ended, but the result could not be saved to Firebase. Do not close this page; reconnect and select Retry Saving Result, or contact the administrator.");
+    } finally {
+      saveInProgressRef.current = false;
+      setResultSaving(false);
+    }
   };
 
   const handleSubmit = async (reason = "manual") => {
-
     // React click events may be passed to this handler; only accept a string reason.
     const finalReason = typeof reason === "string" ? reason : "manual";
-
     if (isSubmittingRef.current) return;
-
     isSubmittingRef.current = true;
-    // Closing the assessment immediately is important: do not wait for the
-    // result write before removing questions from the student's screen.
+
+    // Remove questions immediately; never allow continuing after submission.
     if (finalReason === "screen_switch" || finalReason === "fullscreen_exit") {
       pendingViolationNoticeRef.current = true;
     }
-
     setSubmissionReason(finalReason);
-
     let score = 0;
-
-    questions.forEach((q) => {
-
-      if (isAnswerCorrect(q, answers[q.id])) score++;
-
-    });
-
+    questions.forEach((q) => { if (isAnswerCorrect(q, answers[q.id])) score++; });
     setMarks(score);
-
     setSubmitted(true);
-
     setQuizStarted(false);
 
-    // The test is finished: leave fullscreen so the results page is usable.
     if (document.fullscreenElement || document.webkitFullscreenElement) {
       const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
       if (exitFullscreen) {
@@ -2606,44 +2669,24 @@ const questions = useMemo(
     }
     fullscreenEnforcedRef.current = false;
 
-    try {
-
-      await addDoc(collection(db, "quizResults"), {
-
-        name: userData.name,
-
-        rollNumber: userData.rollNumber,
-
-        college: userData.college,
-
-        branch: userData.branch,
-
-        quizTitle,
-
-        answers,
-
-        marks: score,
-
-        totalMarks: TOTAL_MARKS_DISPLAY,
-
-        totalQuestions: TOTAL_QUESTIONS_DISPLAY,
-
-        durationMinutes: TOTAL_DURATION_MIN,
-
-        questions,
-
-        submissionReason: finalReason,
-
-        submittedAt: serverTimestamp(),
-
-      });
-
-    } catch (e) {
-
-      console.error("Error saving quiz result:", e);
-
-    }
-
+    submissionPayloadRef.current = {
+      name: userData.name,
+      rollNumber: userData.rollNumber,
+      normalizedRollNumber: normalizeRollNumber(userData.rollNumber),
+      college: userData.college,
+      branch: userData.branch,
+      quizTitle,
+      answers,
+      marks: score,
+      totalMarks: TOTAL_MARKS_DISPLAY,
+      totalQuestions: TOTAL_QUESTIONS_DISPLAY,
+      durationMinutes: TOTAL_DURATION_MIN,
+      questions,
+      submissionReason: finalReason,
+      attemptStatus: "submitted",
+      submittedAt: serverTimestamp(),
+    };
+    await saveSubmittedResult();
   };
 
   // When Windows shows the desktop (Win+D), our page is not visible, so an
@@ -3247,7 +3290,7 @@ const questions = useMemo(
 
               style={{
 
-                color: ["manual", "time_end"].includes(submissionReason) ? "#27ae60" : "#c62828",
+                color: saveError ? "#c62828" : ["manual", "time_end"].includes(submissionReason) ? "#27ae60" : "#c62828",
 
                 textAlign: "center",
 
@@ -3257,7 +3300,7 @@ const questions = useMemo(
 
             >
 
-              {submissionReason === "screen_switch" ? "Quiz Submitted – Win + D / Window Switch / Minimize Detected" : submissionReason === "fullscreen_exit" ? "Quiz Submitted – Fullscreen Exit Detected" : submissionReason === "time_end" ? "Quiz Submitted – Scheduled Time Ended" : "Submission Successful"}
+              {saveError ? "Assessment Closed – Result Save Pending" : resultSaving ? "Assessment Closed – Saving Result" : submissionReason === "screen_switch" ? "Quiz Submitted – Win + D / Window Switch / Minimize Detected" : submissionReason === "fullscreen_exit" ? "Quiz Submitted – Fullscreen Exit Detected" : submissionReason === "time_end" ? "Quiz Submitted – Scheduled Time Ended" : "Submission Successful"}
 
             </h3>
 
@@ -3306,6 +3349,22 @@ const questions = useMemo(
               </p>
 
             </div>
+
+            {resultSaving && (
+              <p role="status" style={{ textAlign: "center", color: "#555", fontWeight: 700 }}>
+                Saving result to Firebase...
+              </p>
+            )}
+            {saveError && (
+              <div role="alert" style={{ textAlign: "center", color: "#a72c28", marginTop: 14, fontWeight: 700 }}>
+                {saveError}
+                <div style={{ marginTop: 10 }}>
+                  <button type="button" disabled={resultSaving} onClick={saveSubmittedResult} style={styles.button}>
+                    Retry Saving Result
+                  </button>
+                </div>
+              </div>
+            )}
 
             <p
 
