@@ -4,6 +4,38 @@ import { db } from "../firebase";
 
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
+// Fixed test windows for Saturday, 31 October 2026 (Indian Standard Time, UTC+05:30).
+// The end instant is EXCLUSIVE: 11:00 AM and 4:00 PM are already closed.
+const EXAM_SLOTS = [
+  {
+    start: Date.parse("2026-10-31T10:00:00+05:30"),
+    end: Date.parse("2026-10-31T11:00:00+05:30"),
+    label: "Morning: 10:00 AM – 11:00 AM",
+  },
+  {
+    start: Date.parse("2026-10-31T15:00:00+05:30"),
+    end: Date.parse("2026-10-31T16:00:00+05:30"),
+    label: "Afternoon: 3:00 PM – 4:00 PM",
+  },
+];
+
+const getActiveExamSlot = (time = Date.now()) =>
+  EXAM_SLOTS.find((slot) => time >= slot.start && time < slot.end) || null;
+
+const getScheduleNotice = (time = Date.now()) => {
+  const active = getActiveExamSlot(time);
+  if (active) {
+    return `Assessment is OPEN now (${active.label}, IST). It will close automatically at the scheduled end time.`;
+  }
+  if (time < EXAM_SLOTS[0].start) {
+    return "Assessment is not open yet. It starts on 31 October 2026 at 10:00 AM (IST).";
+  }
+  if (time < EXAM_SLOTS[1].start) {
+    return "Morning session is closed. The next session starts at 3:00 PM on 31 October 2026 (IST).";
+  }
+  return "Assessment is CLOSED. Both sessions for 31 October 2026 have ended.";
+};
+
 export default function QuizPage() {
 
   const [userData, setUserData] = useState({
@@ -24,7 +56,7 @@ export default function QuizPage() {
 
   const QUIZ_OVER = false;
 
-  // Total duration: 120 minutes
+  // Maximum test duration: 60 minutes (or until the active session ends).
 
   const TOTAL_DURATION_MIN = 60;
 
@@ -39,6 +71,9 @@ export default function QuizPage() {
   const [marks, setMarks] = useState(null);
 
   const [timeLeft, setTimeLeft] = useState(TOTAL_DURATION_SEC);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  const examDeadlineRef = useRef(null);
+  const activeExamSlot = getActiveExamSlot(nowMs);
 
   const [loading, setLoading] = useState(false);
 
@@ -62,6 +97,21 @@ export default function QuizPage() {
 
     return () => window.removeEventListener("resize", check);
 
+  }, []);
+
+  // Refresh the login/availability notice as each scheduled window opens or closes.
+  useEffect(() => {
+    const syncClock = () => setNowMs(Date.now());
+    const interval = window.setInterval(syncClock, 1000);
+    window.addEventListener("focus", syncClock);
+    window.addEventListener("pageshow", syncClock);
+    document.addEventListener("visibilitychange", syncClock);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", syncClock);
+      window.removeEventListener("pageshow", syncClock);
+      document.removeEventListener("visibilitychange", syncClock);
+    };
   }, []);
 
   // ✅ Questions placeholder - aap questions doge to yaha replace kar denge
@@ -2408,35 +2458,42 @@ const questions = useMemo(
 
   };
 
-  // ✅ Timer
-
+  // Use actual clock time rather than counting ticks: background tabs may throttle timers.
+  // The quiz deadline can NEVER extend beyond the end of its active session.
   useEffect(() => {
-
     if (!quizStarted || submitted) return;
 
-    const timer = setInterval(() => {
+    const syncRemainingTime = () => {
+      const deadline = examDeadlineRef.current;
+      if (!deadline) return;
+      const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining === 0 && !isSubmittingRef.current) {
+        latestSubmitRef.current?.("time_end");
+      }
+    };
 
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-
-    }, 1000);
-
-    return () => clearInterval(timer);
-
+    syncRemainingTime();
+    const interval = window.setInterval(syncRemainingTime, 1000);
+    window.addEventListener("focus", syncRemainingTime);
+    window.addEventListener("pageshow", syncRemainingTime);
+    document.addEventListener("visibilitychange", syncRemainingTime);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", syncRemainingTime);
+      window.removeEventListener("pageshow", syncRemainingTime);
+      document.removeEventListener("visibilitychange", syncRemainingTime);
+    };
   }, [quizStarted, submitted]);
 
-  // ✅ Auto submit on time end
-
-  useEffect(() => {
-
-    if (!quizStarted || submitted) return;
-
-    if (timeLeft === 0) handleSubmit();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-
-  }, [timeLeft, quizStarted, submitted]);
-
   const handleStart = async () => {
+    // Recheck on click; a disabled UI alone cannot enforce scheduling.
+    const slotAtClick = getActiveExamSlot();
+    if (!slotAtClick || QUIZ_OVER) {
+      setNowMs(Date.now());
+      window.alert(getScheduleNotice());
+      return;
+    }
 
     if (
 
@@ -2479,6 +2536,23 @@ const questions = useMemo(
       setFullscreenNotice("This mobile browser does not support automatic fullscreen. Leaving the quiz or switching apps will still auto-submit when detected.");
     }
     setLoading(false);
+
+    // A slot might close while the fullscreen request is pending.
+    const actualStartTime = Date.now();
+    const slotAtStart = getActiveExamSlot(actualStartTime);
+    if (!slotAtStart) {
+      setNowMs(actualStartTime);
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        try { await (document.exitFullscreen?.() || document.webkitExitFullscreen?.()); } catch (_) { /* ignore */ }
+      }
+      window.alert(getScheduleNotice(actualStartTime));
+      return;
+    }
+    examDeadlineRef.current = Math.min(
+      actualStartTime + TOTAL_DURATION_SEC * 1000,
+      slotAtStart.end
+    );
+    setTimeLeft(Math.max(0, Math.ceil((examDeadlineRef.current - actualStartTime) / 1000)));
     setQuizStarted(true);
 
     setSubmitted(false);
@@ -2488,8 +2562,6 @@ const questions = useMemo(
     setSubmissionReason("manual");
 
     setAnswers({});
-
-    setTimeLeft(TOTAL_DURATION_SEC);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -3175,7 +3247,7 @@ const questions = useMemo(
 
               style={{
 
-                color: submissionReason === "manual" ? "#27ae60" : "#c62828",
+                color: ["manual", "time_end"].includes(submissionReason) ? "#27ae60" : "#c62828",
 
                 textAlign: "center",
 
@@ -3185,7 +3257,7 @@ const questions = useMemo(
 
             >
 
-              {submissionReason === "screen_switch" ? "Quiz Submitted – Win + D / Window Switch / Minimize Detected" : submissionReason === "fullscreen_exit" ? "Quiz Submitted – Fullscreen Exit Detected" : "Submission Successful"}
+              {submissionReason === "screen_switch" ? "Quiz Submitted – Win + D / Window Switch / Minimize Detected" : submissionReason === "fullscreen_exit" ? "Quiz Submitted – Fullscreen Exit Detected" : submissionReason === "time_end" ? "Quiz Submitted – Scheduled Time Ended" : "Submission Successful"}
 
             </h3>
 
@@ -3289,6 +3361,27 @@ const questions = useMemo(
 
             </div>
 
+            <div
+              role="status"
+              aria-live="polite"
+              style={{
+                marginTop: 18,
+                border: `1px solid ${activeExamSlot && !QUIZ_OVER ? "#b7dfc2" : "#f0c9c5"}`,
+                background: activeExamSlot && !QUIZ_OVER ? "#edf9ef" : "#fff3f0",
+                color: activeExamSlot && !QUIZ_OVER ? "#176e39" : "#a72c28",
+                padding: "14px 16px",
+                borderRadius: 12,
+                fontWeight: 700,
+                lineHeight: 1.6,
+                textAlign: "center",
+              }}
+            >
+              {QUIZ_OVER ? "Assessment is currently unavailable." : getScheduleNotice(nowMs)}
+              <div style={{ fontSize: 13, fontWeight: 500, marginTop: 4 }}>
+                Saturday, 31 October 2026 | 10:00–11:00 AM & 3:00–4:00 PM (IST)
+              </div>
+            </div>
+
             <div style={styles.badgeRow}>
 
               <div style={styles.badge}>⏱ Total Duration: {TOTAL_DURATION_MIN} Minutes</div>
@@ -3313,7 +3406,8 @@ const questions = useMemo(
 
               </li>
 
-              <li>The quiz will be automatically submitted when time ends.</li>
+              <li>The quiz is available only on 31 October 2026, from 10:00–11:00 AM and 3:00–4:00 PM (IST).</li>
+              <li>The assessment will auto-submit at the end of its allotted 60 minutes OR when its scheduled session closes, whichever occurs first.</li>
 
               <li>On supported browsers, Start Assessment opens fullscreen. Exiting fullscreen, switching tabs, minimizing, or moving to another window will automatically submit the assessment.</li>
               <li>Browsers and operating systems do not permit websites to disable Home, minimize, or app switching. Some mobile browsers cannot enter true fullscreen.</li>
@@ -3329,6 +3423,14 @@ const questions = useMemo(
           </div>
 
           <div style={styles.card}>
+
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <img
+                src="/hero-steels-logo.png"
+                alt="Hero Steels Limited"
+                style={{ maxWidth: "100%", width: 360, height: "auto", objectFit: "contain" }}
+              />
+            </div>
 
             <div style={styles.row2}>
 
@@ -3412,9 +3514,13 @@ const questions = useMemo(
 
             </div>
 
-            <button style={styles.button} onClick={handleStart} disabled={loading}>
+            <button
+              style={{ ...styles.button, opacity: !activeExamSlot || QUIZ_OVER ? 0.55 : 1, cursor: !activeExamSlot || QUIZ_OVER ? "not-allowed" : "pointer" }}
+              onClick={handleStart}
+              disabled={loading || !activeExamSlot || QUIZ_OVER}
+            >
 
-              {loading ? "Starting..." : "🚀 Start Assessment"}
+              {loading ? "Starting..." : activeExamSlot && !QUIZ_OVER ? "🚀 Start Assessment" : "🔒 Assessment Locked – Outside Scheduled Hours"}
 
             </button>
 
