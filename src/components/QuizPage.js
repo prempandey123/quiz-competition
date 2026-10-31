@@ -4,20 +4,19 @@ import { db } from "../firebase";
 
 import { doc, runTransaction, updateDoc, serverTimestamp } from "firebase/firestore";
 
-// Fixed test windows for Saturday, 31 October 2026 (Indian Standard Time, UTC+05:30).
-// The end instant is EXCLUSIVE: 11:00 AM and 4:00 PM are already closed.
+// Fixed test window for Saturday, 31 October 2026 (Indian Standard Time, UTC+05:30).
+// The end instant is EXCLUSIVE: 3:30 PM is already closed.
 const EXAM_SLOTS = [
   {
-    start: Date.parse("2026-10-31T10:00:00+05:30"),
-    end: Date.parse("2026-10-31T11:00:00+05:30"),
-    label: "Morning: 10:00 AM – 11:00 AM",
-  },
-  {
-    start: Date.parse("2026-10-31T15:00:00+05:30"),
-    end: Date.parse("2026-10-31T16:00:00+05:30"),
-    label: "Afternoon: 3:00 PM – 4:00 PM",
+    start: Date.parse("2026-10-31T14:30:00+05:30"),
+    end: Date.parse("2026-10-31T15:30:00+05:30"),
+    label: "Testing: 2:30 PM – 3:30 PM",
   },
 ];
+
+// The pre-start display is visual only; it does NOT change the quiz access window.
+const PRESTART_COUNTDOWN_SECONDS = 5 * 60;
+const PRESTART_REMINDER_SECONDS = 2 * 60;
 
 // Ignore case and accidental spaces so e.g. "abc 123" and "ABC123" cannot be used twice.
 const normalizeRollNumber = (value) => String(value).normalize("NFKC").replace(/\s+/g, "").toUpperCase();
@@ -34,12 +33,9 @@ const getScheduleNotice = (time = Date.now()) => {
     return `Assessment is OPEN now (${active.label}, IST). It will close automatically at the scheduled end time.`;
   }
   if (time < EXAM_SLOTS[0].start) {
-    return "Assessment is not open yet. It starts on 31 October 2026 at 10:00 AM (IST).";
+    return "Assessment is not open yet. It starts on 31 October 2026 at 2:30 PM (IST).";
   }
-  if (time < EXAM_SLOTS[1].start) {
-    return "Morning session is closed. The next session starts at 3:00 PM on 31 October 2026 (IST).";
-  }
-  return "Assessment is CLOSED. Both sessions for 31 October 2026 have ended.";
+  return "Assessment is CLOSED. The session for 31 October 2026 ended at 3:30 PM (IST).";
 };
 
 export default function QuizPage() {
@@ -80,6 +76,17 @@ export default function QuizPage() {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const examDeadlineRef = useRef(null);
   const activeExamSlot = getActiveExamSlot(nowMs);
+  // Derive the live countdown from the same exam start timestamp, never from a
+  // decrementing counter; switching away and back cannot drift the display.
+  const secondsUntilStart = Math.max(0, Math.ceil((EXAM_SLOTS[0].start - nowMs) / 1000));
+  const showPrestartCountdown = !QUIZ_OVER && secondsUntilStart > 0 &&
+    secondsUntilStart <= PRESTART_COUNTDOWN_SECONDS;
+  const showFinalTenSeconds = showPrestartCountdown && secondsUntilStart <= 10;
+  const prestartMessage = secondsUntilStart <= 60
+    ? "Final minute! Please check your details. The assessment will open at 2:30 PM."
+    : secondsUntilStart <= PRESTART_REMINDER_SECONDS
+      ? "Please fill your details now — the assessment starts in 2 minutes or less."
+      : "Get ready! You can fill your student details before the assessment opens.";
 
   const [loading, setLoading] = useState(false);
 
@@ -2555,7 +2562,7 @@ const questions = useMemo(
       }
 
       // Atomic reservation: two concurrent browsers using the same normalized
-      // Roll Number cannot BOTH start. Once reserved, both test slots count as
+      // Roll Number cannot BOTH start. Once reserved, the test counts as
       // the same single attempt, even if the student refreshes/exits early.
       // Firebase must be online, and Firestore rules must permit a read/create
       // on quizResults and an update to save the finished result.
@@ -2564,7 +2571,7 @@ const questions = useMemo(
         await runTransaction(db, async (transaction) => {
           const existing = await transaction.get(resultRef);
           if (existing.exists()) {
-            const duplicate = new Error("This Roll Number has already started or completed the assessment. Only ONE attempt is allowed across both sessions.");
+            const duplicate = new Error("This Roll Number has already started or completed the assessment. Only ONE attempt is allowed.");
             duplicate.code = "roll-number-already-used";
             throw duplicate;
           }
@@ -2587,7 +2594,7 @@ const questions = useMemo(
         });
       } catch (error) {
         if (error?.code === "roll-number-already-used") {
-          window.alert("Attempt Not Allowed!\n\nThis Roll Number has already attempted the assessment. A second attempt is NOT allowed, including the other time slot.");
+          window.alert("Attempt Not Allowed!\n\nThis Roll Number has already attempted the assessment. A second attempt is NOT allowed.");
         } else if (error?.code === "slot-closed") {
           setNowMs(Date.now());
           window.alert(getScheduleNotice());
@@ -2635,6 +2642,15 @@ const questions = useMemo(
     setSaveError("");
     try {
       await updateDoc(attemptDocRef.current, submissionPayloadRef.current);
+      // After the 3:30 PM automatic closure, return to the login screen
+      // only after Firebase confirms the result was saved. A failed save
+      // retains the existing retry screen so the student's result is safe.
+      if (submissionPayloadRef.current.submissionReason === "time_end" &&
+          Date.now() >= EXAM_SLOTS[0].end) {
+        setSubmitted(false);
+        setNowMs(Date.now());
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     } catch (error) {
       console.error("Error saving quiz result:", error);
       setSaveError("Your quiz has ended, but the result could not be saved to Firebase. Do not close this page; reconnect and select Retry Saving Result, or contact the administrator.");
@@ -3406,7 +3422,57 @@ const questions = useMemo(
 
       <div style={styles.page}>
 
-        <div style={styles.container}>
+        {/* A visible pre-start countdown, without unlocking the assessment early. */}
+        {showPrestartCountdown && (
+          <div role="timer" aria-live="off" style={{
+            position: "fixed", top: 0, left: 0, right: 0, zIndex: 1100,
+            padding: "10px 14px calc(10px + env(safe-area-inset-top, 0px))",
+            background: "linear-gradient(110deg, #91221e, #d33a31)",
+            color: "#fff", textAlign: "center", boxShadow: "0 6px 24px rgba(115, 25, 25, 0.2)",
+          }}>
+            <div style={{ fontWeight: 900, fontSize: isMobile ? 18 : 22, fontVariantNumeric: "tabular-nums" }}>
+              ⏳ Quiz starts in {formatTime(secondsUntilStart)}
+            </div>
+            <div style={{ fontSize: isMobile ? 12 : 13, fontWeight: 600, marginTop: 3 }}>
+              {prestartMessage}
+            </div>
+          </div>
+        )}
+
+        {/* A full-viewport visual countdown; the login form remains mounted underneath
+            so already entered student details are never cleared or unmounted. */}
+        {showFinalTenSeconds && (
+          <div role="status" aria-live="off" style={{
+            position: "fixed", inset: 0, width: "100%", height: "100dvh",
+            zIndex: 1200, background: "radial-gradient(circle at center, #d53a31 0%, #681310 95%)",
+            display: "flex", flexDirection: "column", alignItems: "center",
+            justifyContent: "center", color: "#fff", textAlign: "center", padding: 16,
+            boxSizing: "border-box",
+          }}>
+            <style>{`@keyframes heroQuizPrestartSpin { to { transform: rotate(360deg); } }`}</style>
+            <div style={{ fontSize: isMobile ? 19 : 25, fontWeight: 800, marginBottom: 30 }}>
+              Get ready! Assessment begins in
+            </div>
+            <div style={{ position: "relative", width: isMobile ? 195 : 250, height: isMobile ? 195 : 250,
+              display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div aria-hidden="true" style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                border: "10px solid rgba(255,255,255,0.2)", borderTopColor: "#fff",
+                borderRightColor: "#ffc0a8", animation: "heroQuizPrestartSpin 0.9s linear infinite",
+              }} />
+              <div style={{ fontSize: isMobile ? 98 : 130, fontWeight: 900, lineHeight: 1,
+                fontVariantNumeric: "tabular-nums" }}>
+                {secondsUntilStart}
+              </div>
+            </div>
+            <div style={{ marginTop: 32, maxWidth: 400, fontSize: isMobile ? 14 : 17,
+              fontWeight: 600, lineHeight: 1.5 }}>
+              Your filled details are safe. At 2:30 PM, select Start Assessment.
+            </div>
+          </div>
+        )}
+
+        <div style={{ ...styles.container, marginTop: showPrestartCountdown ? (isMobile ? 106 : 88) : 0 }}>
 
           <div style={styles.titleWrap}>
 
@@ -3437,7 +3503,7 @@ const questions = useMemo(
             >
               {QUIZ_OVER ? "Assessment is currently unavailable." : getScheduleNotice(nowMs)}
               <div style={{ fontSize: 13, fontWeight: 500, marginTop: 4 }}>
-                Saturday, 31 October 2026 | 10:00–11:00 AM & 3:00–4:00 PM (IST)
+                Saturday, 31 October 2026 | 2:30–3:30 PM (IST)
               </div>
             </div>
 
@@ -3465,7 +3531,7 @@ const questions = useMemo(
 
               </li>
 
-              <li>The quiz is available only on 31 October 2026, from 10:00–11:00 AM and 3:00–4:00 PM (IST).</li>
+              <li>The quiz is available only on 31 October 2026, from 2:30–3:30 PM (IST).</li>
               <li>The assessment will auto-submit at the end of its allotted 60 minutes OR when its scheduled session closes, whichever occurs first.</li>
 
               <li>On supported browsers, Start Assessment opens fullscreen. Exiting fullscreen, switching tabs, minimizing, or moving to another window will automatically submit the assessment.</li>
