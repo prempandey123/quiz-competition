@@ -5,12 +5,12 @@ import { db } from "../firebase";
 import { doc, runTransaction, updateDoc, serverTimestamp } from "firebase/firestore";
 
 // Fixed test window for Saturday, 31 October 2026 (Indian Standard Time, UTC+05:30).
-// The end instant is EXCLUSIVE: 3:30 PM is already closed.
+// The end instant is EXCLUSIVE: 5:30 PM is already closed.
 const EXAM_SLOTS = [
   {
-    start: Date.parse("2026-10-31T14:30:00+05:30"),
-    end: Date.parse("2026-10-31T15:30:00+05:30"),
-    label: "Testing: 2:30 PM – 3:30 PM",
+    start: Date.parse("2026-10-31T16:30:00+05:30"),
+    end: Date.parse("2026-10-31T17:30:00+05:30"),
+    label: "Evening: 4:30 PM – 5:30 PM",
   },
 ];
 
@@ -33,9 +33,9 @@ const getScheduleNotice = (time = Date.now()) => {
     return `Assessment is OPEN now (${active.label}, IST). It will close automatically at the scheduled end time.`;
   }
   if (time < EXAM_SLOTS[0].start) {
-    return "Assessment is not open yet. It starts on 31 October 2026 at 2:30 PM (IST).";
+    return "Assessment is not open yet. It starts on 31 October 2026 at 4:30 PM (IST).";
   }
-  return "Assessment is CLOSED. The session for 31 October 2026 ended at 3:30 PM (IST).";
+  return "Assessment is CLOSED. The session for 31 October 2026 ended at 5:30 PM (IST).";
 };
 
 export default function QuizPage() {
@@ -83,7 +83,7 @@ export default function QuizPage() {
     secondsUntilStart <= PRESTART_COUNTDOWN_SECONDS;
   const showFinalTenSeconds = showPrestartCountdown && secondsUntilStart <= 10;
   const prestartMessage = secondsUntilStart <= 60
-    ? "Final minute! Please check your details. The assessment will open at 2:30 PM."
+    ? "Final minute! Please check your details. The assessment will open at 4:30 PM."
     : secondsUntilStart <= PRESTART_REMINDER_SECONDS
       ? "Please fill your details now — the assessment starts in 2 minutes or less."
       : "Get ready! You can fill your student details before the assessment opens.";
@@ -2642,7 +2642,7 @@ const questions = useMemo(
     setSaveError("");
     try {
       await updateDoc(attemptDocRef.current, submissionPayloadRef.current);
-      // After the 3:30 PM automatic closure, return to the login screen
+      // After the 5:30 PM automatic closure, return to the login screen
       // only after Firebase confirms the result was saved. A failed save
       // retains the existing retry screen so the student's result is safe.
       if (submissionPayloadRef.current.submissionReason === "time_end" &&
@@ -3467,7 +3467,7 @@ const questions = useMemo(
             </div>
             <div style={{ marginTop: 32, maxWidth: 400, fontSize: isMobile ? 14 : 17,
               fontWeight: 600, lineHeight: 1.5 }}>
-              Your filled details are safe. At 2:30 PM, select Start Assessment.
+              Your filled details are safe. At 4:30 PM, select Start Assessment.
             </div>
           </div>
         )}
@@ -3503,7 +3503,7 @@ const questions = useMemo(
             >
               {QUIZ_OVER ? "Assessment is currently unavailable." : getScheduleNotice(nowMs)}
               <div style={{ fontSize: 13, fontWeight: 500, marginTop: 4 }}>
-                Saturday, 31 October 2026 | 2:30–3:30 PM (IST)
+                Saturday, 31 October 2026 | 4:30–5:30 PM (IST)
               </div>
             </div>
 
@@ -3531,7 +3531,7 @@ const questions = useMemo(
 
               </li>
 
-              <li>The quiz is available only on 31 October 2026, from 2:30–3:30 PM (IST).</li>
+              <li>The quiz is available only on 31 October 2026, from 4:30–5:30 PM (IST).</li>
               <li>The assessment will auto-submit at the end of its allotted 60 minutes OR when its scheduled session closes, whichever occurs first.</li>
 
               <li>On supported browsers, Start Assessment opens fullscreen. Exiting fullscreen, switching tabs, minimizing, or moving to another window will automatically submit the assessment.</li>
