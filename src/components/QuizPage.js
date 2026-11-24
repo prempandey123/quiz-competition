@@ -4,13 +4,13 @@ import { db } from "../firebase";
 
 import { doc, runTransaction, updateDoc, serverTimestamp } from "firebase/firestore";
 
-// Fixed test window for Saturday, 31 October 2026 (Indian Standard Time, UTC+05:30).
-// The end instant is EXCLUSIVE: 5:30 PM is already closed.
+// Fixed test window for Wednesday, 25 November 2026 (Indian Standard Time, UTC+05:30).
+// The end instant is EXCLUSIVE: 11:00 AM is already closed.
 const EXAM_SLOTS = [
   {
-    start: Date.parse("2026-10-31T16:30:00+05:30"),
-    end: Date.parse("2026-10-31T17:30:00+05:30"),
-    label: "Evening: 4:30 PM – 5:30 PM",
+    start: Date.parse("2026-11-25T09:30:00+05:30"),
+    end: Date.parse("2026-11-25T11:00:00+05:30"),
+    label: "Morning: 9:30 AM – 11:00 AM",
   },
 ];
 
@@ -18,11 +18,20 @@ const EXAM_SLOTS = [
 const PRESTART_COUNTDOWN_SECONDS = 5 * 60;
 const PRESTART_REMINDER_SECONDS = 2 * 60;
 
+const PRIVACY_NOTICE_VERSION = "campus-recruitment-2026-11-25-v1";
+const PRIVACY_NOTICE = {
+  title: "Personal Data Notice & Consent",
+  data: "Student name, roll number, college/university, branch/stream, assessment answers, marks, attempt status, start and submission timestamps, submission reason (including detected exam-window violations), and consent record.",
+  purpose: "Hero Steels Limited uses this information to administer the campus recruitment assessment, prevent duplicate attempts, evaluate performance and support recruitment decisions. Records are stored in Firebase Firestore.",
+  rights: "You may decline by leaving this box unchecked and not starting the assessment. For information about retention, access, correction, erasure, withdrawal of consent or grievances, please contact the Hero Steels Limited HR/Recruitment team through your campus recruitment coordinator.",
+  agreement: "I have read and understood this notice and voluntarily consent to the collection, storage and use of my personal data for the campus recruitment assessment as described above.",
+};
+
 // Ignore case and accidental spaces so e.g. "abc 123" and "ABC123" cannot be used twice.
 const normalizeRollNumber = (value) => String(value).normalize("NFKC").replace(/\s+/g, "").toUpperCase();
 
 const getAttemptDocRef = (rollNumber) =>
-  doc(db, "quizResults", `campus_20261031_${encodeURIComponent(normalizeRollNumber(rollNumber))}`);
+  doc(db, "quizResults", `campus_20261125_${encodeURIComponent(normalizeRollNumber(rollNumber))}`);
 
 const getActiveExamSlot = (time = Date.now()) =>
   EXAM_SLOTS.find((slot) => time >= slot.start && time < slot.end) || null;
@@ -33,9 +42,9 @@ const getScheduleNotice = (time = Date.now()) => {
     return `Assessment is OPEN now (${active.label}, IST). It will close automatically at the scheduled end time.`;
   }
   if (time < EXAM_SLOTS[0].start) {
-    return "Assessment is not open yet. It starts on 31 October 2026 at 4:30 PM (IST).";
+    return "Assessment is not open yet. It starts on 25 November 2026 at 9:30 AM (IST).";
   }
-  return "Assessment is CLOSED. The session for 31 October 2026 ended at 5:30 PM (IST).";
+  return "Assessment is CLOSED. The session for 25 November 2026 ended at 11:00 AM (IST).";
 };
 
 export default function QuizPage() {
@@ -51,6 +60,8 @@ export default function QuizPage() {
     branch: "",
 
   });
+
+  const [privacyConsent, setPrivacyConsent] = useState(false);
 
   const quizTitle = "Hero Steels Campus Recruitment Assessment - 100 Questions";
 
@@ -83,7 +94,7 @@ export default function QuizPage() {
     secondsUntilStart <= PRESTART_COUNTDOWN_SECONDS;
   const showFinalTenSeconds = showPrestartCountdown && secondsUntilStart <= 10;
   const prestartMessage = secondsUntilStart <= 60
-    ? "Final minute! Please check your details. The assessment will open at 4:30 PM."
+    ? "Final minute! Please check your details. The assessment will open at 9:30 AM."
     : secondsUntilStart <= PRESTART_REMINDER_SECONDS
       ? "Please fill your details now — the assessment starts in 2 minutes or less."
       : "Get ready! You can fill your student details before the assessment opens.";
@@ -2522,6 +2533,11 @@ const questions = useMemo(
       return;
     }
 
+    if (!privacyConsent) {
+      window.alert("Please read the Personal Data Notice and provide your consent before starting the assessment.");
+      return;
+    }
+
     const normalizedRollNumber = normalizeRollNumber(userData.rollNumber);
     if (!normalizedRollNumber || normalizedRollNumber.length > 100) {
       window.alert("Please enter a valid Roll Number (up to 100 characters).");
@@ -2587,9 +2603,13 @@ const questions = useMemo(
             college: userData.college.trim(),
             branch: userData.branch.trim(),
             quizTitle,
-            attemptDate: "2026-10-31",
+            attemptDate: "2026-11-25",
             attemptStatus: "started",
             startedAt: serverTimestamp(),
+            privacyConsent: true,
+            privacyConsentAt: serverTimestamp(),
+            privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
+            privacyNotice: PRIVACY_NOTICE,
           });
         });
       } catch (error) {
@@ -2642,7 +2662,7 @@ const questions = useMemo(
     setSaveError("");
     try {
       await updateDoc(attemptDocRef.current, submissionPayloadRef.current);
-      // After the 5:30 PM automatic closure, return to the login screen
+      // After the 11:00 AM automatic closure, return to the login screen
       // only after Firebase confirms the result was saved. A failed save
       // retains the existing retry screen so the student's result is safe.
       if (submissionPayloadRef.current.submissionReason === "time_end" &&
@@ -3467,7 +3487,7 @@ const questions = useMemo(
             </div>
             <div style={{ marginTop: 32, maxWidth: 400, fontSize: isMobile ? 14 : 17,
               fontWeight: 600, lineHeight: 1.5 }}>
-              Your filled details are safe. At 4:30 PM, select Start Assessment.
+              Your filled details are safe. At 9:30 AM, select Start Assessment.
             </div>
           </div>
         )}
@@ -3503,7 +3523,7 @@ const questions = useMemo(
             >
               {QUIZ_OVER ? "Assessment is currently unavailable." : getScheduleNotice(nowMs)}
               <div style={{ fontSize: 13, fontWeight: 500, marginTop: 4 }}>
-                Saturday, 31 October 2026 | 4:30–5:30 PM (IST)
+                Wednesday, 25 November 2026 | 9:30–11:00 AM (IST)
               </div>
             </div>
 
@@ -3531,7 +3551,7 @@ const questions = useMemo(
 
               </li>
 
-              <li>The quiz is available only on 31 October 2026, from 4:30–5:30 PM (IST).</li>
+              <li>The quiz is available only on 25 November 2026, from 9:30–11:00 AM (IST).</li>
               <li>The assessment will auto-submit at the end of its allotted 60 minutes OR when its scheduled session closes, whichever occurs first.</li>
 
               <li>On supported browsers, Start Assessment opens fullscreen. Exiting fullscreen, switching tabs, minimizing, or moving to another window will automatically submit the assessment.</li>
@@ -3639,10 +3659,22 @@ const questions = useMemo(
 
             </div>
 
+            <section aria-labelledby="privacy-notice-title" style={{ margin: "16px 0", padding: 16, border: "1px solid #cbd5e1", borderRadius: 10, background: "#f8fafc", color: "#1e293b", fontSize: 14, lineHeight: 1.6, textAlign: "left" }}>
+              <h3 id="privacy-notice-title" style={{ margin: "0 0 8px", fontSize: 16 }}>{PRIVACY_NOTICE.title}</h3>
+              <p style={{ margin: "0 0 8px" }}><b>Data collected and stored:</b> {PRIVACY_NOTICE.data}</p>
+              <p style={{ margin: "0 0 8px" }}><b>Purpose:</b> {PRIVACY_NOTICE.purpose}</p>
+              <p style={{ margin: "0 0 12px" }}><b>Your choices and rights:</b> {PRIVACY_NOTICE.rights}</p>
+              <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: loading ? "not-allowed" : "pointer", fontWeight: 600 }}>
+                <input type="checkbox" checked={privacyConsent} onChange={(e) => setPrivacyConsent(e.target.checked)} disabled={loading} required style={{ width: 18, height: 18, flexShrink: 0, marginTop: 3 }} />
+                <span>{PRIVACY_NOTICE.agreement} (Required)</span>
+              </label>
+              {!privacyConsent && <div style={{ marginTop: 8, fontSize: 12, color: "#475569" }}>Please tick the consent checkbox to enable Start Assessment.</div>}
+            </section>
+
             <button
-              style={{ ...styles.button, opacity: !activeExamSlot || QUIZ_OVER ? 0.55 : 1, cursor: !activeExamSlot || QUIZ_OVER ? "not-allowed" : "pointer" }}
+              style={{ ...styles.button, opacity: !activeExamSlot || QUIZ_OVER || !privacyConsent || loading ? 0.55 : 1, cursor: !activeExamSlot || QUIZ_OVER || !privacyConsent || loading ? "not-allowed" : "pointer" }}
               onClick={handleStart}
-              disabled={loading || !activeExamSlot || QUIZ_OVER}
+              disabled={loading || !activeExamSlot || QUIZ_OVER || !privacyConsent}
             >
 
               {loading ? "Starting..." : activeExamSlot && !QUIZ_OVER ? "🚀 Start Assessment" : "🔒 Assessment Locked – Outside Scheduled Hours"}
